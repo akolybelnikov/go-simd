@@ -29,3 +29,8 @@ In VS Code, the project configuration sets `GOEXPERIMENT=simd` for the
 integrated terminal and the **Run Go** launch configuration. Open a new
 integrated terminal after opening the project for the terminal setting to take
 effect.
+
+## Packages
+
+- [`packages/ops`](packages/ops/README.md) — scalar versus SIMD operation
+  benchmarks, representative results, and performance interpretation.

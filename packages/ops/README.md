@@ -1,0 +1,194 @@
+# `ops`: scalar and SIMD experiments
+
+This package compares scalar and SIMD operations on `float32` slices. Current
+benchmarks cover slice addition and a compute-heavier element-wise expression:
+
+```text
+a*a + b*b + a*b
+```
+
+The compute-heavy expression's implementations are benchmark-local examples,
+not exported package APIs.
+
+## Addition implementations
+
+`BenchmarkAdd` compares four implementations on the same preallocated input
+and output slices:
+
+- **Scalar** (`ops.AddScalar`) checks slice lengths once, then performs one
+  ordinary `float32` addition per loop iteration. This is the baseline, with
+  no SIMD or goroutine setup.
+- **SIMDPartial** (`ops.AddSIMD`) uses `simd.LoadFloat32sPart` to load up to a
+  vector's worth of values, adds the vectors, and uses `StorePart` to write
+  only valid lanes. It repeats this for the whole slice, including a partial
+  final chunk. This keeps one loop but incurs partial-load/store handling.
+- **SIMDTail** (`ops.AddSIMDVectorTail`) processes full vectors using full
+  loads and stores, then adds leftover elements with a scalar loop. It avoids
+  partial vector operations, but short slices may be handled entirely by the
+  scalar tail after function and vector-width setup.
+- **SIMDParallel** (`ops.AddSIMDParallel`) partitions the slice into balanced,
+  contiguous chunks and starts up to `GOMAXPROCS` goroutines. Each worker uses
+  full vectors and a scalar tail. Every call pays goroutine creation,
+  scheduling, and wait costs; this is a simple experiment, not a persistent
+  worker-pool design.
+
+The variants use the same input lengths and data. The benchmark allocates and
+fills the slices before timing; each implementation's call overhead is
+included. The output is reused.
+
+## Compute-heavy benchmark
+
+`BenchmarkCompute` compares scalar and SIMD loops that evaluate
+`a*a + b*b + a*b` per element. It performs more arithmetic per element than
+addition while still reading two inputs and writing one output. This may
+change the balance between computation and data movement, but it is only one
+example workload.
+
+## Running and interpreting benchmarks
+
+From the repository root:
+
+```sh
+GOEXPERIMENT=simd go test ./packages/ops -run='^$' -bench='^Benchmark(Add|Compute)$' -benchmem -count=5
+```
+
+The benchmark sweeps powers of two from 1 through `1 << 24`, and includes
+sizes just below, at, and above one and two SIMD vector widths. These are
+experimental points, not universal thresholds. At `1 << 24` (16,777,216)
+elements, each `float32` slice occupies about 64 MiB; the two inputs and
+output together occupy about 192 MiB.
+
+Go prints a row for each benchmark variant and size, followed by a comparison
+table. The percentage change is calculated as:
+
+```text
+(implementation time - scalar time) / scalar time * 100
+```
+
+Negative means the implementation took less time than scalar; positive means
+it took more. `B/op` and `allocs/op` should be zero for serial variants because
+the benchmark supplies the output slice. The parallel variant is expected to
+allocate goroutines and synchronization state. `MB/s` estimates two `float32`
+reads and one write per element; with reused buffers, this is effective data
+rate and not necessarily traffic to main memory.
+
+`-count=5` repeats the suite. Compare patterns across runs rather than treating
+a single result as a stable threshold. Very short inputs take only a few
+nanoseconds, where small timing variations can produce large percentage
+changes.
+
+## Example: addition
+
+One representative run on the project's machine:
+
+| Elements | Scalar ns/op | SIMDPartial ns/op | SIMDPartial change | SIMDTail ns/op | SIMDTail change | SIMDParallel ns/op | SIMDParallel change |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 2.25 | 8.70 | +287.2% | 5.92 | +163.3% | 456.89 | +20235.9% |
+| 2 | 2.34 | 8.73 | +272.6% | 6.14 | +162.1% | 827.12 | +35216.8% |
+| 4 | 2.91 | 8.65 | +197.2% | 6.87 | +136.2% | 1667.19 | +57206.9% |
+| 7 | 3.52 | 8.70 | +146.9% | 8.11 | +130.3% | 2897.69 | +82140.0% |
+| 8 | 3.72 | 4.83 | +29.7% | 6.65 | +78.7% | 3259.62 | +87450.3% |
+| 9 | 3.98 | 11.81 | +196.4% | 68.63 | +1622.5% | 3598.45 | +90219.0% |
+| 15 | 5.41 | 9.76 | +80.3% | 71.07 | +1213.3% | 6151.25 | +113566.3% |
+| 16 | 5.56 | 6.14 | +10.4% | 8.25 | +48.3% | 6539.60 | +117448.0% |
+| 17 | 5.92 | 10.96 | +85.2% | 71.41 | +1106.4% | 6444.50 | +108782.3% |
+| 32 | 9.92 | 8.78 | -11.5% | 11.67 | +17.7% | 6388.91 | +64297.0% |
+| 64 | 17.38 | 12.74 | -26.7% | 18.98 | +9.2% | 6674.46 | +38300.5% |
+| 128 | 35.44 | 21.84 | -38.4% | 33.95 | -4.2% | 8591.29 | +24143.3% |
+| 256 | 64.87 | 40.63 | -37.4% | 60.78 | -6.3% | 8778.75 | +13432.5% |
+| 512 | 124.24 | 77.84 | -37.4% | 121.32 | -2.4% | 8793.19 | +6977.6% |
+| 1,024 | 242.37 | 155.31 | -35.9% | 230.33 | -5.0% | 9021.86 | +3622.4% |
+| 2,048 | 482.84 | 301.87 | -37.5% | 477.95 | -1.0% | 9563.94 | +1880.8% |
+| 4,096 | 1,207.86 | 611.25 | -49.4% | 903.85 | -25.2% | 10,668.60 | +783.3% |
+| 8,192 | 2,274.48 | 1,219.45 | -46.4% | 1,801.51 | -20.8% | 13,052.83 | +473.9% |
+| 16,384 | 4,557.43 | 2,398.17 | -47.4% | 3,639.46 | -20.1% | 14,601.73 | +220.4% |
+| 32,768 | 9,352.99 | 4,853.86 | -48.1% | 7,359.03 | -21.3% | 23,425.58 | +150.5% |
+| 65,536 | 19,143.38 | 9,893.66 | -48.3% | 14,750.60 | -22.9% | 31,054.71 | +62.2% |
+| 131,072 | 37,636.89 | 19,709.95 | -47.6% | 29,885.05 | -20.6% | 42,142.57 | +12.0% |
+| 262,144 | 77,252.97 | 39,414.60 | -49.0% | 59,595.56 | -22.9% | 67,170.94 | -13.1% |
+| 524,288 | 158,761.85 | 80,286.16 | -49.4% | 119,193.82 | -24.9% | 102,865.89 | -35.2% |
+| 1,048,576 | 503,443.02 | 292,202.55 | -42.0% | 380,773.95 | -24.4% | 190,742.76 | -62.1% |
+| 2,097,152 | 1,164,238.80 | 909,958.20 | -21.8% | 1,023,300.94 | -12.1% | 615,857.02 | -47.1% |
+| 4,194,304 | 2,560,687.34 | 2,236,745.54 | -12.7% | 2,306,021.39 | -9.9% | 1,848,301.12 | -27.8% |
+| 8,388,608 | 5,929,567.67 | 5,269,910.49 | -11.1% | 5,387,565.39 | -9.1% | 3,808,798.08 | -35.8% |
+| 16,777,216 | 11,770,387.82 | 10,870,612.79 | -7.6% | 11,410,715.01 | -3.1% | 7,417,425.57 | -37.0% |
+
+### Interpreting the addition results
+
+Scalar is fastest for tiny inputs: a simple loop costs less than the setup
+around vector operations, and parallel work is dominated by creating,
+scheduling, and joining goroutines. In this run, `SIMDPartial` starts winning
+at 32 elements. `SIMDTail` is near scalar through 2,048 elements, then wins
+more clearly once there is enough full-vector work.
+
+`SIMDParallel` has a much later crossover: it remains slower through 131,072
+elements, then is faster at 262,144 and 13.1% faster there. At 1,048,576
+elements it is 62.1% faster than scalar in this run. This pattern reflects the
+tradeoff between per-call concurrency overhead and the extra cores available
+for larger work; it does not mean concurrency always scales this way.
+
+At 16 million elements, `SIMDParallel` is 37% faster, while `SIMDPartial` is
+7.6% faster and `SIMDTail` 3.1% faster. Simple addition does little arithmetic
+per byte loaded and stored. At large working sets, data movement, cache
+behavior, and memory bandwidth are plausible limits on serial SIMD gains;
+parallel workers can use more cores, but ultimately share those resources.
+These measurements do not establish which resource caused the curve.
+
+The SIMD width on this machine is 8 `float32` values, so boundary sizes are 7,
+8, 9, 15, 16, and 17. Some of the very large percentage changes for these
+tiny cases arise from dividing by extremely small scalar times and should not
+be treated as stable performance characteristics.
+
+## Example: compute-heavy expression
+
+One representative run of `a*a + b*b + a*b`:
+
+| Elements | Scalar ns/op | SIMD ns/op | SIMD time change | Faster |
+|---:|---:|---:|---:|:---|
+| 1 | 1.08 | 8.68 | +704.5% | Scalar |
+| 2 | 1.56 | 8.64 | +455.1% | Scalar |
+| 4 | 2.67 | 7.76 | +190.6% | Scalar |
+| 7 | 4.56 | 7.95 | +74.4% | Scalar |
+| 8 | 5.01 | 3.51 | -30.0% | SIMD |
+| 9 | 5.59 | 11.46 | +104.8% | Scalar |
+| 15 | 9.02 | 9.64 | +6.9% | Scalar |
+| 16 | 9.64 | 5.56 | -42.4% | SIMD |
+| 17 | 10.34 | 11.53 | +11.5% | Scalar |
+| 32 | 18.84 | 8.98 | -52.3% | SIMD |
+| 64 | 42.71 | 16.36 | -61.7% | SIMD |
+| 128 | 81.08 | 31.23 | -61.5% | SIMD |
+| 256 | 154.36 | 60.52 | -60.8% | SIMD |
+| 512 | 302.00 | 120.98 | -59.9% | SIMD |
+| 1,024 | 596.07 | 240.50 | -59.7% | SIMD |
+| 2,048 | 1,187.13 | 475.35 | -60.0% | SIMD |
+| 4,096 | 2,390.36 | 954.33 | -60.1% | SIMD |
+| 8,192 | 4,770.31 | 1,894.79 | -60.3% | SIMD |
+| 16,384 | 9,464.61 | 3,835.56 | -59.5% | SIMD |
+| 32,768 | 19,017.55 | 7,768.64 | -59.2% | SIMD |
+| 65,536 | 38,095.72 | 15,530.30 | -59.2% | SIMD |
+| 131,072 | 77,131.20 | 31,714.45 | -58.9% | SIMD |
+| 262,144 | 154,537.20 | 62,645.10 | -59.5% | SIMD |
+| 524,288 | 308,726.63 | 124,936.66 | -59.5% | SIMD |
+| 1,048,576 | 643,431.74 | 306,917.09 | -52.3% | SIMD |
+| 2,097,152 | 1,377,933.22 | 1,005,209.35 | -27.0% | SIMD |
+| 4,194,304 | 3,117,838.08 | 2,263,159.94 | -27.4% | SIMD |
+| 8,388,608 | 6,741,531.41 | 5,251,457.64 | -22.1% | SIMD |
+| 16,777,216 | 13,386,764.22 | 10,781,211.95 | -19.5% | SIMD |
+
+SIMD wins over most medium and large sizes in this run. Its advantage is
+roughly 59–62% across much of the medium range and narrows to 19.5% at 16
+million elements. That is a larger remaining gain than simple addition's
+7.6% `SIMDPartial` gain at the same size. More arithmetic per input element
+can make vector execution more valuable relative to data movement. This result
+is consistent with that explanation, but does not prove the workload is
+compute-bound.
+
+## Caveats
+
+These tables are example runs, not promises or universal crossover points.
+The buffers are reused, but the benchmark does not control or measure cache
+residency. Large working sets can be affected by cache capacity, memory
+bandwidth, CPU frequency, background load, Go version, and compiler decisions.
+Repeat runs on an otherwise idle machine and compare the pattern. Use hardware
+performance counters or a deliberately controlled cache/memory experiment
+before attributing a curve to a particular bottleneck.
