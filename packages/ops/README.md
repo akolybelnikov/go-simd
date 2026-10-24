@@ -7,8 +7,9 @@ benchmarks cover slice addition and a compute-heavier element-wise expression:
 a*a + b*b + a*b
 ```
 
-The compute-heavy expression's implementations are benchmark-local examples,
-not exported package APIs.
+The compute-heavy expression is available through
+`ops.ComputeHeavyScalar` and `ops.ComputeHeavySIMD`; both require equal-length
+input and output slices.
 
 ## Addition implementations
 
@@ -46,7 +47,29 @@ example workload.
 
 ## Running and interpreting benchmarks
 
-From the repository root:
+From the repository root, run the CLI for a concise single-size comparison:
+
+```sh
+make run
+make run ARGS="-function add"
+make run ARGS="-function compute"
+```
+
+To save the full multi-size benchmark output and comparison tables as a report:
+
+```sh
+make report
+```
+
+`make report` runs both benchmark suites and writes only the clean comparison
+tables to a timestamped text file in `packages/ops/artifacts/`; raw per-case
+benchmark output is omitted. The terminal prints the concise fixed-size
+comparison and the report path. The default measurement duration is 100 ms per
+benchmark and can be changed with `make report BENCHTIME=500ms`. Remove
+generated reports with `make clean`.
+
+To invoke Go's benchmark runner directly and print the full sweep in the
+terminal, run:
 
 ```sh
 GOEXPERIMENT=simd go test ./packages/ops -run='^$' -bench='^Benchmark(Add|Compute)$' -benchmem -count=5

@@ -79,14 +79,18 @@ func BenchmarkCompute(b *testing.B) {
 			b.Run("Scalar", func(b *testing.B) {
 				measure(b, size, out, results[size], "Scalar", func() {
 					for i := 0; i < b.N; i++ {
-						computeScalar(a, inputB, out)
+						if err := ops.ComputeHeavyScalar(a, inputB, out); err != nil {
+							b.Fatal(err)
+						}
 					}
 				})
 			})
 			b.Run("SIMD", func(b *testing.B) {
 				measure(b, size, out, results[size], "SIMD", func() {
 					for i := 0; i < b.N; i++ {
-						computeSIMD(a, inputB, out)
+						if err := ops.ComputeHeavySIMD(a, inputB, out); err != nil {
+							b.Fatal(err)
+						}
 					}
 				})
 			})
@@ -146,22 +150,6 @@ func measure(
 	}
 	b.StopTimer()
 	results[name] = float64(b.Elapsed()) / float64(b.N)
-}
-
-func computeScalar(a, inputB, out []float32) {
-	for i := range a {
-		x, y := a[i], inputB[i]
-		out[i] = x*x + y*y + x*y
-	}
-}
-
-func computeSIMD(a, inputB, out []float32) {
-	for i := 0; i < len(a); {
-		x, n := simd.LoadFloat32sPart(a[i:])
-		y, _ := simd.LoadFloat32sPart(inputB[i:])
-		x.Mul(x).Add(y.Mul(y)).Add(x.Mul(y)).StorePart(out[i:])
-		i += n
-	}
 }
 
 func printComparison(

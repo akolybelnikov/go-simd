@@ -11,6 +11,9 @@
 coverage.txt
 *.coverprofile
 
+# Generated detailed benchmark reports
+/packages/ops/artifacts/*.txt
+
 # Local environment files
 .env
 .env.*

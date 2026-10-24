@@ -159,8 +159,8 @@ func TestAddSIMDVariantsRejectMismatchedLengths(t *testing.T) {
 	}
 }
 
-// TestComputeScalarAndSIMDAgree verifies that the benchmark scalar and SIMD
-// implementations produce identical results across vector-boundary sizes.
+// TestComputeScalarAndSIMDAgree verifies that scalar and SIMD implementations
+// produce identical results across vector-boundary sizes.
 func TestComputeScalarAndSIMDAgree(t *testing.T) {
 	var vector simd.Float32s
 	width := vector.Len()
@@ -170,8 +170,12 @@ func TestComputeScalarAndSIMDAgree(t *testing.T) {
 			a, inputB, scalarOut := makeBenchmarkSlices(size)
 			simdOut := make([]float32, size)
 
-			computeScalar(a, inputB, scalarOut)
-			computeSIMD(a, inputB, simdOut)
+			if err := ops.ComputeHeavyScalar(a, inputB, scalarOut); err != nil {
+				t.Fatalf("ComputeHeavyScalar() error = %v", err)
+			}
+			if err := ops.ComputeHeavySIMD(a, inputB, simdOut); err != nil {
+				t.Fatalf("ComputeHeavySIMD() error = %v", err)
+			}
 
 			for i := range scalarOut {
 				if scalarOut[i] != simdOut[i] {
