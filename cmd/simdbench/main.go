@@ -10,20 +10,16 @@ import (
 	"testing"
 	"text/tabwriter"
 
-	addition "github.com/akolybelnikov/go-simd/packages/benches/addition"
-	computation "github.com/akolybelnikov/go-simd/packages/benches/computation"
+	"github.com/akolybelnikov/go-simd/internal/addition"
+	"github.com/akolybelnikov/go-simd/internal/benchutil"
+	"github.com/akolybelnikov/go-simd/internal/computation"
 )
 
 const benchmarkSize = 1 << 20
 
 var benchmarkSink float32
 
-type options struct {
-	function    string
-	group       string
-	addition    bool
-	computation bool
-}
+type options struct{ group string }
 
 type variant struct {
 	name string
@@ -56,8 +52,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 
-	a, b, out := makeInputs(benchmarkSize)
-	for _, group := range benchmarkGroups(opts.function, a, b, out) {
+	a, b, out := benchutil.MakeBenchmarkSlices(benchmarkSize)
+	for _, group := range benchmarkGroups(opts.group, a, b, out) {
 		results := make([]result, 0, len(group.variants))
 		for _, item := range group.variants {
 			var runErr error
@@ -85,12 +81,14 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 func parseOptions(args []string, stderr io.Writer) (options, error) {
 	opts := options{}
+	var legacy, group string
+	var add, compute bool
 	flags := flag.NewFlagSet("simdbench", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	flags.StringVar(&opts.function, "function", "all", "legacy alias: add, compute, or all")
-	flags.StringVar(&opts.group, "group", "", "benchmark group: addition, computation, or all")
-	flags.BoolVar(&opts.addition, "addition", false, "run only addition benchmarks")
-	flags.BoolVar(&opts.computation, "computation", false, "run only computation benchmarks")
+	flags.StringVar(&legacy, "function", "", "deprecated alias: add, compute, or all")
+	flags.StringVar(&group, "group", "", "benchmark group: addition, computation, or all")
+	flags.BoolVar(&add, "addition", false, "alias for -group addition")
+	flags.BoolVar(&compute, "computation", false, "alias for -group computation")
 	flags.Usage = func() {
 		fmt.Fprintln(stderr, "Usage: simdbench [-group addition|computation|all] [-addition] [-computation]")
 		fmt.Fprintln(stderr, "\nBenchmarks scalar and SIMD operations on a fixed 1,048,576-element input.")
@@ -102,26 +100,40 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	if flags.NArg() != 0 {
 		return options{}, fmt.Errorf("unexpected positional arguments: %s", strings.Join(flags.Args(), " "))
 	}
-	if opts.addition && opts.computation {
-		return options{}, fmt.Errorf("-addition and -computation cannot be used together")
+	selections := []string{}
+	flags.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "function":
+			selections = append(selections, legacy)
+		case "group":
+			selections = append(selections, group)
+		case "addition":
+			if add {
+				selections = append(selections, "addition")
+			}
+		case "computation":
+			if compute {
+				selections = append(selections, "computation")
+			}
+		}
+	})
+	opts.group = "all"
+	for i, selection := range selections {
+		switch selection {
+		case "add":
+			selection = "addition"
+		case "compute":
+			selection = "computation"
+		case "addition", "computation", "all":
+		default:
+			return options{}, fmt.Errorf("unknown group %q (choose addition, computation, or all)", selection)
+		}
+		if i > 0 && selection != opts.group {
+			return options{}, fmt.Errorf("conflicting group selections cannot be used together")
+		}
+		opts.group = selection
 	}
-	if opts.addition {
-		opts.function = "addition"
-	}
-	if opts.computation {
-		opts.function = "computation"
-	}
-	if opts.group != "" {
-		opts.function = opts.group
-	}
-	switch opts.function {
-	case "add", "addition", "all":
-		return opts, nil
-	case "compute", "computation":
-		return opts, nil
-	default:
-		return options{}, fmt.Errorf("unknown function %q (choose addition, computation, or all)", opts.function)
-	}
+	return opts, nil
 }
 
 func benchmarkGroups(function string, a, b, out []float32) []benchmarkGroup {
@@ -129,9 +141,9 @@ func benchmarkGroups(function string, a, b, out []float32) []benchmarkGroup {
 		name: "Addition",
 		variants: []variant{
 			{name: "Scalar", run: func() error { return addition.AddScalar(a, b, out) }},
-			{name: "SIMD partial", run: func() error { return addition.AddSIMD(a, b, out) }},
-			{name: "SIMD tail", run: func() error { return addition.AddSIMDVectorTail(a, b, out) }},
-			{name: "SIMD parallel", run: func() error { return addition.AddSIMDParallel(a, b, out) }},
+			{name: "SIMDPartial", run: func() error { return addition.AddSIMD(a, b, out) }},
+			{name: "SIMDTail", run: func() error { return addition.AddSIMDVectorTail(a, b, out) }},
+			{name: "SIMDParallel", run: func() error { return addition.AddSIMDParallel(a, b, out) }},
 		},
 	}
 	compute := benchmarkGroup{
@@ -152,19 +164,10 @@ func benchmarkGroups(function string, a, b, out []float32) []benchmarkGroup {
 	}
 }
 
-func makeInputs(size int) (a, b, out []float32) {
-	a = make([]float32, size)
-	b = make([]float32, size)
-	out = make([]float32, size)
-	for i := range a {
-		a[i] = float32(i%100) / 10
-		b[i] = float32(i%50-25) / 10
-	}
-	return a, b, out
-}
-
 func printResults(w io.Writer, title string, results []result) error {
-	fmt.Fprintf(w, "\n%s (%d float32 elements)\n", title, benchmarkSize)
+	if _, err := fmt.Fprintf(w, "\n%s (%d float32 elements)\n", title, benchmarkSize); err != nil {
+		return err
+	}
 	table := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(table, "IMPLEMENTATION\tTIME (ns/op)\tALLOCATIONS\tCHANGE VS SCALAR")
 	var scalarNanos float64

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/akolybelnikov/go-simd/packages/benches"
+	"github.com/akolybelnikov/go-simd/internal/benchutil"
 )
 
 func TestParseOptions(t *testing.T) {
@@ -17,14 +17,17 @@ func TestParseOptions(t *testing.T) {
 		wantError string
 	}{
 		{name: "default all", want: "all"},
-		{name: "addition", args: []string{"-function", "add"}, want: "add"},
-		{name: "compute", args: []string{"-function=compute"}, want: "compute"},
+		{name: "addition", args: []string{"-function", "add"}, want: "addition"},
+		{name: "compute", args: []string{"-function=compute"}, want: "computation"},
 		{name: "addition group", args: []string{"-group", "addition"}, want: "addition"},
 		{name: "computation group", args: []string{"-group=computation"}, want: "computation"},
 		{name: "addition shortcut", args: []string{"-addition"}, want: "addition"},
 		{name: "computation shortcut", args: []string{"-computation"}, want: "computation"},
-		{name: "invalid function", args: []string{"-function", "multiply"}, wantError: "unknown function"},
+		{name: "invalid function", args: []string{"-function", "multiply"}, wantError: "unknown group"},
 		{name: "unexpected argument", args: []string{"add"}, wantError: "unexpected positional arguments"},
+		{name: "conflicting group and shortcut", args: []string{"-group", "all", "-addition"}, wantError: "conflicting"},
+		{name: "conflicting legacy", args: []string{"-function", "compute", "-group", "addition"}, wantError: "conflicting"},
+		{name: "matching aliases", args: []string{"-function", "add", "-group", "addition", "-addition"}, want: "addition"},
 		{name: "conflicting shortcuts", args: []string{"-addition", "-computation"}, wantError: "cannot be used together"},
 	}
 
@@ -41,8 +44,8 @@ func TestParseOptions(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parseOptions() error = %v", err)
 			}
-			if got.function != tt.want {
-				t.Errorf("function = %q, want %q", got.function, tt.want)
+			if got.group != tt.want {
+				t.Errorf("function = %q, want %q", got.group, tt.want)
 			}
 		})
 	}
@@ -60,7 +63,7 @@ func TestParseOptionsHelp(t *testing.T) {
 }
 
 func TestBenchmarkGroups(t *testing.T) {
-	a, b, out := benches.MakeBenchmarkSlices(1)
+	a, b, out := benchutil.MakeBenchmarkSlices(1)
 	for _, tt := range []struct {
 		function string
 		want     int

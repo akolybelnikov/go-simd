@@ -1,18 +1,19 @@
 package addition
 
 import (
+	"errors"
 	"runtime"
 	"simd"
 	"sync"
-
-	"github.com/akolybelnikov/go-simd/packages/benches"
 )
 
-var BadInputError = benches.BadInputError
+// ErrLengthMismatch indicates unequal input and output lengths.
+var ErrLengthMismatch = errors.New("input and output slices must have equal lengths")
 
+// AddSIMD adds inputs using partial SIMD loads and stores.
 func AddSIMD(a, b, out []float32) error {
 	if len(a) != len(b) || len(a) != len(out) {
-		return BadInputError
+		return ErrLengthMismatch
 	}
 	for i := 0; i < len(a); {
 		x, n := simd.LoadFloat32sPart(a[i:])
@@ -28,7 +29,7 @@ func AddSIMD(a, b, out []float32) error {
 // elements with scalar additions.
 func AddSIMDVectorTail(a, b, out []float32) error {
 	if len(a) != len(b) || len(a) != len(out) {
-		return BadInputError
+		return ErrLengthMismatch
 	}
 	addSIMDVectorTail(a, b, out)
 	return nil
@@ -39,7 +40,7 @@ func AddSIMDVectorTail(a, b, out []float32) error {
 // workers; small inputs may be slower because of goroutine overhead.
 func AddSIMDParallel(a, b, out []float32) error {
 	if len(a) != len(b) || len(a) != len(out) {
-		return BadInputError
+		return ErrLengthMismatch
 	}
 	if len(a) == 0 {
 		return nil
@@ -80,9 +81,10 @@ func addSIMDVectorTail(a, b, out []float32) {
 	}
 }
 
+// AddScalar adds inputs using a scalar loop.
 func AddScalar(a, b, out []float32) error {
 	if len(a) != len(b) || len(a) != len(out) {
-		return BadInputError
+		return ErrLengthMismatch
 	}
 	for i := range a {
 		out[i] = a[i] + b[i]

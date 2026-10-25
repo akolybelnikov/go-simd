@@ -11,9 +11,9 @@
 coverage.txt
 *.coverprofile
 
-# Generated detailed benchmark reports
-/packages/benches/artifacts/*.txt
-/packages/benches/artifacts/**/*.txt
+# Generated benchmark reports
+/artifacts/
+/packages/benches/artifacts/
 
 # Local environment files
 .env
@@ -28,3 +28,7 @@ coverage.txt
 .DS_Store
 Thumbs.db
 .vscode
+.ai
+
+# Local requirements and implementation tracking
+/.ai/

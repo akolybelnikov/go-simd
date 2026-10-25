@@ -1,48 +1,70 @@
 # go-simd
 
-An experimental Go project for exploring the standard library's SIMD support.
-The goal is to compare scalar and SIMD approaches to the same problems, measure
-potential performance improvements, and understand how vectorization can affect
-algorithm design and implementation.
-
-The project is a learning and benchmarking space, not a production library.
-Performance results depend on the hardware, Go version, and workload, so
-comparisons should use equivalent inputs and proper Go benchmarks rather than
-assuming SIMD is always faster.
+An experimental Go project comparing scalar and SIMD operations on float32 slices.
+This is a learning and benchmarking workspace. Results depend on hardware,
+toolchain, workload and background load; SIMD is not always faster.
 
 ## Requirements
 
-- Go 1.27.3 or later
-- A Go toolchain with the `simd` experiment
+- Go 1.27.3 or later with the `simd` experiment available.
+- Set `GOEXPERIMENT=simd` for builds, tests and benchmarks.
+- Optional: GNU Make and a POSIX shell for the convenience targets below.
+  The Go commands also work directly in PowerShell without Make or Bash.
 
-## Run
+## Run and verify
 
-Open a terminal in the repository root. The CLI needs Go 1.27.3 or later and
-the `simd` experiment enabled. Run the concise comparison for both groups with:
+From the repository root in PowerShell:
 
-```sh
-make run
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdbench
+go run ./cmd/simdbench -group addition
+go test ./...
+go vet ./...
+gofmt -l cmd internal
 ```
 
-To run a specific benchmark group:
+The CLI accepts `-group addition|computation|all` (default: all). Existing
+`-addition`, `-computation`, and `-function add|compute|all` aliases remain
+available; conflicting explicit selections are rejected.
 
-```sh
-make run ARGS="-group addition"
-make run ARGS="-group computation"
-make run-addition
-make run-computation
+With Make, use `make run`, `make run-addition`, `make run-computation`,
+`make check`, and `make fmt`. Make enables the experiment automatically.
+`make clean` removes generated reports and Go build artifacts.
+
+## Benchmark reports
+
+```powershell
+go run ./cmd/simdreport -count 5 -benchtime 100ms
+go run ./cmd/simdreport -group addition -count 5 -benchtime 500ms
+# A quick filtered smoke measurement (not a performance conclusion):
+go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^Scalar$' -count 1 -benchtime 1x
 ```
 
-The default is all groups. The CLI now supports the split package layout with
-`-group` and the dedicated `-addition` / `-computation` flags. Use
-`make report` to save the detailed comparison tables under the corresponding
-operation folders in `packages/benches/artifacts/`; `make clean` removes them.
+Reports save median comparison tables and raw output to `artifacts/<group>/`.
+They retain environment metadata, individual measurements, allocations, and
+throughput. Use repeated runs on an idle machine before drawing conclusions.
+The full sweep reaches 16 million elements and can take several minutes.
 
-## Packages
+Equivalent Make targets: `make report`, `make report-addition`, and
+`make report-computation`; configure `COUNT=5 BENCHTIME=500ms` and `ARGS`.
 
-- [`packages/benches`](packages/benches/README.md) — shared benchmark utilities,
-  full results, and performance interpretation.
-- [`packages/benches/addition`](packages/benches/addition/README.md) — addition
-  implementations and benchmarks.
-- [`packages/benches/computation`](packages/benches/computation/README.md) —
-  compute-heavy implementations and benchmarks.
+## Structure
+
+- `cmd/simdbench`: concise fixed-size CLI comparisons.
+- `cmd/simdreport`: benchmark execution, raw output capture and median reports.
+- [`internal/addition`](internal/addition/README.md): four addition variants.
+- [`internal/computation`](internal/computation/README.md): scalar and SIMD
+  implementations of `a*a + b*b + a*b`.
+- [`internal/benchutil`](internal/benchutil/README.md): shared benchmark setup,
+  interpretation and historical example results.
+- `.github/workflows`: formatting, tests, vet and filtered benchmark checks.
+
+Operations accept disjoint output or exact in-place output aliasing either input.
+Partial overlap is unsupported. Length errors leave output unchanged.
+
+The report command prints the comparison table in the terminal and saves it at
+the beginning of each `.txt` report: one row per sample size, scalar timing,
+each SIMD timing, and its percentage change from scalar. Negative percentages
+mean less time than scalar; positive percentages mean more time. Environment
+metadata follows the table, and `.raw` files retain individual measurements.

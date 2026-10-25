@@ -1,13 +1,12 @@
-package benches
+package benchutil
 
 import (
 	"bytes"
 	"reflect"
+	"simd"
 	"slices"
 	"strings"
 	"testing"
-
-	"simd"
 )
 
 func TestBenchmarkSizesIncludesVectorBoundaries(t *testing.T) {
@@ -57,10 +56,14 @@ func TestPrintComparison(t *testing.T) {
 	}
 }
 
-func TestPrintComparisonRejectsMissingTiming(t *testing.T) {
-	err := PrintComparison(&bytes.Buffer{}, "Addition", []int{4}, BenchmarkResults{}, []string{"Scalar"})
-	if err == nil {
-		t.Fatal("PrintComparison() error = nil, want missing results error")
+func TestPrintComparisonAllowsMissingTiming(t *testing.T) {
+	var out bytes.Buffer
+	err := PrintComparison(&out, "Addition", []int{4}, BenchmarkResults{4: {"SIMD": 8}}, []string{"Scalar", "SIMD"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "Inf") || !strings.Contains(out.String(), "—") {
+		t.Fatalf("unexpected table: %s", out.String())
 	}
 }
 
