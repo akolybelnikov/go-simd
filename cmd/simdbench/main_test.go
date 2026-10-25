@@ -5,6 +5,8 @@ import (
 	"flag"
 	"strings"
 	"testing"
+
+	"github.com/akolybelnikov/go-simd/packages/benches"
 )
 
 func TestParseOptions(t *testing.T) {
@@ -17,8 +19,13 @@ func TestParseOptions(t *testing.T) {
 		{name: "default all", want: "all"},
 		{name: "addition", args: []string{"-function", "add"}, want: "add"},
 		{name: "compute", args: []string{"-function=compute"}, want: "compute"},
+		{name: "addition group", args: []string{"-group", "addition"}, want: "addition"},
+		{name: "computation group", args: []string{"-group=computation"}, want: "computation"},
+		{name: "addition shortcut", args: []string{"-addition"}, want: "addition"},
+		{name: "computation shortcut", args: []string{"-computation"}, want: "computation"},
 		{name: "invalid function", args: []string{"-function", "multiply"}, wantError: "unknown function"},
 		{name: "unexpected argument", args: []string{"add"}, wantError: "unexpected positional arguments"},
+		{name: "conflicting shortcuts", args: []string{"-addition", "-computation"}, wantError: "cannot be used together"},
 	}
 
 	for _, tt := range tests {
@@ -53,7 +60,7 @@ func TestParseOptionsHelp(t *testing.T) {
 }
 
 func TestBenchmarkGroups(t *testing.T) {
-	a, b, out := makeInputs(1)
+	a, b, out := benches.MakeBenchmarkSlices(1)
 	for _, tt := range []struct {
 		function string
 		want     int

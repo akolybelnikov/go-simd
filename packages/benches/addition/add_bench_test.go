@@ -3,18 +3,13 @@ package addition_test
 import (
 	"fmt"
 	"os"
-	"slices"
 	"testing"
-	"text/tabwriter"
 
 	"simd"
 
-	"github.com/akolybelnikov/go-simd/packages/addition"
+	"github.com/akolybelnikov/go-simd/packages/benches"
+	"github.com/akolybelnikov/go-simd/packages/benches/addition"
 )
-
-var benchmarkSink float32
-
-type benchmarkResults map[int]map[string]float64
 
 type addBenchmarkVariant struct {
 	name string
@@ -23,8 +18,8 @@ type addBenchmarkVariant struct {
 
 func BenchmarkAddition(b *testing.B) {
 	var vector simd.Float32s
-	sizes := benchmarkSizes(vector.Len())
-	results := make(benchmarkResults, len(sizes))
+	sizes := benches.BenchmarkSizes(vector.Len())
+	results := make(benches.BenchmarkResults, len(sizes))
 	variants := []addBenchmarkVariant{
 		{name: "Scalar", add: addition.AddScalar},
 		{name: "SIMDPartial", add: addition.AddSIMD},
@@ -34,13 +29,13 @@ func BenchmarkAddition(b *testing.B) {
 
 	for _, size := range sizes {
 		b.Run(fmt.Sprintf("n=%d", size), func(b *testing.B) {
-			a, inputB, out := makeBenchmarkSlices(size)
+			a, inputB, out := benches.MakeBenchmarkSlices(size)
 			results[size] = make(map[string]float64, len(variants))
 
 			for _, variant := range variants {
 				variant := variant
 				b.Run(variant.name, func(b *testing.B) {
-					measure(b, size, out, results[size], variant.name, func() {
+					benches.Measure(b, size, out, results[size], variant.name, func() {
 						for i := 0; i < b.N; i++ {
 							if err := variant.add(a, inputB, out); err != nil {
 								b.Fatal(err)
@@ -56,98 +51,7 @@ func BenchmarkAddition(b *testing.B) {
 	for i, variant := range variants {
 		names[i] = variant.name
 	}
-	printComparison(b, "Addition", sizes, results, names)
-}
-
-func benchmarkSizes(width int) []int {
-	sizes := make([]int, 0, 32)
-	for size := 1; size <= 1<<24; size *= 2 {
-		sizes = append(sizes, size)
-	}
-	for _, size := range []int{
-		width - 1,
-		width,
-		width + 1,
-		2*width - 1,
-		2 * width,
-		2*width + 1,
-	} {
-		if size > 0 {
-			sizes = append(sizes, size)
-		}
-	}
-	slices.Sort(sizes)
-	return slices.Compact(sizes)
-}
-
-func makeBenchmarkSlices(size int) (a, inputB, out []float32) {
-	a = make([]float32, size)
-	inputB = make([]float32, size)
-	out = make([]float32, size)
-	for i := range a {
-		a[i] = float32(i%100) / 10
-		inputB[i] = float32(i%50-25) / 10
-	}
-	return a, inputB, out
-}
-
-func measure(
-	b *testing.B,
-	size int,
-	out []float32,
-	results map[string]float64,
-	name string,
-	run func(),
-) {
-	b.ReportAllocs()
-	b.SetBytes(int64(size * 3 * 4))
-	b.ResetTimer()
-	run()
-	if size > 0 {
-		benchmarkSink = out[size-1]
-	}
-	b.StopTimer()
-	results[name] = float64(b.Elapsed()) / float64(b.N)
-}
-
-func printComparison(
-	b *testing.B,
-	title string,
-	sizes []int,
-	results benchmarkResults,
-	names []string,
-) {
-	fmt.Fprintf(os.Stdout, "\n%s benchmark comparison (ns/op; change vs scalar)\n", title)
-	table := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprint(table, "ELEMENTS\t")
-	for _, name := range names {
-		fmt.Fprintf(table, "%s ns/op\t", name)
-		if name != "Scalar" {
-			fmt.Fprintf(table, "%s change\t", name)
-		}
-	}
-	fmt.Fprintln(table)
-
-	for _, size := range sizes {
-		timings := results[size]
-		scalar, ok := timings["Scalar"]
-		if !ok {
-			continue
-		}
-		fmt.Fprintf(table, "%d\t", size)
-		for _, name := range names {
-			elapsed, ok := timings[name]
-			if !ok {
-				b.Fatalf("missing %s timing for size %d", name, size)
-			}
-			fmt.Fprintf(table, "%.2f\t", elapsed)
-			if name != "Scalar" {
-				fmt.Fprintf(table, "%+.1f%%\t", (elapsed-scalar)/scalar*100)
-			}
-		}
-		fmt.Fprintln(table)
-	}
-	if err := table.Flush(); err != nil {
+	if err := benches.PrintComparison(os.Stdout, "Addition", sizes, results, names); err != nil {
 		b.Fatal(err)
 	}
 }

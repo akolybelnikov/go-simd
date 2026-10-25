@@ -1,13 +1,14 @@
 package addition
 
 import (
-	"errors"
 	"runtime"
 	"simd"
 	"sync"
+
+	"github.com/akolybelnikov/go-simd/packages/benches"
 )
 
-var BadInputError = errors.New("input slices must have the same length and match the output slice length")
+var BadInputError = benches.BadInputError
 
 func AddSIMD(a, b, out []float32) error {
 	if len(a) != len(b) || len(a) != len(out) {

@@ -1,5 +1,5 @@
 package computation
 
-import "errors"
+import "github.com/akolybelnikov/go-simd/packages/benches"
 
-var BadInputError = errors.New("input slices must have the same length and match the output slice length")
+var BadInputError = benches.BadInputError

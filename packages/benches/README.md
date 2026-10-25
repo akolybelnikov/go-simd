@@ -1,4 +1,4 @@
-# `ops`: scalar and SIMD experiments
+# `benches`: shared SIMD benchmark utilities
 
 This package compares scalar and SIMD operations on `float32` slices. Current
 benchmarks cover slice addition and a compute-heavier element-wise expression:
@@ -7,27 +7,33 @@ benchmarks cover slice addition and a compute-heavier element-wise expression:
 a*a + b*b + a*b
 ```
 
-The compute-heavy expression is available through
-`ops.ComputeHeavyScalar` and `ops.ComputeHeavySIMD`; both require equal-length
-input and output slices.
+Operation implementations live in child packages: `benches/addition` and
+`benches/computation`. The compute-heavy expression is available through
+`computation.ComputeHeavyScalar` and `computation.ComputeHeavySIMD`; both
+require equal-length input and output slices.
+
+This root package holds shared benchmark utilities used by each operation:
+vector-boundary size generation, deterministic input construction, timing and
+result-table formatting. This keeps the benchmark setup consistent when new
+operations are added.
 
 ## Addition implementations
 
-`BenchmarkAdd` compares four implementations on the same preallocated input
+`BenchmarkAddition` compares four implementations on the same preallocated input
 and output slices:
 
-- **Scalar** (`ops.AddScalar`) checks slice lengths once, then performs one
+- **Scalar** (`addition.AddScalar`) checks slice lengths once, then performs one
   ordinary `float32` addition per loop iteration. This is the baseline, with
   no SIMD or goroutine setup.
-- **SIMDPartial** (`ops.AddSIMD`) uses `simd.LoadFloat32sPart` to load up to a
+- **SIMDPartial** (`addition.AddSIMD`) uses `simd.LoadFloat32sPart` to load up to a
   vector's worth of values, adds the vectors, and uses `StorePart` to write
   only valid lanes. It repeats this for the whole slice, including a partial
   final chunk. This keeps one loop but incurs partial-load/store handling.
-- **SIMDTail** (`ops.AddSIMDVectorTail`) processes full vectors using full
+- **SIMDTail** (`addition.AddSIMDVectorTail`) processes full vectors using full
   loads and stores, then adds leftover elements with a scalar loop. It avoids
   partial vector operations, but short slices may be handled entirely by the
   scalar tail after function and vector-width setup.
-- **SIMDParallel** (`ops.AddSIMDParallel`) partitions the slice into balanced,
+- **SIMDParallel** (`addition.AddSIMDParallel`) partitions the slice into balanced,
   contiguous chunks and starts up to `GOMAXPROCS` goroutines. Each worker uses
   full vectors and a scalar tail. Every call pays goroutine creation,
   scheduling, and wait costs; this is a simple experiment, not a persistent
@@ -39,7 +45,7 @@ included. The output is reused.
 
 ## Compute-heavy benchmark
 
-`BenchmarkCompute` compares scalar and SIMD loops that evaluate
+`BenchmarkComputation` compares scalar and SIMD loops that evaluate
 `a*a + b*b + a*b` per element. It performs more arithmetic per element than
 addition while still reading two inputs and writing one output. This may
 change the balance between computation and data movement, but it is only one
@@ -51,8 +57,8 @@ From the repository root, run the CLI for a concise single-size comparison:
 
 ```sh
 make run
-make run ARGS="-function add"
-make run ARGS="-function compute"
+make run-addition
+make run-computation
 ```
 
 To save the full multi-size benchmark output and comparison tables as a report:
@@ -62,17 +68,21 @@ make report
 ```
 
 `make report` runs both benchmark suites and writes only the clean comparison
-tables to a timestamped text file in `packages/ops/artifacts/`; raw per-case
-benchmark output is omitted. The terminal prints the concise fixed-size
-comparison and the report path. The default measurement duration is 100 ms per
-benchmark and can be changed with `make report BENCHTIME=500ms`. Remove
-generated reports with `make clean`.
+tables to timestamped text files under
+`packages/benches/artifacts/addition/` and
+`packages/benches/artifacts/computation/`. Raw per-case benchmark output is
+omitted. The terminal prints the concise fixed-size comparison and the report
+paths. While each detailed sweep runs, the terminal updates an elapsed-seconds
+counter once per second. Use `make report-addition` or
+`make report-computation` to generate one report. The default measurement
+duration is 100 ms per benchmark and can be changed with
+`make report BENCHTIME=500ms`. Remove generated reports with `make clean`.
 
 To invoke Go's benchmark runner directly and print the full sweep in the
 terminal, run:
 
 ```sh
-GOEXPERIMENT=simd go test ./packages/ops -run='^$' -bench='^Benchmark(Add|Compute)$' -benchmem -count=5
+GOEXPERIMENT=simd go test ./packages/benches/addition ./packages/benches/computation -run='^$' -bench='^(BenchmarkAddition|BenchmarkComputation)$' -benchmem -count=5
 ```
 
 The benchmark sweeps powers of two from 1 through `1 << 24`, and includes

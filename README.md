@@ -29,16 +29,20 @@ To run a specific benchmark group:
 ```sh
 make run ARGS="-group addition"
 make run ARGS="-group computation"
-make run ARGS="-function add"
-make run ARGS="-function compute"
 make run-addition
 make run-computation
 ```
 
 The default is all groups. The CLI now supports the split package layout with
-`-group` and the dedicated `-addition` / `-computation` flags.
+`-group` and the dedicated `-addition` / `-computation` flags. Use
+`make report` to save the detailed comparison tables under the corresponding
+operation folders in `packages/benches/artifacts/`; `make clean` removes them.
 
 ## Packages
 
-- `packages/addition` — scalar versus SIMD addition benchmarks.
-- `packages/computation` — scalar versus SIMD compute-heavy benchmark.
+- [`packages/benches`](packages/benches/README.md) — shared benchmark utilities,
+  full results, and performance interpretation.
+- [`packages/benches/addition`](packages/benches/addition/README.md) — addition
+  implementations and benchmarks.
+- [`packages/benches/computation`](packages/benches/computation/README.md) —
+  compute-heavy implementations and benchmarks.

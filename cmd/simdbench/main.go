@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/tabwriter"
 
-	addition "github.com/akolybelnikov/go-simd/packages/addition"
-	computation "github.com/akolybelnikov/go-simd/packages/computation"
+	addition "github.com/akolybelnikov/go-simd/packages/benches/addition"
+	computation "github.com/akolybelnikov/go-simd/packages/benches/computation"
 )
 
 const benchmarkSize = 1 << 20
@@ -19,9 +19,9 @@ const benchmarkSize = 1 << 20
 var benchmarkSink float32
 
 type options struct {
-	function string
-	group    string
-	addition bool
+	function    string
+	group       string
+	addition    bool
 	computation bool
 }
 

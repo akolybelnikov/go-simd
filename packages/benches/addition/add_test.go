@@ -7,14 +7,14 @@ import (
 
 	"simd"
 
-	"github.com/akolybelnikov/go-simd/packages/addition"
+	"github.com/akolybelnikov/go-simd/packages/benches/addition"
 )
 
 var tests = []struct {
-	name string
-	a    []float32
-	b    []float32
-	want []float32
+	name    string
+	a       []float32
+	b       []float32
+	want    []float32
 	wantErr error
 }{
 	{
