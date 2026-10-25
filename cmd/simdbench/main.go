@@ -10,7 +10,8 @@ import (
 	"testing"
 	"text/tabwriter"
 
-	"github.com/akolybelnikov/go-simd/packages/ops"
+	addition "github.com/akolybelnikov/go-simd/packages/addition"
+	computation "github.com/akolybelnikov/go-simd/packages/computation"
 )
 
 const benchmarkSize = 1 << 20
@@ -19,6 +20,9 @@ var benchmarkSink float32
 
 type options struct {
 	function string
+	group    string
+	addition bool
+	computation bool
 }
 
 type variant struct {
@@ -83,9 +87,12 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	opts := options{}
 	flags := flag.NewFlagSet("simdbench", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	flags.StringVar(&opts.function, "function", "all", "function to benchmark: add, compute, or all")
+	flags.StringVar(&opts.function, "function", "all", "legacy alias: add, compute, or all")
+	flags.StringVar(&opts.group, "group", "", "benchmark group: addition, computation, or all")
+	flags.BoolVar(&opts.addition, "addition", false, "run only addition benchmarks")
+	flags.BoolVar(&opts.computation, "computation", false, "run only computation benchmarks")
 	flags.Usage = func() {
-		fmt.Fprintln(stderr, "Usage: simdbench [-function add|compute|all]")
+		fmt.Fprintln(stderr, "Usage: simdbench [-group addition|computation|all] [-addition] [-computation]")
 		fmt.Fprintln(stderr, "\nBenchmarks scalar and SIMD operations on a fixed 1,048,576-element input.")
 		flags.PrintDefaults()
 	}
@@ -95,11 +102,25 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	if flags.NArg() != 0 {
 		return options{}, fmt.Errorf("unexpected positional arguments: %s", strings.Join(flags.Args(), " "))
 	}
+	if opts.addition && opts.computation {
+		return options{}, fmt.Errorf("-addition and -computation cannot be used together")
+	}
+	if opts.addition {
+		opts.function = "addition"
+	}
+	if opts.computation {
+		opts.function = "computation"
+	}
+	if opts.group != "" {
+		opts.function = opts.group
+	}
 	switch opts.function {
-	case "add", "compute", "all":
+	case "add", "addition", "all":
+		return opts, nil
+	case "compute", "computation":
 		return opts, nil
 	default:
-		return options{}, fmt.Errorf("unknown function %q (choose add, compute, or all)", opts.function)
+		return options{}, fmt.Errorf("unknown function %q (choose addition, computation, or all)", opts.function)
 	}
 }
 
@@ -107,24 +128,24 @@ func benchmarkGroups(function string, a, b, out []float32) []benchmarkGroup {
 	add := benchmarkGroup{
 		name: "Addition",
 		variants: []variant{
-			{name: "Scalar", run: func() error { return ops.AddScalar(a, b, out) }},
-			{name: "SIMD partial", run: func() error { return ops.AddSIMD(a, b, out) }},
-			{name: "SIMD tail", run: func() error { return ops.AddSIMDVectorTail(a, b, out) }},
-			{name: "SIMD parallel", run: func() error { return ops.AddSIMDParallel(a, b, out) }},
+			{name: "Scalar", run: func() error { return addition.AddScalar(a, b, out) }},
+			{name: "SIMD partial", run: func() error { return addition.AddSIMD(a, b, out) }},
+			{name: "SIMD tail", run: func() error { return addition.AddSIMDVectorTail(a, b, out) }},
+			{name: "SIMD parallel", run: func() error { return addition.AddSIMDParallel(a, b, out) }},
 		},
 	}
 	compute := benchmarkGroup{
 		name: "Compute-heavy expression: a*a + b*b + a*b",
 		variants: []variant{
-			{name: "Scalar", run: func() error { return ops.ComputeHeavyScalar(a, b, out) }},
-			{name: "SIMD", run: func() error { return ops.ComputeHeavySIMD(a, b, out) }},
+			{name: "Scalar", run: func() error { return computation.ComputeHeavyScalar(a, b, out) }},
+			{name: "SIMD", run: func() error { return computation.ComputeHeavySIMD(a, b, out) }},
 		},
 	}
 
 	switch function {
-	case "add":
+	case "add", "addition":
 		return []benchmarkGroup{add}
-	case "compute":
+	case "compute", "computation":
 		return []benchmarkGroup{compute}
 	default:
 		return []benchmarkGroup{add, compute}
