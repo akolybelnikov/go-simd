@@ -1,0 +1,30 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      GOEXPERIMENT: simd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Check formatting
+        shell: bash
+        run: |
+          files=$(gofmt -l cmd internal)
+          if [ -n "$files" ]; then printf '%s\n' "$files"; exit 1; fi
+      - run: go test ./...
+      - run: go vet ./...
+      - name: Check races
+        if: runner.os == 'Linux'
+        run: go test -race ./...
+      - name: Check filtered benchmark
+        run: go test ./internal/addition ./internal/computation -run='^$' -bench='^Benchmark(Addition|Computation)$/^n=1$/^Scalar$' -benchtime=1x

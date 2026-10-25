@@ -1,7 +1,6 @@
-package benches
+package benchutil
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"slices"
@@ -13,9 +12,6 @@ import (
 type BenchmarkResults map[int]map[string]float64
 
 var benchmarkSink float32
-
-// BadInputError is shared by operation packages when slice lengths disagree.
-var BadInputError = errors.New("input slices must have the same length and match the output slice length")
 
 // BenchmarkSizes returns powers of two and sizes around two SIMD vector widths.
 func BenchmarkSizes(width int) []int {
@@ -51,24 +47,19 @@ func MakeBenchmarkSlices(size int) (a, inputB, out []float32) {
 	return a, inputB, out
 }
 
-// Measure runs a benchmark closure and records its average duration.
-func Measure(
-	b *testing.B,
-	size int,
-	out []float32,
-	results map[string]float64,
-	name string,
-	run func(),
-) {
+// Measure runs a benchmark with preallocated inputs and includes call overhead.
+func Measure(b *testing.B, size int, out []float32, run func() error) {
 	b.ReportAllocs()
-	b.SetBytes(int64(size * 3 * 4))
+	b.SetBytes(int64(size) * 12)
 	b.ResetTimer()
-	run()
+	for i := 0; i < b.N; i++ {
+		if err := run(); err != nil {
+			b.Fatal(err)
+		}
+	}
 	if size > 0 {
 		benchmarkSink = out[size-1]
 	}
-	b.StopTimer()
-	results[name] = float64(b.Elapsed()) / float64(b.N)
 }
 
 // PrintComparison writes a formatted time comparison table.
@@ -101,26 +92,34 @@ func PrintComparison(
 	}
 
 	for _, size := range sizes {
-		timings, ok := results[size]
-		if !ok {
-			return fmt.Errorf("missing benchmark results for size %d", size)
-		}
-		scalar, ok := timings["Scalar"]
-		if !ok {
-			return fmt.Errorf("missing scalar timing for size %d", size)
-		}
+		timings := results[size]
+		scalar := timings["Scalar"]
 		if _, err := fmt.Fprintf(table, "%d\t", size); err != nil {
 			return err
 		}
 		for _, name := range names {
 			elapsed, ok := timings[name]
 			if !ok {
-				return fmt.Errorf("missing %s timing for size %d", name, size)
+				if _, err := fmt.Fprint(table, "—\t"); err != nil {
+					return err
+				}
+				if name != "Scalar" {
+					if _, err := fmt.Fprint(table, "—\t"); err != nil {
+						return err
+					}
+				}
+				continue
 			}
 			if _, err := fmt.Fprintf(table, "%.2f\t", elapsed); err != nil {
 				return err
 			}
 			if name != "Scalar" {
+				if scalar <= 0 {
+					if _, err := fmt.Fprint(table, "—\t"); err != nil {
+						return err
+					}
+					continue
+				}
 				if _, err := fmt.Fprintf(table, "%+.1f%%\t", (elapsed-scalar)/scalar*100); err != nil {
 					return err
 				}
