@@ -1,0 +1,22 @@
+Repeated measurements summarized by median.
+
+addition benchmark comparison (ns/op; change vs scalar)
+ELEMENTS  Scalar ns/op  SIMDPartial ns/op  SIMDPartial change  SIMDTail ns/op  SIMDTail change  SIMDParallel ns/op  SIMDParallel change
+8         250.00        350.00             +40.0%              450.00          +80.0%           27800.00            +11020.0%
+9         200.00        250.00             +25.0%              300.00          +50.0%           30750.00            +15275.0%
+
+Measurement environment
+date: 2026-10-26T23:47:05Z
+go: go1.27.3-X:simd
+platform: windows/amd64
+GOMAXPROCS: 16
+SIMD float32 lanes: 8
+command: go test ./internal/addition -run=^$ -bench=^Benchmark(Addition|Computation)$/^n=(8|9)$/^(Scalar|SIMD.*)$ -benchmem -benchtime=1x -count=2
+toolchain environment: {
+	"GOAMD64": "v1",
+	"GOARM64": "",
+	"GOEXPERIMENT": "simd",
+	"GOTOOLCHAIN": "auto"
+}
+
+cpu: AMD Ryzen 7 7435HS

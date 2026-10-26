@@ -1,0 +1,35 @@
+date: 2026-10-26T23:47:05Z
+go: go1.27.3-X:simd
+platform: windows/amd64
+GOMAXPROCS: 16
+SIMD float32 lanes: 8
+command: go test ./internal/addition -run=^$ -bench=^Benchmark(Addition|Computation)$/^n=(8|9)$/^(Scalar|SIMD.*)$ -benchmem -benchtime=1x -count=2
+toolchain environment: {
+	"GOAMD64": "v1",
+	"GOARM64": "",
+	"GOEXPERIMENT": "simd",
+	"GOTOOLCHAIN": "auto"
+}
+
+goos: windows
+goarch: amd64
+pkg: github.com/akolybelnikov/go-simd/internal/addition
+cpu: AMD Ryzen 7 7435HS
+BenchmarkAddition/n=8/Scalar-16  	       1	       300.0 ns/op	 320.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/Scalar-16  	       1	       200.0 ns/op	 480.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	       1	       400.0 ns/op	 240.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	       1	       300.0 ns/op	 320.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	       1	       700.0 ns/op	 137.14 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	       1	       200.0 ns/op	 480.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	       1	     35500 ns/op	   2.70 MB/s	    5376 B/op	      19 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	       1	     20100 ns/op	   4.78 MB/s	    3792 B/op	      15 allocs/op
+BenchmarkAddition/n=9/Scalar-16              	       1	       200.0 ns/op	 540.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/Scalar-16              	       1	       200.0 ns/op	 540.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/SIMDPartial-16         	       1	       300.0 ns/op	 360.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/SIMDPartial-16         	       1	       200.0 ns/op	 540.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/SIMDTail-16            	       1	       400.0 ns/op	 270.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/SIMDTail-16            	       1	       200.0 ns/op	 540.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=9/SIMDParallel-16        	       1	     21600 ns/op	   5.00 MB/s	    4864 B/op	      18 allocs/op
+BenchmarkAddition/n=9/SIMDParallel-16        	       1	     39900 ns/op	   2.71 MB/s	    5456 B/op	      20 allocs/op
+PASS
+ok  	github.com/akolybelnikov/go-simd/internal/addition	0.629s

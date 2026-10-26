@@ -4,6 +4,10 @@ An experimental Go project comparing scalar and SIMD operations on float32 slice
 This is a learning and benchmarking workspace. Results depend on hardware,
 toolchain, workload and background load; SIMD is not always faster.
 
+The [architecture migration record](docs/migration/README.md) documents completed
+milestones, compatibility contracts, and baseline evidence. See the
+[changelog](CHANGELOG.md) for changes and validation notes.
+
 ## Requirements
 
 - Go 1.27.3 or later with the `simd` experiment available.
