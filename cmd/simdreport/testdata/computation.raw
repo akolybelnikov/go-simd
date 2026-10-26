@@ -1,0 +1,11 @@
+goos: linux
+goarch: amd64
+BenchmarkComputation/n=16/SIMD-8 100 12 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=8/SIMD-8 100 4 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=16/Scalar-8 100 10 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=8/Scalar-8 100 8 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=16/SIMD-8 100 10 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=8/Scalar-8 100 10 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=8/Scalar-8 100 6 ns/op 0 B/op 0 allocs/op
+BenchmarkComputation/n=16/SIMD-8 100 8 ns/op 0 B/op 0 allocs/op
+PASS

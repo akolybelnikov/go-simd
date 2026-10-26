@@ -1,0 +1,6 @@
+Repeated measurements summarized by median.
+
+computation benchmark comparison (ns/op; change vs scalar)
+ELEMENTS Scalar ns/op SIMD ns/op SIMD change
+8 8.00 4.00 -50.0%
+16 10.00 10.00 +0.0%

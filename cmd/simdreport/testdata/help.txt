@@ -1,0 +1,11 @@
+Usage of simdreport:
+  -bench string
+    	Go benchmark selection expression (default ".")
+  -benchtime string
+    	duration or iteration count per measurement (default "100ms")
+  -count int
+    	measurement repetitions (default 5)
+  -group string
+    	addition, computation, or all (default "all")
+  -output string
+    	report directory (default "artifacts")

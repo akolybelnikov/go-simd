@@ -1,0 +1,4 @@
+BenchmarkAddition/n=16/SIMDTail-4 100 6 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-4 100 3 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-4 100 1 ns/op 0 B/op 0 allocs/op
+PASS
