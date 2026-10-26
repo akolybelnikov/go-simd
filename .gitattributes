@@ -2,3 +2,8 @@
 *.go text eol=lf
 *.sh text eol=lf
 Makefile text eol=lf
+
+# Go's flag package emits spaces followed by a tab in help descriptions.
+# Preserve its exact output in these compatibility fixtures.
+cmd/simdbench/testdata/help.txt whitespace=-space-before-tab
+cmd/simdreport/testdata/help.txt whitespace=-space-before-tab

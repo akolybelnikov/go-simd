@@ -1,0 +1,18 @@
+goos: windows
+goarch: amd64
+pkg: github.com/akolybelnikov/go-simd/internal/addition
+cpu: synthetic compatibility fixture
+BenchmarkAddition/n=16/SIMDTail-16 100 5 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16 100 50 ns/op 128 B/op 2 allocs/op
+BenchmarkAddition/n=8/Scalar-16 100 10 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=16/Scalar-16 100 20 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/Scalar-16 100 30 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16 100 8.25 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/Scalar-16 100 20 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16 100 30 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=16/SIMDPartial-16 100 10 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/Scalar-16 100 40 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16 100 8.75 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=32/Scalar-16 100 0 ns/op 0 B/op 0 allocs/op
+BenchmarkAddition/n=32/SIMDPartial-16 100 0.125 ns/op 0 B/op 0 allocs/op
+PASS

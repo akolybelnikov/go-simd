@@ -1,0 +1,7 @@
+Repeated measurements summarized by median.
+
+addition benchmark comparison (ns/op; change vs scalar)
+ELEMENTS Scalar ns/op SIMDPartial ns/op SIMDPartial change SIMDTail ns/op SIMDTail change SIMDParallel ns/op SIMDParallel change
+8 25.00 8.50 -66.0% 30.00 +20.0% 50.00 +100.0%
+16 20.00 10.00 -50.0% 5.00 -75.0% — —
+32 0.00 0.12 — — — — —

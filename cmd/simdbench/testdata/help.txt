@@ -1,0 +1,11 @@
+Usage: simdbench [-group addition|computation|all] [-addition] [-computation]
+
+Benchmarks scalar and SIMD operations on a fixed 1,048,576-element input.
+  -addition
+    	alias for -group addition
+  -computation
+    	alias for -group computation
+  -function string
+    	deprecated alias: add, compute, or all
+  -group string
+    	benchmark group: addition, computation, or all
