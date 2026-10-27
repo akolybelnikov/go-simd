@@ -41,6 +41,8 @@ With Make, use `make run`, `make run-addition`, `make run-computation`,
 ```powershell
 go run ./cmd/simdreport -count 5 -benchtime 100ms
 go run ./cmd/simdreport -group addition -count 5 -benchtime 500ms
+go run ./cmd/simdreport -group addition -format md
+go run ./cmd/simdreport -group computation -format csv
 # A quick filtered smoke measurement (not a performance conclusion):
 go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^Scalar$' -count 1 -benchtime 1x
 ```
@@ -50,13 +52,26 @@ They retain environment metadata, individual measurements, allocations, and
 throughput. Use repeated runs on an idle machine before drawing conclusions.
 The full sweep reaches 16 million elements and can take several minutes.
 
+Choose `-format txt|md|csv` for the saved report; `txt` is the default. Terminal
+comparisons stay readable text for every format, and every report retains its
+companion `.raw` measurements. Unknown formats fail before measuring or creating
+artifacts. Markdown includes environment metadata below the table. CSV contains
+only a header and data rows: timings and numeric percentage-point changes
+(`-20.0` means 20% less time than scalar), with empty fields for unavailable
+values. CSV metadata stays in the raw companion file.
+
 Equivalent Make targets: `make report`, `make report-addition`, and
 `make report-computation`; configure `COUNT=5 BENCHTIME=500ms` and `ARGS`.
+For example: `make report-addition ARGS="-format md"`.
 
 ## Structure
 
 - `cmd/simdbench`: concise fixed-size CLI comparisons.
 - `cmd/simdreport`: benchmark execution, raw output capture and median reports.
+- `internal/result`: typed run/case observations, legacy text import, medians,
+  and scalar comparisons.
+- `internal/report`: TXT, Markdown, and CSV renderers over shared comparisons.
+- `internal/input`: deterministic generated inputs and input-bit fingerprints.
 - [`internal/addition`](internal/addition/README.md): four addition variants.
 - [`internal/computation`](internal/computation/README.md): scalar and SIMD
   implementations of `a*a + b*b + a*b`.
@@ -67,8 +82,11 @@ Equivalent Make targets: `make report`, `make report-addition`, and
 Operations accept disjoint output or exact in-place output aliasing either input.
 Partial overlap is unsupported. Length errors leave output unchanged.
 
-The report command prints the comparison table in the terminal and saves it at
-the beginning of each `.txt` report: one row per sample size, scalar timing,
+The report command prints the comparison table in the terminal and saves it in
+the selected format: one row per sample size, scalar timing,
 each SIMD timing, and its percentage change from scalar. Negative percentages
 mean less time than scalar; positive percentages mean more time. Environment
-metadata follows the table, and `.raw` files retain individual measurements.
+metadata follows TXT/Markdown tables, and `.raw` files retain individual
+measurements. Filtered variants work without a scalar baseline; their changes
+are unavailable rather than invented. The runner still requires Go and the
+repository root during this migration stage.
