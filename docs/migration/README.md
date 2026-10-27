@@ -62,3 +62,10 @@ Share runtime operation descriptors between quick commands and developer
 benchmarks. The legacy-name mapping in `internal/result/legacy.go` is an importer
 adapter, not runtime kernel registration. Do not begin M2 before the M1 stopping
 point; standalone measurement extraction remains M3.
+
+## Related operation backlog
+
+[F004: operation and experiment patterns](../features/F004-operation-patterns.md)
+reviews missing broadcast, predicate/selection, accumulation, movement and
+representation experiments. It informs descriptor seams without expanding M2
+into new kernels or changing the checkpoint order.

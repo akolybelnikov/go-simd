@@ -128,3 +128,12 @@ The structured result model separates display names from identity:
 
 These identifiers are internal model fields, not new command flags. Select
 current CLI cases with group names and benchmark labels from the registry.
+
+## Pattern gaps and reading credit
+
+[SIMD and Go, by Jesús Espino](https://internals-for-interns.com/posts/go-simd/)
+is credited as the reading prompt for our
+[SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
+That review identifies planned broadcast, mask/selection, accumulation and
+movement experiments, and checks the portable/`archsimd` API boundary. The six
+kernels documented above remain the currently implemented catalogue.
