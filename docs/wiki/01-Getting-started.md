@@ -65,12 +65,18 @@ go test ./...
 go vet ./...
 gofmt -l cmd internal examples
 go run ./cmd/simdbench -h
+go run ./cmd/simdbench -list
 go run ./cmd/simdreport -h
 ```
 
 `gofmt -l` lists files needing formatting; no output means those files are
 formatted. Help is written to stderr and exits successfully without measuring.
 The test suite includes short real report exports; it is not only kernel tests.
+
+`-list` shows this process's Go/platform, vector width/lanes, emulation flag and
+GOMAXPROCS, followed by the implemented operations and strategies. It allocates
+no benchmark fixtures and runs no measurements. Filter with `-group addition`
+or `-group computation`; only the existing six kernels are registered.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
 CI runs this check. A local `runtime/cgo` build failure is a toolchain problem

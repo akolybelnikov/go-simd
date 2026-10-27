@@ -1,6 +1,6 @@
 # 11 — Glossary and capability ledger
 
-Reviewed against M1 / Feature 1 on 2026-10-27. This is a ledger of implemented
+Reviewed against M2 / Feature 1 on 2026-10-27. This is a ledger of implemented
 capabilities, not a promise to deliver every possible extension.
 
 ## Capability ledger
@@ -20,6 +20,8 @@ capabilities, not a promise to deliver every possible extension.
 | Sum/dot reductions | Planned composed kernels; scalar-result and numerical-order contracts pending |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
+| Shared runtime catalogue | Two operation descriptors / six typed bindings shared by CLI and native benchmarks; logical traffic and stable identities |
+| Runtime listing | `simdbench -list`, optionally group-filtered; no fixtures or benchmarks; live Go/platform/vector/emulation/GOMAXPROCS context |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
 | Retained observations | Legacy raw Go benchmark text plus environment context |
@@ -29,15 +31,15 @@ capabilities, not a promise to deliver every possible extension.
 | Concurrency control | GOMAXPROCS environment or native Go `-cpu`; no project worker flag |
 | Parallel scalar control | Not implemented |
 | Platform execution evidence | Current Windows/amd64 and Linux/amd64 CI; other targets require execution evidence |
-| ISA/emulation claims | Experimental; vector API success alone does not establish native acceleration, and raw metadata has no explicit emulation status |
+| ISA/emulation claims | `-list` shows live `simd.Emulated()`; vector API success alone does not establish acceleration, and report raw metadata still has no emulation flag |
 | Installed standalone report runner | Not implemented; report still invokes Go from the checkout |
 | HTML/TUI/advisor/cost model | Not implemented |
 | Process CPU / RSS / resource attribution | Not implemented; Go allocation counters are different metrics |
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M2 is shared runtime catalog work; M3 is the standalone benchmark backend.
-Their migration order does not change current command availability. Broader
+M2's shared runtime catalogue is complete; M3's standalone report backend is
+pending. No new broadcast, mask or reduction kernels shipped in M2. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.
 
 ## Glossary

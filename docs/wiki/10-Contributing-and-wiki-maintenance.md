@@ -44,9 +44,21 @@ Start with an experiment or learning goal. A contributed kernel should include:
 - Strategy/operation identity and documentation explaining what the comparison
   can and cannot establish.
 
-The current runtime registry is still duplicated between commands and developer
-benchmarks; shared catalog work is the next architecture checkpoint, M2. Avoid
-assuming that an importer alias table is already a shared execution catalog.
+M2 shares descriptors through
+[`internal/catalog`](https://github.com/akolybelnikov/go-simd/tree/main/internal/catalog)
+and typed executable bindings through its `kernels` subpackage. Add metadata
+there, then bind the native function and explicit prepared-buffer closure to the
+same kernel. Retain the quick closure's direct kernel call and native benchmark's
+existing function-pointer boundary. Update binding/identity tests, declare
+logical inputs/output bytes, and test both paths at vector boundaries and aliases.
+New top-level operations also need a native benchmark wrapper that delegates to
+`benchutil.BenchmarkOperation`; do not recreate independent variant lists.
+
+Metadata must remain independent of SIMD and `testing`, so offline import and
+render packages continue to work without the experiment. Parameter descriptions
+and scalar-output shapes are seams only; implementing those kernels requires
+typed preparation, identity, output retention and numerical contracts. M3's
+standalone report backend is still the next architecture checkpoint.
 
 ## Local validation commands
 

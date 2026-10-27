@@ -2,7 +2,9 @@
 
 Status: **extended requirements and implementation backlog**, 2026-10-27.
 No kernels, catalogue registration, CLI flags, or measurement behavior are added
-by this review. Architecture M0/M1 are complete; M2 remains the next checkpoint.
+by this review. Architecture M0-M2 are now complete; M3 is the next checkpoint.
+M2 supplied the shared catalogue for existing kernels, descriptor traffic and
+`simdbench -list`. The new patterns below remain an implementation backlog.
 
 ## Purpose and evidence
 
@@ -36,7 +38,7 @@ selection kernels, accumulator loops, scalar-output reductions, or permutations.
 ## Pattern gap ledger
 
 All proposed operation IDs below are design candidates, not registered IDs or
-new CLI selectors. Preserve the existing M0 IDs when M2 shares current kernels.
+new CLI selectors. M2 preserves existing M0 IDs in the shared runtime catalogue.
 
 | Pattern | Present in the lab | Verified API / boundary | Proposed useful experiment |
 | --- | --- | --- | --- |
@@ -62,7 +64,7 @@ matching both output and conversion boundaries.
 
 ## Delivery order and architecture dependencies
 
-1. **M2 foundation:** register the current six kernels through shared typed
+1. **M2 foundation (complete):** register the current six kernels through shared typed
    descriptors. Descriptors must be able to describe array operands, scalar
    parameters, output kind, semantics, requirements, and work/byte accounting.
    Keep M2's migration commit focused on the existing kernels; new patterns are

@@ -12,7 +12,7 @@ reviewed at a stopping point before the next milestone starts.
 | --- | --- | --- |
 | M0 | Freeze behavior, retain native observations, decide identity/versioning/compatibility contracts | Complete, 2026-10-27 |
 | M1 | Extract typed results, aggregation, and rendering; implement TXT/MD/CSV against the extracted model | Complete, 2026-10-27 |
-| M2 | Share runtime operation descriptors between commands and developer benchmarks | Pending |
+| M2 | Share runtime operation descriptors between commands and developer benchmarks | Complete, 2026-10-27 |
 | M3 | Add a compiled `testing.Benchmark` backend; validate outside the source checkout without Go on PATH | Pending |
 | Later, conditional | Worker isolation, resource instrumentation, workload adapters, advanced analysis, optional TUI | Requires an observed laboratory or pilot need |
 
@@ -56,12 +56,19 @@ regardless of the saved format.
 M1 does not replace the measurement engine or rewrite kernels. M0's native
 timings are observational evidence, never pass/fail thresholds.
 
-## Next checkpoint: M2
+## M2 deliverables
 
-Share runtime operation descriptors between quick commands and developer
-benchmarks. The legacy-name mapping in `internal/result/legacy.go` is an importer
-adapter, not runtime kernel registration. Do not begin M2 before the M1 stopping
-point; standalone measurement extraction remains M3.
+The [M2 implementation record](m2-runtime-catalog.md) describes the shared
+metadata, six typed kernel bindings, descriptor-derived traffic, runtime listing,
+compatibility checks, and retained before/after observations. The quick CLI,
+native benchmark trees, report group selection, and legacy identity importer now
+consume the catalogue. Kernel bodies and existing report formats are unchanged.
+
+## Next checkpoint: M3
+
+Extract the compiled benchmark backend and remove the report runner's runtime
+Go/source dependency. M2 stops at shared registration and `simdbench -list`;
+`simdreport` still launches `go env` and repository-relative `go test`.
 
 ## Related operation backlog
 

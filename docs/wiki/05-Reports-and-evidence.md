@@ -62,6 +62,11 @@ current raw format does not provide complete source identity, an emulation flag,
 or an exact total duration recoverable from rounded ns/op. Record source revision
 and local changes separately; do not fabricate missing evidence.
 
+M2's `simdbench -list` can capture live emulation/vector context separately.
+It does not add those fields to the report's raw format or establish a child
+process's capabilities. Shared descriptors preserve current `12*n` effective
+bytes; throughput still does not measure DRAM transactions.
+
 ## Internal observations versus exported files
 
 M1 introduces typed observations with case/run/environment identity, individual

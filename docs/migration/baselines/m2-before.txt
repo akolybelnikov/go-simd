@@ -1,0 +1,115 @@
+go version go1.27.3 windows/amd64
+goos: windows
+goarch: amd64
+pkg: github.com/akolybelnikov/go-simd/internal/addition
+cpu: AMD Ryzen 7 7435HS
+BenchmarkAddition/n=1/Scalar-16  	18334605	         2.928 ns/op	4098.16 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/Scalar-16  	18513375	         2.918 ns/op	4112.43 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/Scalar-16  	22393072	         2.900 ns/op	4137.28 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDPartial-16         	 6278120	        10.11 ns/op	1186.48 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDPartial-16         	 6240249	        10.22 ns/op	1173.83 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDPartial-16         	 6260302	        10.21 ns/op	1174.90 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDTail-16            	 8945743	         6.781 ns/op	1769.66 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDTail-16            	 8345038	         6.893 ns/op	1740.87 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDTail-16            	 8913847	         6.938 ns/op	1729.66 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1/SIMDParallel-16        	   65592	       802.6 ns/op	  14.95 MB/s	     128 B/op	       2 allocs/op
+BenchmarkAddition/n=1/SIMDParallel-16        	   79711	       745.3 ns/op	  16.10 MB/s	     128 B/op	       2 allocs/op
+BenchmarkAddition/n=1/SIMDParallel-16        	   85545	       770.2 ns/op	  15.58 MB/s	     128 B/op	       2 allocs/op
+BenchmarkAddition/n=8/Scalar-16              	 9836871	         5.619 ns/op	17084.23 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/Scalar-16              	11696133	         5.537 ns/op	17338.36 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/Scalar-16              	11283285	         5.498 ns/op	17459.52 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	11317124	         5.443 ns/op	17636.50 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	11466135	         5.308 ns/op	18085.18 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	11080401	         5.518 ns/op	17397.11 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	 8195713	         8.121 ns/op	11821.57 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	 6899406	         7.632 ns/op	12579.25 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	 8013462	         7.574 ns/op	12674.91 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	   16362	      3348 ns/op	  28.67 MB/s	     912 B/op	       9 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	   17797	      3359 ns/op	  28.58 MB/s	     912 B/op	       9 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	   18087	      3208 ns/op	  29.93 MB/s	     912 B/op	       9 allocs/op
+BenchmarkAddition/n=16/Scalar-16             	 8774880	         7.074 ns/op	27142.87 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/Scalar-16             	 8986609	         7.160 ns/op	26816.11 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/Scalar-16             	 7469188	         7.098 ns/op	27051.04 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDPartial-16        	 9554139	         6.691 ns/op	28693.94 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDPartial-16        	 9648163	         6.702 ns/op	28649.09 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDPartial-16        	 9530464	         6.549 ns/op	29316.19 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDTail-16           	 6428593	         9.338 ns/op	20561.39 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDTail-16           	 6802566	         9.046 ns/op	21224.34 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDTail-16           	 6032271	         9.154 ns/op	20974.17 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=16/SIMDParallel-16       	   11715	      4939 ns/op	  38.87 MB/s	    1809 B/op	      17 allocs/op
+BenchmarkAddition/n=16/SIMDParallel-16       	    9282	      5455 ns/op	  35.20 MB/s	    1808 B/op	      17 allocs/op
+BenchmarkAddition/n=16/SIMDParallel-16       	   10000	      5675 ns/op	  33.83 MB/s	    1810 B/op	      17 allocs/op
+BenchmarkAddition/n=1024/Scalar-16           	  253549	       250.0 ns/op	49143.67 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/Scalar-16           	  248498	       383.4 ns/op	32052.55 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/Scalar-16           	  244987	       342.4 ns/op	35886.20 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDPartial-16      	  320494	       226.5 ns/op	54254.79 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDPartial-16      	  301386	       213.6 ns/op	57528.22 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDPartial-16      	  386174	       228.7 ns/op	53718.22 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDTail-16         	  184825	       292.9 ns/op	41947.88 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDTail-16         	  236806	       357.9 ns/op	34330.89 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDTail-16         	  206227	       339.1 ns/op	36240.14 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1024/SIMDParallel-16     	    7089	      9178 ns/op	1338.89 MB/s	    1808 B/op	      17 allocs/op
+BenchmarkAddition/n=1024/SIMDParallel-16     	    7072	      8701 ns/op	1412.23 MB/s	    1808 B/op	      17 allocs/op
+BenchmarkAddition/n=1024/SIMDParallel-16     	    7891	      8218 ns/op	1495.26 MB/s	    1808 B/op	      17 allocs/op
+BenchmarkAddition/n=1048576/Scalar-16        	     117	    571793 ns/op	22006.06 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/Scalar-16        	      99	    608982 ns/op	20662.21 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/Scalar-16        	     116	    681391 ns/op	18466.50 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDPartial-16   	     253	    260355 ns/op	48329.76 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDPartial-16   	     234	    225843 ns/op	55715.37 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDPartial-16   	     258	    247989 ns/op	50739.77 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDTail-16      	     175	    321629 ns/op	39122.42 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDTail-16      	     183	    324386 ns/op	38789.96 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDTail-16      	     158	    458868 ns/op	27421.65 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=1048576/SIMDParallel-16  	     435	    117677 ns/op	106927.95 MB/s	    1873 B/op	      17 allocs/op
+BenchmarkAddition/n=1048576/SIMDParallel-16  	     513	    118543 ns/op	106146.67 MB/s	    1817 B/op	      17 allocs/op
+BenchmarkAddition/n=1048576/SIMDParallel-16  	     524	    144866 ns/op	86858.73 MB/s	    1808 B/op	      17 allocs/op
+PASS
+ok  	github.com/akolybelnikov/go-simd/internal/addition	5.681s
+goos: windows
+goarch: amd64
+pkg: github.com/akolybelnikov/go-simd/internal/computation
+cpu: AMD Ryzen 7 7435HS
+BenchmarkComputation/n=1/Scalar-16  	19281444	         3.253 ns/op	3688.99 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1/Scalar-16  	18524235	         3.254 ns/op	3687.26 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1/Scalar-16  	19177293	         3.294 ns/op	3643.19 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1/SIMD-16    	 6437422	         9.605 ns/op	1249.33 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1/SIMD-16    	 6365371	         9.576 ns/op	1253.08 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1/SIMD-16    	 6572749	         9.536 ns/op	1258.43 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/Scalar-16  	 9656547	         6.482 ns/op	14809.33 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/Scalar-16  	 8334837	         6.575 ns/op	14599.74 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/Scalar-16  	 8316814	         6.607 ns/op	14531.07 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/SIMD-16    	 9154993	         5.813 ns/op	16513.40 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/SIMD-16    	 9923169	         6.526 ns/op	14709.66 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=8/SIMD-16    	10073367	         6.704 ns/op	14320.69 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/Scalar-16 	 5525989	        10.28 ns/op	18677.85 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/Scalar-16 	 5851887	        10.92 ns/op	17576.51 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/Scalar-16 	 5885121	        10.25 ns/op	18734.19 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/SIMD-16   	 7494192	         7.010 ns/op	27390.95 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/SIMD-16   	 8971022	         7.328 ns/op	26199.26 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=16/SIMD-16   	 8376846	         7.131 ns/op	26924.74 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/Scalar-16         	  129204	       509.2 ns/op	24133.06 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/Scalar-16         	  127328	       512.3 ns/op	23988.02 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/Scalar-16         	  107602	       499.0 ns/op	24625.39 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/SIMD-16           	  322371	       221.6 ns/op	55456.48 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/SIMD-16           	  297530	       192.6 ns/op	63790.36 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1024/SIMD-16           	  263395	       221.3 ns/op	55534.55 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/Scalar-16      	      86	    673452 ns/op	18684.19 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/Scalar-16      	      85	    675118 ns/op	18638.10 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/Scalar-16      	     102	    604006 ns/op	20832.43 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/SIMD-16        	     154	    454560 ns/op	27681.50 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/SIMD-16        	     184	    357936 ns/op	35154.04 MB/s	       0 B/op	       0 allocs/op
+BenchmarkComputation/n=1048576/SIMD-16        	     147	    445073 ns/op	28271.58 MB/s	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/akolybelnikov/go-simd/internal/computation	2.666s
+
+Addition (1048576 float32 elements)
+IMPLEMENTATION  TIME (ns/op)  ALLOCATIONS              CHANGE VS SCALAR
+Scalar          588409.00     0 B/op, 0 allocs/op      baseline
+SIMDPartial     398910.00     0 B/op, 0 allocs/op      -32.2%
+SIMDTail        443257.00     0 B/op, 0 allocs/op      -24.7%
+SIMDParallel    169130.00     1825 B/op, 17 allocs/op  -71.3%
+
+Compute-heavy expression: a*a + b*b + a*b (1048576 float32 elements)
+IMPLEMENTATION  TIME (ns/op)  ALLOCATIONS          CHANGE VS SCALAR
+Scalar          648589.00     0 B/op, 0 allocs/op  baseline
+SIMD            331869.00     0 B/op, 0 allocs/op  -48.8%

@@ -29,6 +29,7 @@ From the repository root in PowerShell:
 $env:GOEXPERIMENT = 'simd'
 go run ./cmd/simdbench
 go run ./cmd/simdbench -group addition
+go run ./cmd/simdbench -list
 go test ./...
 go vet ./...
 gofmt -l cmd internal
@@ -37,6 +38,11 @@ gofmt -l cmd internal
 The CLI accepts `-group addition|computation|all` (default: all). Existing
 `-addition`, `-computation`, and `-function add|compute|all` aliases remain
 available; conflicting explicit selections are rejected.
+
+Use `-list` (optionally with `-group`) to inspect implemented operations, stable
+strategy identities, logical traffic, and this process's runtime SIMD context
+without running benchmarks. The compiled quick binary can list from any working
+directory without Go on PATH. The report runner's standalone migration is M3.
 
 With Make, use `make run`, `make run-addition`, `make run-computation`,
 `make check`, and `make fmt`. Make enables the experiment automatically.
@@ -78,6 +84,8 @@ For example: `make report-addition ARGS="-format md"`.
   and scalar comparisons.
 - `internal/report`: TXT, Markdown, and CSV renderers over shared comparisons.
 - `internal/input`: deterministic generated inputs and input-bit fingerprints.
+- `internal/catalog`: shared operation/strategy metadata and logical byte models.
+- `internal/catalog/kernels`: typed bindings to the existing six kernels.
 - [`internal/addition`](internal/addition/README.md): four addition variants.
 - [`internal/computation`](internal/computation/README.md): scalar and SIMD
   implementations of `a*a + b*b + a*b`.

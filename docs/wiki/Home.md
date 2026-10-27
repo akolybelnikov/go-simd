@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M1 / Feature 1, reviewed 2026-10-27.
+**Guide baseline:** architecture M2 / Feature 1, reviewed 2026-10-27.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -30,6 +30,7 @@ explicitly. This guide grows alongside each delivered feature.
 - Compare four addition strategies and two implementations of `a*a + b*b + a*b`
   over generated `float32` slices.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
+- Inspect registered operations and live SIMD context with `simdbench -list`.
 - Select benchmark groups, sizes, and variants using Go benchmark expressions.
 - Choose repetitions and a target measurement duration or fixed iteration count.
 - Save median tables as TXT, Markdown, or CSV, with companion raw observations.
@@ -60,6 +61,7 @@ useful repeated measurement.
 | --- | --- |
 | 2026-10-27 | Initial progressive guide, full command registry, six-kernel reference, report conventions, experiment recipes, troubleshooting, and runnable Go example |
 | 2026-10-27 | F004 pattern-gap review, portable/architecture API checks, and credit to Jesús Espino's *SIMD and Go* |
+| 2026-10-27 | M2 shared catalogue, typed bindings, descriptor traffic, runtime listing and contributor workflow |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

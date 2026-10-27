@@ -129,6 +129,13 @@ The structured result model separates display names from identity:
 These identifiers are internal model fields, not new command flags. Select
 current CLI cases with group names and benchmark labels from the registry.
 
+M2 defines these identities once in
+[`internal/catalog`](https://github.com/akolybelnikov/go-simd/tree/main/internal/catalog).
+Quick comparisons, native benchmark registration and the legacy importer consume
+that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
+and runtime context. The six typed bindings preserve the original kernels and
+their validation/call boundaries; no new arithmetic patterns are enabled.
+
 ## Pattern gaps and reading credit
 
 [SIMD and Go, by Jesús Espino](https://internals-for-interns.com/posts/go-simd/)
