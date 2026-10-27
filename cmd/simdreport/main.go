@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/report"
 	"github.com/akolybelnikov/go-simd/internal/result"
 )
@@ -51,7 +52,12 @@ func run(args []string, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	groups := []string{"addition", "computation"}
+	var groups []string
+	for _, operation := range catalog.All() {
+		if !slices.Contains(groups, operation.Group) {
+			groups = append(groups, operation.Group)
+		}
+	}
 	if *group != "all" {
 		if !slices.Contains(groups, *group) {
 			return fmt.Errorf("unknown group %q", *group)

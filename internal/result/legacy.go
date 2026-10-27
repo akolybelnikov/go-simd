@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/input"
 )
 
@@ -117,36 +118,23 @@ func benchmarkVariant(name string) (string, OptionalInt) {
 	return name, OptionalInt{}
 }
 
-// This maps only the legacy text aliases. Runtime kernel registration is M2.
+// Known aliases/policies come from the same metadata as executable registration.
+// Unknown names retain their historical namespace without executable fallback.
 func legacyCase(benchmark, label string, size int, procs OptionalInt) Case {
 	c := Case{OperationID: "legacy:" + benchmark, TypeID: "unknown", StrategyID: "legacy:" + label,
-		ArithmeticID: "unknown", Elements: size, ExecutionMode: "kernel-only"}
-	switch benchmark {
-	case "BenchmarkAddition":
-		c.OperationID, c.TypeID, c.ArithmeticID = "add", "float32", "go-float32-add-v1"
-	case "BenchmarkComputation":
-		c.OperationID, c.TypeID, c.ArithmeticID = "compute-expression", "float32", "go-float32-quadratic-v1"
+		ArithmeticID: "unknown", Elements: size, ExecutionMode: catalog.KernelOnly}
+	if op, ok := catalog.ByBenchmark(benchmark); ok {
+		c.OperationID, c.TypeID, c.ArithmeticID, c.ExecutionMode = op.ID, op.TypeID, op.ArithmeticID, op.ExecutionMode
 	}
-	switch label {
-	case "Scalar":
-		c.StrategyID = "scalar"
-	case "SIMD", "SIMDPartial":
-		c.StrategyID = "simd-partial"
-	case "SIMDTail":
-		c.StrategyID = "simd-scalar-tail"
-	case "SIMDParallel":
-		c.StrategyID = "simd-parallel-scalar-tail"
-	}
-	if c.TypeID == "float32" {
-		switch c.StrategyID {
-		case "scalar", "simd-partial", "simd-scalar-tail":
-			c.Workers = OptionalInt{1, true}
-		case "simd-parallel-scalar-tail":
-			if size == 0 {
-				c.Workers = OptionalInt{0, true}
-			} else if procs.Known {
-				c.Workers = OptionalInt{min(procs.Value, size), true}
+	if variant, ok := catalog.LegacyVariant(label); ok {
+		c.StrategyID = variant.ID
+		if c.TypeID == catalog.Float32 {
+			knownProcs := 0
+			if procs.Known {
+				knownProcs = procs.Value
 			}
+			count, known := variant.WorkerCount(size, knownProcs)
+			c.Workers = OptionalInt{count, known}
 		}
 	}
 	return c
