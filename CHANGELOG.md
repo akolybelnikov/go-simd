@@ -5,6 +5,24 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 operation-pattern review — 2026-10-27
+
+- Added a tracked F004 gap ledger and staged pattern backlog: broadcast
+  parameters, comparisons/masks/selection, clamp, reductions/dot/accumulators,
+  explicit FMA, and movement/representation experiments.
+- Verified portable versus amd64 `archsimd` availability against Go 1.27.3;
+  documented absent portable permutation, horizontal and packed-mask methods.
+- Specified operand sources, scalar parameters, output representations, tail
+  validity, numerical rules, predicate fixtures, capability gates and per-pattern
+  traffic models. Three vector operands do not imply three input arrays.
+- Credited Jesús Espino's *SIMD and Go* in the Wiki and added a pattern review
+  distinguishing proposed experiments from the six implemented kernels.
+- Updated the local F4 tracker to prioritize useful patterns before broad type
+  coverage. No kernels, selectors or architecture milestones are implemented
+  by this planning/documentation change.
+- Validated local SDK symbols, current-kernel coverage, Wiki/source links,
+  Markdown tables/fences, and unchanged runtime-source scope.
+
 ### User knowledge guide — 2026-10-27
 
 - Added a progressive GitHub Wiki guide with tracked sources under `docs/wiki`,

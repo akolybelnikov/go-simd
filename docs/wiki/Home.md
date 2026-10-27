@@ -23,6 +23,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Diagnose setup, flags, selection, and report failures | [09 — Troubleshooting](https://github.com/akolybelnikov/go-simd/wiki/09-Troubleshooting) |
 | Contribute and keep this Wiki current | [10 — Contribution and Wiki maintenance](https://github.com/akolybelnikov/go-simd/wiki/10-Contributing-and-wiki-maintenance) |
 | Check terminology and current capability limits | [11 — Glossary and capabilities](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities) |
+| Explore missing SIMD patterns and credited reading | [12 — SIMD patterns and reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading) |
 
 ## What you can do today
 
@@ -58,6 +59,7 @@ useful repeated measurement.
 | Date | Delivered knowledge |
 | --- | --- |
 | 2026-10-27 | Initial progressive guide, full command registry, six-kernel reference, report conventions, experiment recipes, troubleshooting, and runnable Go example |
+| 2026-10-27 | F004 pattern-gap review, portable/architecture API checks, and credit to Jesús Espino's *SIMD and Go* |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

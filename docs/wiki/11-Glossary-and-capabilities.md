@@ -15,6 +15,10 @@ capabilities, not a promise to deliver every possible extension.
 | Input CSV/JSON inference | Not implemented |
 | Other numeric types / comprehensive operation catalog | Not implemented |
 | MulAdd/FMA mode | Not implemented; numerical semantics need an explicit contract |
+| Broadcast scale/affine kernels | Planned in F004; SDK broadcast exists, but no lab kernel or selector is registered |
+| Predicate/mask/selection kernels | Planned in F004; no benchmark kernels yet |
+| Sum/dot reductions | Planned composed kernels; scalar-result and numerical-order contracts pending |
+| Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -45,6 +49,11 @@ workers/resources/frontends remain conditional on observed laboratory needs.
 | Lane | One element position in the vector representation |
 | Vector width | Lane count times element bits; eight float32 lanes would be 256 bits |
 | Partial vector | A vector operation whose load/store handles fewer valid elements than a full vector |
+| Broadcast | Filling vector lanes from one scalar parameter |
+| Mask | Logical per-lane predicate results; exported representation must be declared |
+| Selection / blend | Choosing one of two values per lane according to a mask |
+| Reduction | Combining multiple input values into fewer results, often one scalar |
+| Permutation | Rearranging lane positions according to an index contract |
 | Tail | Remaining elements after full-vector processing; the scalar-tail strategy uses a scalar loop for these |
 | Payload size | Number of elements in each input/output slice, not the number of bytes |
 | Working set | Buffers used by an experiment; three float32 slices occupy about `12 * elements` bytes |
@@ -69,3 +78,5 @@ workers/resources/frontends remain conditional on observed laboratory needs.
 Return to [Home](https://github.com/akolybelnikov/go-simd/wiki), or use the
 [command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)
 to choose an implemented workflow.
+The [pattern review and credited reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading)
+explain the F004 backlog without presenting proposed patterns as implemented.

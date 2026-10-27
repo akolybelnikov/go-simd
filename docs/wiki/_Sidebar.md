@@ -12,5 +12,6 @@
 - [09 · Troubleshooting](https://github.com/akolybelnikov/go-simd/wiki/09-Troubleshooting)
 - [10 · Contribution and maintenance](https://github.com/akolybelnikov/go-simd/wiki/10-Contributing-and-wiki-maintenance)
 - [11 · Glossary and capabilities](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities)
+- [12 · SIMD patterns and reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading)
 
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)
