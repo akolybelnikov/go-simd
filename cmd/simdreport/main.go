@@ -17,6 +17,9 @@ import (
 	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/cli"
+	"github.com/akolybelnikov/go-simd/internal/engine"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 	"github.com/akolybelnikov/go-simd/internal/report"
 	"github.com/akolybelnikov/go-simd/internal/result"
 )
@@ -30,7 +33,12 @@ func main() {
 
 func run(args []string, stdout io.Writer) error {
 	flags := flag.NewFlagSet("simdreport", flag.ContinueOnError)
-	group := flags.String("group", "all", "addition, computation, or all")
+	flags.Usage = func() {
+		cli.Help(flags.Output(), flags, "Repeated kernel measurements and TXT/MD/CSV reports. Runs standalone by default.", "simdreport -list", "simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md", "simdreport -backend go-test -group computation")
+	}
+	var selection cli.Selection
+	selection.Register(flags)
+	backend := flags.String("backend", "compiled", "measurement backend: compiled or go-test (developer checkout only)")
 	count := flags.Int("count", 5, "measurement repetitions")
 	benchtime := flags.String("benchtime", "100ms", "duration or iteration count per measurement")
 	bench := flags.String("bench", ".", "Go benchmark selection expression")
@@ -42,15 +50,24 @@ func run(args []string, stdout io.Writer) error {
 		}
 		return err
 	}
-	if flags.NArg() != 0 {
-		return fmt.Errorf("unexpected positional arguments")
+	group, err := selection.Resolve(flags)
+	if err != nil {
+		return err
 	}
-	if *count < 1 {
-		return fmt.Errorf("count must be positive")
+	config := engine.Config{Count: *count, Benchtime: *benchtime, Bench: *bench}
+	if err := config.Validate(); err != nil {
+		return err
 	}
 	format, err := report.ParseFormat(*formatName)
 	if err != nil {
 		return err
+	}
+	if *backend != "compiled" && *backend != "go-test" {
+		return fmt.Errorf("unknown backend %q (choose compiled or go-test)", *backend)
+	}
+	machine := platform.Current()
+	if selection.List {
+		return cli.PrintCatalog(stdout, group, machine)
 	}
 	var groups []string
 	for _, operation := range catalog.All() {
@@ -58,21 +75,32 @@ func run(args []string, stdout io.Writer) error {
 			groups = append(groups, operation.Group)
 		}
 	}
-	if *group != "all" {
-		if !slices.Contains(groups, *group) {
-			return fmt.Errorf("unknown group %q", *group)
+	if group != "all" {
+		groups = []string{group}
+	}
+	plans := make(map[string]engine.Plan)
+	for _, name := range groups {
+		plan, err := engine.Prepare(name, config, machine.Lanes)
+		if err != nil {
+			return err
 		}
-		groups = []string{*group}
+		plans[name] = plan
 	}
 	for _, name := range groups {
-		if err := measureReport(name, *bench, *benchtime, *count, *output, format, stdout); err != nil {
+		var err error
+		if *backend == "go-test" {
+			err = measureLegacyReport(name, *bench, *benchtime, *count, *output, format, stdout)
+		} else {
+			err = measureCompiledReport(name, plans[name], machine, *output, format, stdout)
+		}
+		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func measureReport(group, bench, benchtime string, count int, output string, format report.Format, stdout io.Writer) error {
+func measureLegacyReport(group, bench, benchtime string, count int, output string, format report.Format, stdout io.Writer) error {
 	directory := filepath.Join(output, group)
 	if err := os.MkdirAll(directory, 0755); err != nil {
 		return err
@@ -120,13 +148,17 @@ func measureReport(group, bench, benchtime string, count int, output string, for
 	if err != nil {
 		return fmt.Errorf("%s (raw output saved to %s)", err, raw.Name())
 	}
+	return saveReport(group, raw.Name(), run, format, stdout)
+}
+
+func saveReport(group, evidencePath string, run result.Run, format report.Format, stdout io.Writer) error {
 	summaries, err := result.Summarize(run.Observations)
 	if err != nil {
-		return fmt.Errorf("%w (raw output saved to %s)", err, raw.Name())
+		return fmt.Errorf("%w (measurements saved to %s)", err, evidencePath)
 	}
 	table, err := result.Compare(group, summaries)
 	if err != nil {
-		return fmt.Errorf("%w (raw output saved to %s)", err, raw.Name())
+		return fmt.Errorf("%w (measurements saved to %s)", err, evidencePath)
 	}
 	var saved, terminal bytes.Buffer
 	if err := report.Write(&saved, format, table, run.Metadata); err != nil {
@@ -135,10 +167,11 @@ func measureReport(group, bench, benchtime string, count int, output string, for
 	if err := report.Write(&terminal, report.TXT, table, ""); err != nil {
 		return err
 	}
-	reportPath := strings.TrimSuffix(raw.Name(), ".raw") + "." + string(format)
+	base := strings.TrimSuffix(strings.TrimSuffix(evidencePath, ".raw"), ".measurements.json")
+	reportPath := base + "." + string(format)
 	if err := os.WriteFile(reportPath, saved.Bytes(), 0644); err != nil {
-		return fmt.Errorf("saving report (raw output saved to %s): %w", raw.Name(), err)
+		return fmt.Errorf("saving report (measurements saved to %s): %w", evidencePath, err)
 	}
-	_, err = fmt.Fprintf(stdout, "%s\nSaved %s and %s\n", terminal.String(), reportPath, raw.Name())
+	_, err = fmt.Fprintf(stdout, "%s\nSaved %s and %s\n", terminal.String(), reportPath, evidencePath)
 	return err
 }

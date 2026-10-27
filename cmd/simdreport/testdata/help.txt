@@ -1,13 +1,32 @@
-Usage of simdreport:
+Usage: simdreport [flags]
+
+Repeated kernel measurements and TXT/MD/CSV reports. Runs standalone by default.
+
+Options:
+  -addition
+    	alias for -group addition
+  -backend string
+    	measurement backend: compiled or go-test (developer checkout only) (default "compiled")
   -bench string
     	Go benchmark selection expression (default ".")
   -benchtime string
     	duration or iteration count per measurement (default "100ms")
+  -computation
+    	alias for -group computation
   -count int
     	measurement repetitions (default 5)
   -format string
     	saved report format: txt, md, or csv (terminal stays text) (default "txt")
+  -function string
+    	deprecated alias: add, compute, or all
   -group string
-    	addition, computation, or all (default "all")
+    	benchmark group: addition, computation, or all (default "all")
+  -list
+    	list implemented kernels and runtime capabilities without benchmarking
   -output string
     	report directory (default "artifacts")
+
+Examples:
+  simdreport -list
+  simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md
+  simdreport -backend go-test -group computation

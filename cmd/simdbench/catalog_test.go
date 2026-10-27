@@ -6,6 +6,9 @@ import (
 	"io"
 	"strings"
 	"testing"
+
+	"github.com/akolybelnikov/go-simd/internal/cli"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 )
 
 func TestListSelectors(t *testing.T) {
@@ -34,7 +37,7 @@ func TestListSelectors(t *testing.T) {
 func TestCatalogListing(t *testing.T) {
 	for _, emulated := range []bool{false, true} {
 		var output bytes.Buffer
-		err := printCatalog(&output, "all", capabilities{"go-fixture", "fixture-os", "fixture-arch", 256, 8, 4, emulated})
+		err := cli.PrintCatalog(&output, "all", platform.Info{GoVersion: "go-fixture", OS: "fixture-os", Arch: "fixture-arch", Bits: 256, Lanes: 8, Procs: 4, Emulated: emulated})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -83,10 +86,10 @@ func (w listingWriter) Write(p []byte) (int, error) { return 0, w.err }
 
 func TestCatalogWriterFailures(t *testing.T) {
 	want := errors.New("listing write failed")
-	if err := printCatalog(listingWriter{want}, "all", capabilities{}); !errors.Is(err, want) {
+	if err := cli.PrintCatalog(listingWriter{want}, "all", platform.Info{}); !errors.Is(err, want) {
 		t.Fatalf("error = %v", err)
 	}
-	if err := printCatalog(listingWriter{}, "all", capabilities{}); !errors.Is(err, io.ErrShortWrite) {
+	if err := cli.PrintCatalog(listingWriter{}, "all", platform.Info{}); !errors.Is(err, io.ErrShortWrite) {
 		t.Fatalf("short write = %v", err)
 	}
 }
