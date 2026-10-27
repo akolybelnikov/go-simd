@@ -5,6 +5,20 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### User knowledge guide — 2026-10-27
+
+- Added a progressive GitHub Wiki guide with tracked sources under `docs/wiki`,
+  sidebar/footer navigation, and an incremental maintenance/publishing workflow.
+- Documented both CLIs and every flag, all Make targets/variables, native Go
+  benchmark controls, build/test commands, current capabilities, and failures.
+- Added operation/alias/numerical-contract references, report/evidence guidance,
+  interpretation lessons, focused experiment recipes, and troubleshooting.
+- Added `examples/basic`, a runnable module-local demonstration of all six
+  kernels, exact in-place aliases, unchanged output on length mismatch, and nil
+  input. Measurement kernels and migration scope are unchanged.
+- Verified example output, all project flag/Make/kernel reference coverage,
+  Wiki/source links, Markdown fences, formatting, full tests, and vet.
+
 ### Architecture migration M1 / Feature 1 — 2026-10-27
 
 #### Added

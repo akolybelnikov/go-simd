@@ -4,6 +4,12 @@ An experimental Go project comparing scalar and SIMD operations on float32 slice
 This is a learning and benchmarking workspace. Results depend on hardware,
 toolchain, workload and background load; SIMD is not always faster.
 
+Start with the [user Wiki](https://github.com/akolybelnikov/go-simd/wiki):
+progressive experiments, the complete command registry, kernel examples, report
+interpretation, and troubleshooting. Its editable sources live in
+[`docs/wiki`](docs/wiki/Home.md). Run `go run ./examples/basic` for a small
+module-local example of all six kernels.
+
 The [architecture migration record](docs/migration/README.md) documents completed
 milestones, compatibility contracts, and baseline evidence. See the
 [changelog](CHANGELOG.md) for changes and validation notes.
