@@ -37,9 +37,9 @@ func MakeBenchmarkSlices(size int) (a, inputB, out []float32) {
 }
 
 // Measure runs a benchmark with preallocated inputs and includes call overhead.
-func Measure(b *testing.B, size int, out []float32, run func() error) {
+func Measure(b *testing.B, size int, logicalBytes int64, out []float32, run func() error) {
 	b.ReportAllocs()
-	b.SetBytes(int64(size) * 12)
+	b.SetBytes(logicalBytes)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := run(); err != nil {

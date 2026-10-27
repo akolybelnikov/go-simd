@@ -10,16 +10,19 @@ import (
 	"testing"
 	"text/tabwriter"
 
-	"github.com/akolybelnikov/go-simd/internal/addition"
 	"github.com/akolybelnikov/go-simd/internal/benchutil"
-	"github.com/akolybelnikov/go-simd/internal/computation"
+	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
 )
 
 const benchmarkSize = 1 << 20
 
 var benchmarkSink float32
 
-type options struct{ group string }
+type options struct {
+	group string
+	list  bool
+}
 
 type variant struct {
 	name string
@@ -32,8 +35,9 @@ type result struct {
 }
 
 type benchmarkGroup struct {
-	name     string
-	variants []variant
+	name         string
+	logicalBytes int64
+	variants     []variant
 }
 
 func main() {
@@ -51,15 +55,22 @@ func run(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
+	if opts.list {
+		return printCatalog(stdout, opts.group, currentCapabilities())
+	}
 
 	a, b, out := benchutil.MakeBenchmarkSlices(benchmarkSize)
-	for _, group := range benchmarkGroups(opts.group, a, b, out) {
+	groups, err := benchmarkGroups(opts.group, a, b, out)
+	if err != nil {
+		return err
+	}
+	for _, group := range groups {
 		results := make([]result, 0, len(group.variants))
 		for _, item := range group.variants {
 			var runErr error
 			stats := testing.Benchmark(func(b *testing.B) {
 				b.ReportAllocs()
-				b.SetBytes(int64(benchmarkSize * 3 * 4))
+				b.SetBytes(group.logicalBytes)
 				for i := 0; i < b.N; i++ {
 					if runErr = item.run(); runErr != nil {
 						b.Fatal(runErr)
@@ -89,8 +100,9 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	flags.StringVar(&group, "group", "", "benchmark group: addition, computation, or all")
 	flags.BoolVar(&add, "addition", false, "alias for -group addition")
 	flags.BoolVar(&compute, "computation", false, "alias for -group computation")
+	flags.BoolVar(&opts.list, "list", false, "list implemented kernels and runtime capabilities without benchmarking")
 	flags.Usage = func() {
-		fmt.Fprintln(stderr, "Usage: simdbench [-group addition|computation|all] [-addition] [-computation]")
+		fmt.Fprintln(stderr, "Usage: simdbench [-group addition|computation|all] [-addition] [-computation] [-list]")
 		fmt.Fprintln(stderr, "\nBenchmarks scalar and SIMD operations on a fixed 1,048,576-element input.")
 		flags.PrintDefaults()
 	}
@@ -136,32 +148,36 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	return opts, nil
 }
 
-func benchmarkGroups(function string, a, b, out []float32) []benchmarkGroup {
-	add := benchmarkGroup{
-		name: "Addition",
-		variants: []variant{
-			{name: "Scalar", run: func() error { return addition.AddScalar(a, b, out) }},
-			{name: "SIMDPartial", run: func() error { return addition.AddSIMD(a, b, out) }},
-			{name: "SIMDTail", run: func() error { return addition.AddSIMDVectorTail(a, b, out) }},
-			{name: "SIMDParallel", run: func() error { return addition.AddSIMDParallel(a, b, out) }},
-		},
+func benchmarkGroups(group string, a, b, out []float32) ([]benchmarkGroup, error) {
+	switch group {
+	case "add":
+		group = "addition"
+	case "compute":
+		group = "computation"
 	}
-	compute := benchmarkGroup{
-		name: "Compute-heavy expression: a*a + b*b + a*b",
-		variants: []variant{
-			{name: "Scalar", run: func() error { return computation.ComputeHeavyScalar(a, b, out) }},
-			{name: "SIMD", run: func() error { return computation.ComputeHeavySIMD(a, b, out) }},
-		},
+	var groups []benchmarkGroup
+	for _, descriptor := range catalog.All() {
+		if group != "all" && group != descriptor.Group {
+			continue
+		}
+		operation, err := kernels.Lookup(descriptor.ID, descriptor.TypeID)
+		if err != nil {
+			return nil, err
+		}
+		bytes, err := descriptor.LogicalBytes(len(a))
+		if err != nil {
+			return nil, err
+		}
+		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes}
+		for _, implementation := range operation.Implementations {
+			item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.Bind(a, b, out)})
+		}
+		groups = append(groups, item)
 	}
-
-	switch function {
-	case "add", "addition":
-		return []benchmarkGroup{add}
-	case "compute", "computation":
-		return []benchmarkGroup{compute}
-	default:
-		return []benchmarkGroup{add, compute}
+	if len(groups) == 0 {
+		return nil, fmt.Errorf("unknown group %q", group)
 	}
+	return groups, nil
 }
 
 func printResults(w io.Writer, title string, results []result) error {

@@ -7,6 +7,8 @@ import (
 	"math"
 	"slices"
 	"strings"
+
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 )
 
 // Optional values distinguish an unavailable metric from a measured zero.
@@ -169,7 +171,7 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 			return Comparison{}, fmt.Errorf("invalid summary for strategy %q", s.Key.Case.StrategyID)
 		}
 		c := s.Key.Case
-		column := Column{c.StrategyID, s.Label, c.StrategyID == "scalar"}
+		column := Column{c.StrategyID, s.Label, c.StrategyID == catalog.Scalar}
 		if previous, ok := columns[c.StrategyID]; ok && previous != column {
 			return Comparison{}, fmt.Errorf("conflicting strategy labels")
 		}
@@ -190,14 +192,7 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 		table.Columns = append(table.Columns, column)
 	}
 	slices.SortFunc(table.Columns, func(a, b Column) int {
-		order := []string{"Scalar", "SIMD", "SIMDPartial", "SIMDTail", "SIMDParallel"}
-		ai, bi := slices.Index(order, a.Label), slices.Index(order, b.Label)
-		if ai < 0 {
-			ai = len(order)
-		}
-		if bi < 0 {
-			bi = len(order)
-		}
+		ai, bi := catalog.LegacyLabelOrder(a.Label), catalog.LegacyLabelOrder(b.Label)
 		if ai != bi {
 			return ai - bi
 		}
@@ -210,7 +205,7 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 	slices.Sort(sizes)
 	for _, size := range sizes {
 		row := Row{Elements: size}
-		baseline, hasBaseline := bySize[size]["scalar"]
+		baseline, hasBaseline := bySize[size][catalog.Scalar]
 		for _, column := range table.Columns {
 			cell := Cell{}
 			if s, ok := bySize[size][column.StrategyID]; ok {

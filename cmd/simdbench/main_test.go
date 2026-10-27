@@ -80,7 +80,10 @@ func TestLegacyVariantRegistration(t *testing.T) {
 		t.Fatalf("quick comparison size changed: %d", benchmarkSize)
 	}
 	a, b, out := benchutil.MakeBenchmarkSlices(1)
-	groups := benchmarkGroups("all", a, b, out)
+	groups, err := benchmarkGroups("all", a, b, out)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var names [][]string
 	for _, group := range groups {
 		row := []string{group.name}
@@ -146,7 +149,10 @@ func TestBenchmarkGroups(t *testing.T) {
 		{function: "compute", want: 1},
 		{function: "all", want: 2},
 	} {
-		groups := benchmarkGroups(tt.function, a, b, out)
+		groups, err := benchmarkGroups(tt.function, a, b, out)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if len(groups) != tt.want {
 			t.Errorf("benchmarkGroups(%q) returned %d groups, want %d", tt.function, len(groups), tt.want)
 		}

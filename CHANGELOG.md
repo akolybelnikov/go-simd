@@ -5,6 +5,28 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### Architecture migration M2 — 2026-10-27
+
+- Added a shared ordinary-source catalogue for the existing two float32
+  operations/six implementations: stable identities, labels/order, arithmetic
+  semantics, operand/output shapes, parameter seams and worker policies.
+- Added typed native calls and explicit prepared-buffer bindings consumed by
+  both simdbench and native benchmarks. Report groups and legacy result identity
+  mapping now consume the same metadata. Metadata remains SIMD/testing-free.
+- Derived logical byte accounting from descriptors; current operations retain
+  `12*n`. Added shape/width/overflow checks and synthetic future-shape tests.
+- Added `simdbench -list`, with existing group/alias rules, implemented-operation
+  details and live runtime SIMD/emulation context, without measuring or creating
+  fixtures/artifacts. Verified the built listing outside the checkout without Go
+  on PATH. The source-based report runner remains unchanged until M3.
+- Preserved all kernel bodies, timed validation/call boundaries, benchmark names,
+  sizes, labels, M0 identities, quick tables and M1 report formats.
+- Added binding/registry, vector-boundary/in-place/error, metadata/traffic,
+  listing/filter/writer and compatibility checks; full tests/vet and pure-package
+  tests pass. Retained before/after native observations and quick comparisons.
+- Updated the migration record and progressive user Wiki, including command
+  registry and contribution instructions. New F004 kernels remain planned.
+
 ### F004 operation-pattern review — 2026-10-27
 
 - Added a tracked F004 gap ledger and staged pattern backlog: broadcast
