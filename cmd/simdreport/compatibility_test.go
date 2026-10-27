@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const reportCommandHelperEnv = "GO_SIMD_REPORT_COMMAND_HELPER"
+
 // These fixtures characterize the legacy parser and table before M1 extracts
 // their responsibilities. They are synthetic examples, not timing assertions.
 func TestLegacyReportFixtures(t *testing.T) {
@@ -53,6 +55,8 @@ func TestReportRejectsInvalidOptionsBeforeArtifacts(t *testing.T) {
 		{"unknown group", []string{"-group=unknown"}, `unknown group "unknown"`},
 		{"zero count", []string{"-count=0"}, "count must be positive"},
 		{"negative count", []string{"-count=-1"}, "count must be positive"},
+		{"unsupported format", []string{"-format=html"}, `unsupported format "html" (choose txt, md, or csv)`},
+		{"empty format", []string{"-format="}, `unsupported format "" (choose txt, md, or csv)`},
 		{"positional argument", []string{"extra"}, "unexpected positional arguments"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -77,7 +81,7 @@ func TestReportHelpCompatibility(t *testing.T) {
 	// A separate process captures flag's real stderr and main's exit behavior
 	// without changing process-wide stderr or refactoring production code in M0.
 	command := exec.Command(os.Args[0], "-test.run=^TestReportCommandProcess$", "--", "-h")
-	command.Env = append(os.Environ(), "GO_SIMD_M0_REPORT_HELP=1")
+	command.Env = append(os.Environ(), reportCommandHelperEnv+"=1")
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil {
@@ -93,7 +97,7 @@ func TestReportHelpCompatibility(t *testing.T) {
 }
 
 func TestReportCommandProcess(t *testing.T) {
-	if os.Getenv("GO_SIMD_M0_REPORT_HELP") != "1" {
+	if os.Getenv(reportCommandHelperEnv) != "1" {
 		return
 	}
 	separator := slices.Index(os.Args, "--")

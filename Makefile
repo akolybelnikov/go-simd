@@ -8,7 +8,7 @@ ARTIFACT_ROOT ?= artifacts
 
 .PHONY: help run run-addition run-computation report report-addition report-computation test vet fmt fmt-check check clean
 help:
-	@printf '%s\n' 'make run [ARGS="-group addition"]' 'make report [COUNT=5 BENCHTIME=100ms]' 'make report-addition | report-computation' 'make check | fmt | clean'
+	@printf '%s\n' 'make run [ARGS="-group addition"]' 'make report [COUNT=5 BENCHTIME=100ms ARGS="-format md"]' 'make report-addition | report-computation' 'make check | fmt | clean'
 run:
 	$(GO) run ./cmd/simdbench $(ARGS)
 run-addition:

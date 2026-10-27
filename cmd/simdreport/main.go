@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"flag"
@@ -17,7 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akolybelnikov/go-simd/internal/benchutil"
+	"github.com/akolybelnikov/go-simd/internal/report"
+	"github.com/akolybelnikov/go-simd/internal/result"
 )
 
 func main() {
@@ -34,6 +34,7 @@ func run(args []string, stdout io.Writer) error {
 	benchtime := flags.String("benchtime", "100ms", "duration or iteration count per measurement")
 	bench := flags.String("bench", ".", "Go benchmark selection expression")
 	output := flags.String("output", "artifacts", "report directory")
+	formatName := flags.String("format", "txt", "saved report format: txt, md, or csv (terminal stays text)")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -46,6 +47,10 @@ func run(args []string, stdout io.Writer) error {
 	if *count < 1 {
 		return fmt.Errorf("count must be positive")
 	}
+	format, err := report.ParseFormat(*formatName)
+	if err != nil {
+		return err
+	}
 	groups := []string{"addition", "computation"}
 	if *group != "all" {
 		if !slices.Contains(groups, *group) {
@@ -54,14 +59,14 @@ func run(args []string, stdout io.Writer) error {
 		groups = []string{*group}
 	}
 	for _, name := range groups {
-		if err := report(name, *bench, *benchtime, *count, *output, stdout); err != nil {
+		if err := measureReport(name, *bench, *benchtime, *count, *output, format, stdout); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func report(group, bench, benchtime string, count int, output string, stdout io.Writer) error {
+func measureReport(group, bench, benchtime string, count int, output string, format report.Format, stdout io.Writer) error {
 	directory := filepath.Join(output, group)
 	if err := os.MkdirAll(directory, 0755); err != nil {
 		return err
@@ -103,102 +108,31 @@ func report(group, bench, benchtime string, count int, output string, stdout io.
 			break
 		}
 	}
-	table, err := comparison(measurements.String(), group)
+	run, err := result.ReadLegacy(&measurements, result.LegacyOptions{
+		RunID: strings.TrimSuffix(filepath.Base(raw.Name()), ".raw"), Metadata: metadata, GeneratedInputs: true,
+	})
 	if err != nil {
 		return fmt.Errorf("%s (raw output saved to %s)", err, raw.Name())
 	}
-	reportPath := strings.TrimSuffix(raw.Name(), ".raw") + ".txt"
-	if err := os.WriteFile(reportPath, []byte(table+"\nMeasurement environment\n"+metadata), 0644); err != nil {
+	summaries, err := result.Summarize(run.Observations)
+	if err != nil {
+		return fmt.Errorf("%w (raw output saved to %s)", err, raw.Name())
+	}
+	table, err := result.Compare(group, summaries)
+	if err != nil {
+		return fmt.Errorf("%w (raw output saved to %s)", err, raw.Name())
+	}
+	var saved, terminal bytes.Buffer
+	if err := report.Write(&saved, format, table, run.Metadata); err != nil {
 		return err
 	}
-	_, err = fmt.Fprintf(stdout, "%s\nSaved %s and %s\n", table, reportPath, raw.Name())
+	if err := report.Write(&terminal, report.TXT, table, ""); err != nil {
+		return err
+	}
+	reportPath := strings.TrimSuffix(raw.Name(), ".raw") + "." + string(format)
+	if err := os.WriteFile(reportPath, saved.Bytes(), 0644); err != nil {
+		return fmt.Errorf("saving report (raw output saved to %s): %w", raw.Name(), err)
+	}
+	_, err = fmt.Fprintf(stdout, "%s\nSaved %s and %s\n", terminal.String(), reportPath, raw.Name())
 	return err
-}
-
-// comparison aggregates repeated measurements by their median. Only selected
-// variants appear, and percentage changes require a measured scalar baseline.
-func comparison(raw, title string) (string, error) {
-	samples := map[int]map[string][]float64{}
-	names := []string{}
-	scanner := bufio.NewScanner(strings.NewReader(raw))
-	for scanner.Scan() {
-		fields := strings.Fields(scanner.Text())
-		if len(fields) < 4 || !strings.HasPrefix(fields[0], "Benchmark") {
-			continue
-		}
-		parts := strings.Split(fields[0], "/")
-		if len(parts) != 3 || !strings.HasPrefix(parts[1], "n=") {
-			continue
-		}
-		size, err := strconv.Atoi(strings.TrimPrefix(parts[1], "n="))
-		if err != nil {
-			return "", err
-		}
-		name := parts[2]
-		if i := strings.LastIndex(name, "-"); i >= 0 {
-			name = name[:i]
-		}
-		for i := 2; i+1 < len(fields); i++ {
-			if fields[i+1] != "ns/op" {
-				continue
-			}
-			value, err := strconv.ParseFloat(fields[i], 64)
-			if err != nil {
-				return "", err
-			}
-			if samples[size] == nil {
-				samples[size] = map[string][]float64{}
-			}
-			samples[size][name] = append(samples[size][name], value)
-			if !slices.Contains(names, name) {
-				names = append(names, name)
-			}
-			break
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return "", err
-	}
-	if len(samples) == 0 {
-		return "", fmt.Errorf("no benchmark measurements found")
-	}
-	sizes := make([]int, 0, len(samples))
-	results := benchutil.BenchmarkResults{}
-	for size, variants := range samples {
-		sizes = append(sizes, size)
-		results[size] = map[string]float64{}
-		for name, values := range variants {
-			slices.Sort(values)
-			n := len(values)
-			median := values[n/2]
-			if n%2 == 0 {
-				median = (values[n/2-1] + median) / 2
-			}
-			results[size][name] = median
-		}
-	}
-	slices.SortFunc(names, func(a, b string) int {
-		order := []string{"Scalar", "SIMD", "SIMDPartial", "SIMDTail", "SIMDParallel"}
-		ai, bi := slices.Index(order, a), slices.Index(order, b)
-		if ai < 0 {
-			ai = len(order)
-		}
-		if bi < 0 {
-			bi = len(order)
-		}
-		if ai < bi {
-			return -1
-		}
-		if ai > bi {
-			return 1
-		}
-		return strings.Compare(a, b)
-	})
-	slices.Sort(sizes)
-	var out bytes.Buffer
-	fmt.Fprintln(&out, "Repeated measurements summarized by median.")
-	if err := benchutil.PrintComparison(&out, title, sizes, results, names); err != nil {
-		return "", err
-	}
-	return out.String(), nil
 }
