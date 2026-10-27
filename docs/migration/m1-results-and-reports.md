@@ -101,7 +101,7 @@ or artifact creation. `simdbench` retains its existing interface and output.
 - Model tests verify identity separation, per-case repetitions, retained counters,
   bit-level input encoding, no fabricated durations, and no input mutation.
 - Real subprocess tests exercise default TXT and explicit TXT/MD/CSV for both
-  groups at sizes 8/9, two repetitions, `1x`. Each saved/terminal table is checked
+  groups at sizes 8/16, two repetitions, `1x`. Each saved/terminal table is checked
   against its own raw observations, without performance thresholds.
 - Empty selections and failed benchmarks retain raw evidence, return exit 1,
   and produce no successful summary file. Writer failures propagate.
@@ -110,3 +110,8 @@ or artifact creation. `simdbench` retains its existing interface and output.
   Linux CI supplies the configured full race check.
 
 M1 is the stopping point. M2 catalog work has not started.
+
+Portability follow-up during Wiki publication (2026-10-27): select universal
+power-of-two sizes 8/16 in the export smoke test. The earlier 8/9 selection
+assumed a width-dependent boundary; size 9 is absent from a width-16 sweep.
+This corrects test coverage without changing production selection or kernels.

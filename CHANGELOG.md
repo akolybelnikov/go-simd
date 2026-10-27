@@ -18,6 +18,9 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
   input. Measurement kernels and migration scope are unchanged.
 - Verified example output, all project flag/Make/kernel reference coverage,
   Wiki/source links, Markdown fences, formatting, full tests, and vet.
+- Corrected the M1 export smoke test to select universal sizes 8/16 after CI
+  exposed its earlier assumption that the width-dependent size 9 always exists.
+  General Wiki smoke recipes now use those portable sizes too.
 
 ### Architecture migration M1 / Feature 1 — 2026-10-27
 

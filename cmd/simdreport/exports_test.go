@@ -36,7 +36,9 @@ func TestReportExports(t *testing.T) {
 				format = report.TXT
 			}
 			output := t.TempDir()
-			args := []string{"-output", output, "-bench", "^Benchmark(Addition|Computation)$/^n=(8|9)$/^(Scalar|SIMD.*)$", "-count=2", "-benchtime=1x"}
+			// Both are powers of two on every vector width. Size 9 is only
+			// registered as a boundary on some machines (for example width 8).
+			args := []string{"-output", output, "-bench", "^Benchmark(Addition|Computation)$/^n=(8|16)$/^(Scalar|SIMD.*)$", "-count=2", "-benchtime=1x"}
 			if name != "default" {
 				args = append(args, "-format", name)
 			}

@@ -7,12 +7,13 @@ can learn one behavior before running the full sweep.
 ## A. Verify plumbing without drawing conclusions
 
 ```powershell
-go run ./cmd/simdreport -group all -bench '^Benchmark(Addition|Computation)$/^n=(8|9)$/^(Scalar|SIMD.*)$' -count 1 -benchtime 1x -format md
+go run ./cmd/simdreport -group all -bench '^Benchmark(Addition|Computation)$/^n=(8|16)$/^(Scalar|SIMD.*)$' -count 1 -benchtime 1x -format md
 ```
 
 Expect two pairs of raw/Markdown files, one per group. This checks selection,
-execution, and saving. The sizes are literal examples, not guaranteed vector
-boundaries on every environment, and `1x` timings are not performance evidence.
+execution, and saving. Both sizes are powers of two present in every current
+sweep; they are not guaranteed vector boundaries on every environment. `1x`
+timings are not performance evidence.
 
 ## B. Study vector boundaries
 
