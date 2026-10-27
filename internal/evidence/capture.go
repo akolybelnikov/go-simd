@@ -7,15 +7,17 @@ import (
 	"io"
 	"runtime/debug"
 
+	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/result"
 )
 
 const Schema = "go-simd.measurements/v1"
 
 type Config struct {
-	Count     int    `json:"count"`
-	Benchtime string `json:"benchtime"`
-	Bench     string `json:"bench"`
+	Input     *input.Options `json:"input,omitempty"`
+	Count     int            `json:"count"`
+	Benchtime string         `json:"benchtime"`
+	Bench     string         `json:"bench"`
 }
 
 type Machine struct {

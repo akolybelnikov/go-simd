@@ -7,16 +7,39 @@ import (
 	"text/tabwriter"
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/platform"
 )
 
 // Listing consumes metadata only: no fixture allocation, kernel binding,
 // calibration, benchmark invocation, Go subprocess, or artifact creation.
 func PrintCatalog(w io.Writer, group string, machine platform.Info) error {
+	return PrintCatalogWithOptions(w, group, machine, input.DefaultOptions())
+}
+
+func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, options input.Options) error {
 	var out strings.Builder
 	fmt.Fprintln(&out, "Implemented laboratory catalogue (no benchmarks run)")
 	fmt.Fprintf(&out, "go: %s\nplatform: %s/%s\nSIMD bits: %d\nSIMD float32 lanes: %d\nemulated: %t\nGOMAXPROCS: %d\n",
 		machine.GoVersion, machine.OS, machine.Arch, machine.Bits, machine.Lanes, machine.Emulated, machine.Procs)
+	if group == "all" {
+		fmt.Fprintln(&out)
+		table := tabwriter.NewWriter(&out, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(table, "GROUP\tOPERATION / TYPE\tSTRATEGIES\tLOGICAL BYTES AT n=1")
+		for _, op := range catalog.All() {
+			bytes, err := op.LogicalBytes(1)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(table, "%s\t[%s/%s]\t%d\t%d\n", op.Group, op.ID, op.TypeID, len(op.Variants), bytes)
+		}
+		if err := table.Flush(); err != nil {
+			return err
+		}
+		fmt.Fprintln(&out, "\nUse -list -group <group> for expressions, parameters, strategy labels and semantics.")
+		fmt.Fprintln(&out, "Logical traffic is effective work accounting, not measured DRAM traffic.")
+		return writeCatalog(w, out.String())
+	}
 	for _, op := range catalog.All() {
 		if group != "all" && group != op.Group {
 			continue
@@ -28,6 +51,12 @@ func PrintCatalog(w io.Writer, group string, machine platform.Info) error {
 			inputs = append(inputs, describeValue(value))
 		}
 		fmt.Fprintf(&out, "inputs: %s\noutput: %s\nscalar parameters: %d\n", strings.Join(inputs, ", "), describeValue(op.Output), len(op.Parameters))
+		if op.Parameterized() {
+			for _, p := range op.Parameters {
+				fmt.Fprintf(&out, "  %s: %g (float32 bits 0x%08x)\n", p.Name, options.Float(p.Name), options.Bits(p.Name))
+			}
+			fmt.Fprintf(&out, "fixture: %s\nsetup: scalar parameters prepared; SIMD broadcasts once per kernel call\n", options.Generator(op))
+		}
 		bytes, err := op.LogicalBytes(1)
 		if err != nil {
 			return err
@@ -50,8 +79,12 @@ func PrintCatalog(w io.Writer, group string, machine platform.Info) error {
 		}
 	}
 	fmt.Fprintln(&out, "\nOnly registered operation/type pairs are listed; no implicit casts or ISA-only extensions.")
-	n, err := io.WriteString(w, out.String())
-	if err == nil && n != out.Len() {
+	return writeCatalog(w, out.String())
+}
+
+func writeCatalog(w io.Writer, value string) error {
+	n, err := io.WriteString(w, value)
+	if err == nil && n != len(value) {
 		return io.ErrShortWrite
 	}
 	return err

@@ -13,6 +13,9 @@ func TestFrozenOperationIdentities(t *testing.T) {
 	}
 	var got [][]string
 	for _, op := range All() {
+		if op.Parameterized() {
+			continue
+		}
 		row := []string{op.ID, op.Group, op.BenchmarkName, op.TypeID, op.ArithmeticID}
 		if op.ReferenceVariantID != Scalar || op.ExecutionMode != KernelOnly || len(op.Inputs) != 2 || len(op.Parameters) != 0 || op.Output.Shape != Array {
 			t.Fatalf("unexpected existing-operation contract: %+v", op)

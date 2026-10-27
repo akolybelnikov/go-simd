@@ -8,15 +8,17 @@ import (
 	"github.com/akolybelnikov/go-simd/internal/addition"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/computation"
+	"github.com/akolybelnikov/go-simd/internal/input"
 )
 
 type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
-	Descriptor catalog.Variant
-	Run        Float32Kernel
-	Bind       Float32Binder
+	BindConfigured func(a, b, out []float32, options input.Options) func() error
+	Descriptor     catalog.Variant
+	Run            Float32Kernel
+	Bind           Float32Binder
 }
 
 type Operation struct {
@@ -66,11 +68,19 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.Parameterized() {
+			bind, ok := configuredBindings[bindingKey{id, variant.ID}]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing configured binding for %s/%s", id, variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindConfigured: bind})
+			continue
+		}
 		bound, ok := bindings[bindingKey{id, variant.ID}]
 		if !ok || bound.run == nil || bound.bind == nil {
 			return Operation{}, fmt.Errorf("missing kernel binding for %s/%s", id, variant.ID)
 		}
-		operation.Implementations = append(operation.Implementations, Implementation{variant, bound.run, bound.bind})
+		operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, Run: bound.run, Bind: bound.bind})
 	}
 	return operation, nil
 }

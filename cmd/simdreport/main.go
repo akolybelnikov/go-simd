@@ -16,9 +16,11 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/cli"
 	"github.com/akolybelnikov/go-simd/internal/engine"
+	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/platform"
 	"github.com/akolybelnikov/go-simd/internal/report"
 	"github.com/akolybelnikov/go-simd/internal/result"
@@ -67,7 +69,7 @@ func run(args []string, stdout io.Writer) error {
 	}
 	machine := platform.Current()
 	if selection.List {
-		return cli.PrintCatalog(stdout, group, machine)
+		return cli.PrintCatalogWithOptions(stdout, group, machine, selection.Input)
 	}
 	var groups []string
 	for _, operation := range catalog.All() {
@@ -80,7 +82,7 @@ func run(args []string, stdout io.Writer) error {
 	}
 	plans := make(map[string]engine.Plan)
 	for _, name := range groups {
-		plan, err := engine.Prepare(name, config, machine.Lanes)
+		plan, err := engine.PrepareWithOptions(name, config, machine.Lanes, selection.Input)
 		if err != nil {
 			return err
 		}
@@ -89,7 +91,7 @@ func run(args []string, stdout io.Writer) error {
 	for _, name := range groups {
 		var err error
 		if *backend == "go-test" {
-			err = measureLegacyReport(name, *bench, *benchtime, *count, *output, format, stdout)
+			err = measureLegacyReport(name, *bench, *benchtime, *count, *output, format, stdout, plans[name])
 		} else {
 			err = measureCompiledReport(name, plans[name], machine, *output, format, stdout)
 		}
@@ -100,7 +102,7 @@ func run(args []string, stdout io.Writer) error {
 	return nil
 }
 
-func measureLegacyReport(group, bench, benchtime string, count int, output string, format report.Format, stdout io.Writer) error {
+func measureLegacyReport(group, bench, benchtime string, count int, output string, format report.Format, stdout io.Writer, plan engine.Plan) error {
 	directory := filepath.Join(output, group)
 	if err := os.MkdirAll(directory, 0755); err != nil {
 		return err
@@ -109,7 +111,12 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	if err != nil {
 		return err
 	}
-	args := []string{"test", "./internal/" + group, "-run=^$", "-bench=" + bench, "-benchmem", "-benchtime=" + benchtime, "-count=" + strconv.Itoa(count)}
+	op, _ := catalog.ByGroup(group)
+	requested := bench
+	if op.Parameterized() {
+		bench = plan.NativeSelection()
+	}
+	args := []string{"test", op.NativePath(), "-run=^$", "-bench=" + bench, "-benchmem", "-benchtime=" + benchtime, "-count=" + strconv.Itoa(count)}
 	var vector simd.Float32s
 	metadata := fmt.Sprintf("date: %s\ngo: %s\nplatform: %s/%s\nGOMAXPROCS: %d\nSIMD float32 lanes: %d\ncommand: go %s\n", time.Now().UTC().Format(time.RFC3339), runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0), vector.Len(), strings.Join(args, " "))
 	envOutput, err := exec.Command("go", "env", "-json", "GOEXPERIMENT", "GOAMD64", "GOARM64", "GOTOOLCHAIN").CombinedOutput()
@@ -118,6 +125,10 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 		return fmt.Errorf("go env: %w: %s", err, envOutput)
 	}
 	metadata += "toolchain environment: " + string(envOutput) + "\n"
+	optionBytes, _ := json.Marshal(plan.Input)
+	if op.Parameterized() {
+		metadata += "requested selection: " + requested + "\ninput configuration: " + string(optionBytes) + "\n"
+	}
 	if _, err := io.WriteString(raw, metadata); err != nil {
 		raw.Close()
 		return err
@@ -125,6 +136,15 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	fmt.Fprintf(stdout, "Measuring %s (%d repetitions)...\n", group, count)
 	var measurements bytes.Buffer
 	command := exec.Command("go", args...)
+	if op.Parameterized() {
+		for _, entry := range os.Environ() {
+			key, _, _ := strings.Cut(entry, "=")
+			if key != input.NativeOptionsEnv {
+				command.Env = append(command.Env, entry)
+			}
+		}
+		command.Env = append(command.Env, input.NativeOptionsEnv+"="+string(optionBytes))
+	}
 	command.Stdout = io.MultiWriter(raw, &measurements)
 	command.Stderr = command.Stdout
 	runErr := command.Run()
@@ -143,7 +163,7 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 		}
 	}
 	run, err := result.ReadLegacy(&measurements, result.LegacyOptions{
-		RunID: strings.TrimSuffix(filepath.Base(raw.Name()), ".raw"), Metadata: metadata, GeneratedInputs: true,
+		RunID: strings.TrimSuffix(filepath.Base(raw.Name()), ".raw"), Metadata: metadata, GeneratedInputs: true, InputOptions: &plan.Input,
 	})
 	if err != nil {
 		return fmt.Errorf("%s (raw output saved to %s)", err, raw.Name())

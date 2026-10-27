@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/engine"
 	"github.com/akolybelnikov/go-simd/internal/evidence"
 	"github.com/akolybelnikov/go-simd/internal/report"
@@ -41,7 +42,7 @@ func TestReportExports(t *testing.T) {
 			output := t.TempDir()
 			// Both are powers of two on every vector width. Size 9 is only
 			// registered as a boundary on some machines (for example width 8).
-			args := []string{"-output", output, "-bench", "^Benchmark(Addition|Computation)$/^n=(8|16)$/^(Scalar|SIMD.*)$", "-count=2", "-benchtime=1x"}
+			args := []string{"-output", output, "-bench", "^Benchmark.*$/^n=(8|16)$/^(Scalar|SIMD.*)$", "-count=2", "-benchtime=1x"}
 			if name != "default" {
 				args = append(args, "-format", name)
 			}
@@ -49,7 +50,7 @@ func TestReportExports(t *testing.T) {
 			if err != nil {
 				t.Fatalf("export failed: %v\n%s", err, stderr)
 			}
-			for _, group := range []string{"addition", "computation"} {
+			for _, group := range catalog.Groups() {
 				files, err := os.ReadDir(filepath.Join(output, group))
 				if err != nil {
 					t.Fatal(err)
@@ -81,13 +82,11 @@ func TestReportExports(t *testing.T) {
 					t.Fatal(err)
 				}
 				run := capture.Run
-				if capture.Schema != evidence.Schema || capture.Status != "complete" || run.BackendID != engine.BackendID || run.HarnessID != engine.HarnessID || capture.Machine.Lanes < 1 {
+				op, _ := catalog.ByGroup(group)
+				if capture.Schema != evidence.Schema || capture.Status != "complete" || run.BackendID != engine.BackendID || run.HarnessID != engine.HarnessFor(op) || capture.Machine.Lanes < 1 {
 					t.Fatal("missing direct-result provenance")
 				}
-				wantCount := 16
-				if group == "computation" {
-					wantCount = 8
-				}
+				wantCount := len(op.Variants) * 4
 				if len(run.Observations) != wantCount || !bytes.Contains(raw, []byte("-count=2")) || !bytes.Contains(raw, []byte("-benchtime=1x")) {
 					t.Fatalf("raw measurements/configuration lost: %s", raw)
 				}

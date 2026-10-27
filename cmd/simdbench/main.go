@@ -13,6 +13,7 @@ import (
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
 	"github.com/akolybelnikov/go-simd/internal/cli"
+	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/platform"
 )
 
@@ -21,6 +22,7 @@ const benchmarkSize = 1 << 20
 var benchmarkSink float32
 
 type options struct {
+	input input.Options
 	group string
 	list  bool
 }
@@ -36,6 +38,7 @@ type result struct {
 }
 
 type benchmarkGroup struct {
+	output       []float32
 	name         string
 	logicalBytes int64
 	variants     []variant
@@ -57,11 +60,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 	if opts.list {
-		return cli.PrintCatalog(stdout, opts.group, platform.Current())
+		return cli.PrintCatalogWithOptions(stdout, opts.group, platform.Current(), opts.input)
 	}
 
-	a, b, out := benchutil.MakeBenchmarkSlices(benchmarkSize)
-	groups, err := benchmarkGroups(opts.group, a, b, out)
+	groups, err := benchmarkGroupsForSize(opts.group, benchmarkSize, nil, nil, nil, opts.input)
 	if err != nil {
 		return err
 	}
@@ -77,7 +79,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 						b.Fatal(runErr)
 					}
 				}
-				benchmarkSink = out[len(out)-1]
+				benchmarkSink = group.output[len(group.output)-1]
 			})
 			if runErr != nil {
 				return fmt.Errorf("%s %s benchmark: %w", group.name, item.name, runErr)
@@ -108,10 +110,15 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 		return options{}, err
 	}
 	opts.group, opts.list = group, selection.List
+	opts.input = selection.Input
 	return opts, nil
 }
 
 func benchmarkGroups(group string, a, b, out []float32) ([]benchmarkGroup, error) {
+	return benchmarkGroupsForSize(group, len(a), a, b, out, input.DefaultOptions())
+}
+
+func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options input.Options) ([]benchmarkGroup, error) {
 	switch group {
 	case "add":
 		group = "addition"
@@ -120,6 +127,13 @@ func benchmarkGroups(group string, a, b, out []float32) ([]benchmarkGroup, error
 	}
 	var groups []benchmarkGroup
 	for _, descriptor := range catalog.All() {
+		if group == "all" || group == descriptor.Group {
+			if err := options.ValidateFor(descriptor); err != nil {
+				return nil, err
+			}
+		}
+	}
+	for _, descriptor := range catalog.All() {
 		if group != "all" && group != descriptor.Group {
 			continue
 		}
@@ -127,13 +141,29 @@ func benchmarkGroups(group string, a, b, out []float32) ([]benchmarkGroup, error
 		if err != nil {
 			return nil, err
 		}
-		bytes, err := descriptor.LogicalBytes(len(a))
+		bytes, err := descriptor.LogicalBytes(size)
 		if err != nil {
 			return nil, err
 		}
-		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes}
+		x, y, resultOut := a, b, out
+		if descriptor.Parameterized() {
+			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
+		} else if out == nil {
+			a, b, out = benchutil.MakeBenchmarkSlices(size)
+			x, y, resultOut = a, b, out
+		}
+		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
+		if descriptor.Parameterized() {
+			item.name += "\n" + cli.InputSummary(options.Identity(descriptor), options.Generator(descriptor))
+		}
 		for _, implementation := range operation.Implementations {
-			item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.Bind(a, b, out)})
+			var call func() error
+			if descriptor.Parameterized() {
+				call = implementation.BindConfigured(x, y, resultOut, options)
+			} else {
+				call = implementation.Bind(x, y, resultOut)
+			}
+			item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: call})
 		}
 		groups = append(groups, item)
 	}

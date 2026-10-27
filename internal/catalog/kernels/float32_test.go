@@ -24,6 +24,9 @@ func TestExactLegacyKernelBindings(t *testing.T) {
 	}
 	registered := 0
 	for _, descriptor := range catalog.All() {
+		if descriptor.Parameterized() {
+			continue
+		}
 		op, err := Lookup(descriptor.ID, descriptor.TypeID)
 		if err != nil {
 			t.Fatal(err)
@@ -53,6 +56,9 @@ func TestBoundAndNativeKernelsPreserveContracts(t *testing.T) {
 	var vector simd.Float32s
 	w := vector.Len()
 	for _, descriptor := range catalog.All() {
+		if descriptor.Parameterized() {
+			continue
+		}
 		op, err := Lookup(descriptor.ID, descriptor.TypeID)
 		if err != nil {
 			t.Fatal(err)
