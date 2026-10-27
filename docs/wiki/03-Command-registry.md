@@ -116,11 +116,11 @@ does not create a new arbitrary size.
 | --- | --- | --- |
 | All addition cases | `addition` | `.` |
 | One exact scalar case | `addition` | `^BenchmarkAddition$/^n=1024$/^Scalar$` |
-| Three sizes, serial variants | `addition` | `^BenchmarkAddition$/^n=(128|1024|8192)$/^(Scalar|SIMDPartial|SIMDTail)$` |
+| Three sizes, serial variants | `addition` | `^BenchmarkAddition$/^n=(128\|1024\|8192)$/^(Scalar\|SIMDPartial\|SIMDTail)$` |
 | Partial-vector only | `addition` | `^BenchmarkAddition$/^n=1024$/^SIMDPartial$` |
-| Scalar and parallel | `addition` | `^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$` |
-| Compute scalar and SIMD | `computation` | `^BenchmarkComputation$/^n=1024$/^(Scalar|SIMD)$` |
-| Both groups, two sizes | `all` | `^Benchmark(Addition|Computation)$/^n=(8|9)$/^(Scalar|SIMD.*)$` |
+| Scalar and parallel | `addition` | `^BenchmarkAddition$/^n=1048576$/^(Scalar\|SIMDParallel)$` |
+| Compute scalar and SIMD | `computation` | `^BenchmarkComputation$/^n=1024$/^(Scalar\|SIMD)$` |
+| Both groups, two sizes | `all` | `^Benchmark(Addition\|Computation)$/^n=(8\|16)$/^(Scalar\|SIMD.*)$` |
 
 Go matches slash-separated regex components. Anchors matter: unanchored `n=1`
 also matches `n=16`, `n=128`, and other names containing that substring.

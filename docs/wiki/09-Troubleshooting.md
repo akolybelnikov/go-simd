@@ -51,6 +51,12 @@ Then widen one component at a time. A selection regex cannot add sizes that
 the benchmark never registers. Save the retained raw output when diagnosing
 an empty selection or runner failure.
 
+### Why size 9 can disappear on another machine
+
+Size 9 is not a power of two. It appears around width 8 (`w+1`), but is not
+registered around width 16. Use powers of two, such as 8 and 16, for a portable
+two-size smoke check, or derive tail examples from the observed lane count.
+
 ## The table has em dashes or empty percentage fields
 
 These can be correct: scalar was filtered out, a variant was not measured at
