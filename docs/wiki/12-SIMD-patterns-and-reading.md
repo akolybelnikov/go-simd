@@ -86,8 +86,9 @@ element rather than assuming addition's tail treatment works for every pattern.
 
 ## Proposed delivery priorities
 
-1. Complete M2's shared descriptors for the existing six kernels, retaining
-   current identities. Describe scalar parameters and output shapes cleanly.
+1. M2 foundation is complete: shared descriptors/bindings for the existing six
+   kernels preserve current identities. Scalar parameter descriptions and output
+   shapes are seams; new typed preparation/retention remains implementation work.
 2. Add a focused float32 broadcast and predicate/selection slice with equivalent
    scalar references. Cover none/mixed/all-true predicate arrangements.
 3. Add sum/dot experiments after scalar-output and reduction-order contracts.
@@ -97,4 +98,4 @@ element rather than assuming addition's tail treatment works for every pattern.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. No broadcast, mask, permutation, sum, or dot command has
-been implemented by this documentation update.
+been implemented. M2 adds catalogue inspection through `simdbench -list`.

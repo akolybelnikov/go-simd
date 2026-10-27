@@ -13,6 +13,14 @@ sizes and measurement setup, delegating deterministic generation to
 `internal/input`. Report observations/aggregation live in `internal/result`;
 formatting lives in `internal/report`. Operations do not depend on these helpers.
 
+M2 registers native benchmark trees through `BenchmarkOperation`, consuming the
+same `internal/catalog` descriptors and `internal/catalog/kernels` bindings as
+the quick CLI. Descriptor input/output shapes determine `SetBytes`; both current
+operations still account for two float32 reads and one write (`12*n` logical
+bytes). This is effective traffic, not measured DRAM traffic. Registration,
+descriptor lookup, fixture preparation, and byte calculation happen outside the
+timed loop; kernel validation, dispatch, and per-call workers remain inside.
+
 ## Addition implementations
 
 `BenchmarkAddition` compares four implementations on the same preallocated input

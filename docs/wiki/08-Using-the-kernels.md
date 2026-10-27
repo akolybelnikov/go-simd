@@ -99,6 +99,11 @@ distinct sentinels. Zero-length equal slices succeed, including nil slices.
 
 ## Bring your own slices carefully
 
+Use `go run ./cmd/simdbench -list` to see implemented descriptors before choosing
+a kernel. The catalogue and typed bindings are internal extension points, not a
+public plugin API. Broadcast parameters, scalar-returning reductions and new
+output types still need explicit bindings and correctness contracts.
+
 The functions accept caller-supplied `[]float32` inside the module, so you can
 write a local program that prepares different values and checks results. The
 report CLI itself still uses generated fixtures; it has no CSV/JSON input-file

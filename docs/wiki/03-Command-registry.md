@@ -1,6 +1,6 @@
 # 03 — Complete command registry
 
-Baseline: M1 / Feature 1. Run examples from the repository root with
+Baseline: M2 / Feature 1. Run examples from the repository root with
 `GOEXPERIMENT=simd` enabled. This page distinguishes project flags from Go-tool
 flags; options supported by `go test` are not automatically project CLI options.
 
@@ -9,6 +9,7 @@ flags; options supported by `go test` are not automatically project CLI options.
 | Command | Purpose | Saves files? |
 | --- | --- | --- |
 | `go run ./cmd/simdbench` | Quick fixed-size comparison, both groups | No |
+| `go run ./cmd/simdbench -list` | Implemented kernels and current runtime SIMD context; no measurement | No |
 | `go run ./cmd/simdreport` | Repeated size sweep and summary export, both groups | Yes: selected report + raw per group |
 | `go run ./examples/basic` | Deterministic six-kernel usage example | No |
 | `go test ./...` | Tests, including short real CLI export tests | Test temporary files |
@@ -25,10 +26,11 @@ flags; options supported by `go test` are not automatically project CLI options.
 go run ./cmd/simdbench
 go run ./cmd/simdbench -group addition
 go run ./cmd/simdbench -group computation
+go run ./cmd/simdbench -list -group addition
 go run ./cmd/simdbench -h
 ```
 
-Every variant uses **1,048,576 float32 elements**. There is no quick-CLI size,
+In measurement mode every variant uses **1,048,576 float32 elements**. There is no quick-CLI size,
 count, duration, report-format, or output-file flag. It uses compiled
 `testing.Benchmark` calibration and prints one result per strategy, with
 allocation counters and change versus scalar. Its displayed ns/op comes from
@@ -42,6 +44,7 @@ Go's integer `NsPerOp()` result, unlike the report importer's parsed precision.
 | `-function` | Unset | Deprecated alias: `add`, `compute`, `all`; parser also accepts canonical group names | `-function add` |
 | `-addition` | `false` | Boolean alias selecting addition when true | `-addition` |
 | `-computation` | `false` | Boolean alias selecting computation when true | `-computation=true` |
+| `-list` | `false` | List registered kernels and runtime context without measuring; existing selectors filter the listing | `-list -group addition` |
 | `-h`, `-help` | — | Print help to stderr and succeed without measurements | `-h` |
 
 The quick parser also normalizes `add`/`compute` when supplied through `-group`;
@@ -58,6 +61,27 @@ go run ./cmd/simdbench -group all -addition
 Setting a boolean alias to false does not select that group. With no true aliases
 or explicit group/function selection, both groups run. Positional arguments are
 rejected. Failures from the built command exit **2**; help exits **0**.
+
+### Inspect capabilities without a benchmark
+
+```powershell
+go run ./cmd/simdbench -list
+go run ./cmd/simdbench -list -function compute
+```
+
+The header reports this process's Go version, OS/architecture, SIMD bit width,
+float32 lanes, `simd.Emulated()` and GOMAXPROCS. Each operation lists its stable
+operation/type/strategy IDs, legacy labels, expression/semantics, input/output
+shapes, scalar parameters (currently zero), logical traffic and worker policy.
+Both current operations account for 12 logical bytes at one element: two float32
+reads and one write. This is effective traffic, not measured DRAM traffic.
+
+Listing runs before fixture allocation, binding or benchmark calibration. It
+does not execute kernels, invoke Go subprocesses or create artifacts. Only
+registered pairs appear; proposed broadcast/mask/reduction experiments are
+absent. SIMD variants use portable hardware or emulation according to the live
+flag; that context does not establish a speedup. Output is a human-readable
+diagnostic, not a versioned JSON/CSV schema. `-list=false` runs normal comparisons.
 
 ## `simdreport`: sweep and export
 
@@ -212,6 +236,7 @@ New-Item -ItemType Directory -Force bin | Out-Null
 go build -o ./bin/simdbench.exe ./cmd/simdbench
 go build -o ./bin/simdreport.exe ./cmd/simdreport
 .\bin\simdbench.exe -group addition
+.\bin\simdbench.exe -list
 .\bin\simdreport.exe -group addition -bench '^BenchmarkAddition$/^n=1$/^Scalar$' -count 1 -benchtime 1x -format csv
 ```
 
@@ -227,8 +252,9 @@ go build -o ./bin/simdreport ./cmd/simdreport
 The quick binary uses compiled measurement facilities. The report binary still
 launches `go env` and repository-relative `go test`; building it does not remove
 its runtime Go/source dependency. Keep the experiment enabled for its child Go
-commands. No `--version`, capabilities subcommand, or unified `simd` executable
-is implemented at this baseline.
+commands. A built `simdbench -list` works from any directory without Go on PATH;
+`go run` itself still needs Go and source. There is no `--version`, unified
+`simd` executable, or separate capabilities subcommand at this baseline.
 
 ## Every Make target
 

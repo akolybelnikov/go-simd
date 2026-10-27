@@ -30,6 +30,11 @@ output. The current report command depends on both the checkout and Go on PATH.
 Use `go run ./cmd/simdbench -h` and `go run ./cmd/simdreport -h` to inspect the
 installed source's actual command definitions.
 
+`simdbench -list` is available from M2; `simdreport -list` is not a supported
+flag. The compiled quick listing needs neither Go nor a source checkout, while
+`go run` and the report runner still do. Listing only the current float32 pairs
+is expected: it does not advertise planned SDK methods as implemented kernels.
+
 ## No benchmark measurements found
 
 The Go subprocess can succeed without a matching benchmark case. Verify:
