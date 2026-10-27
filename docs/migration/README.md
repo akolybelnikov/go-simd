@@ -11,7 +11,7 @@ reviewed at a stopping point before the next milestone starts.
 | Milestone | Scope | Status |
 | --- | --- | --- |
 | M0 | Freeze behavior, retain native observations, decide identity/versioning/compatibility contracts | Complete, 2026-10-27 |
-| M1 | Extract typed results, aggregation, and rendering; implement TXT/MD/CSV against the extracted model | Pending |
+| M1 | Extract typed results, aggregation, and rendering; implement TXT/MD/CSV against the extracted model | Complete, 2026-10-27 |
 | M2 | Share runtime operation descriptors between commands and developer benchmarks | Pending |
 | M3 | Add a compiled `testing.Benchmark` backend; validate outside the source checkout without Go on PATH | Pending |
 | Later, conditional | Worker isolation, resource instrumentation, workload adapters, advanced analysis, optional TUI | Requires an observed laboratory or pilot need |
@@ -36,7 +36,15 @@ depend on resource instrumentation or worker isolation.
 M0 changes tests and documentation. Existing kernels, source-based report runner,
 quick-comparison runner, and timing boundaries remain the migration baseline.
 
-## Next checkpoint: M1
+## M1 deliverables
+
+The [M1 implementation record](m1-results-and-reports.md) documents the typed
+model, comparison compatibility checks, format conventions, and verification.
+`internal/result`, `internal/report`, and `internal/input` now implement these
+boundaries. TXT/MD/CSV consume one comparison model; native benchmark execution
+and kernels retain their existing timing boundaries.
+
+## M1 checkpoint scope
 
 Introduce `internal/result` and `internal/report` as they become used. Keep the
 `go test` subprocess while separating legacy parsing, observations, summaries,
@@ -47,3 +55,10 @@ regardless of the saved format.
 
 M1 does not replace the measurement engine or rewrite kernels. M0's native
 timings are observational evidence, never pass/fail thresholds.
+
+## Next checkpoint: M2
+
+Share runtime operation descriptors between quick commands and developer
+benchmarks. The legacy-name mapping in `internal/result/legacy.go` is an importer
+adapter, not runtime kernel registration. Do not begin M2 before the M1 stopping
+point; standalone measurement extraction remains M3.
