@@ -9,7 +9,7 @@ can learn one behavior before running the full sweep.
 ## A. Verify plumbing without drawing conclusions
 
 ```powershell
-go run ./cmd/simdreport -group all -bench '^Benchmark(Addition|Computation)$/^n=(8|16)$/^(Scalar|SIMD.*)$' -count 1 -benchtime 1x -format md
+go run ./cmd/simdreport -group all -bench '^Benchmark.*$/^n=(8|16)$/^(Scalar|SIMD.*)$' -count 1 -benchtime 1x -format md
 ```
 
 Expect two pairs of raw/Markdown files, one per group. This checks selection,

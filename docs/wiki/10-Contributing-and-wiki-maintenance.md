@@ -69,6 +69,14 @@ and captures actual T/N directly. Do not concurrently invoke unrelated
 Test installed execution outside source with PATH empty, exact iterations,
 fractional timing, error/partial capture and selectors against native Go.
 
+F004 adds configured float32 bindings for scalar parameters and unary/binary
+arrays. Keep original bindings frozen; new kernels use pattern harness IDs.
+Record parameter bits, pattern/seed and actual declared-array fingerprints.
+Shared native packages must restrict a report group to its selected leaf set.
+Test independent numerical oracles, distributions, partial-store canaries,
+backend identity parity and forced portable emulation before marking a pattern
+implemented. The scalar-output/reduction seam is still future work.
+
 ## Local validation commands
 
 ```powershell

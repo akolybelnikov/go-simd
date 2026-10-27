@@ -1,0 +1,472 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "selection",
+  "config": {
+    "input": {
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 3212836864,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "shuffled",
+      "Seed": 123
+    },
+    "count": 2,
+    "benchtime": "2x",
+    "bench": "^BenchmarkSelection$/^n=(8|16)$"
+  },
+  "machine": {
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261027-172051-2533333356",
+    "Environment": {
+      "ID": "benchmark-20261027-172051-2533333356/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-patterns/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-10-27T17:20:51Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-patterns/v1\ngroup: selection\nselection: \"^BenchmarkSelection$/^n=(8|16)$\"\n-count=2\n-benchtime=2x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nparameters: threshold=float32:0xbf800000\nfixture: predicate-float32-v1/shuffled/seed=123\n",
+    "Observations": [
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "ca2b1a34dbc309f64e91f5413497d02d9981e0a0155550d8a53da72083134dd4"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 480,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=8/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "ca2b1a34dbc309f64e91f5413497d02d9981e0a0155550d8a53da72083134dd4"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 150,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 640,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=8/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "ca2b1a34dbc309f64e91f5413497d02d9981e0a0155550d8a53da72083134dd4"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 480,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=8/SIMDPartial-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "ca2b1a34dbc309f64e91f5413497d02d9981e0a0155550d8a53da72083134dd4"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 480,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=8/SIMDPartial-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 16,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "bdca23f53c8fa4d3a80b609182d39642a0746ac4919ac09910a38a56a05e9e3a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 150,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1280,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=16/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 16,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "bdca23f53c8fa4d3a80b609182d39642a0746ac4919ac09910a38a56a05e9e3a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1920,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=16/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 16,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "bdca23f53c8fa4d3a80b609182d39642a0746ac4919ac09910a38a56a05e9e3a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 960,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=16/SIMDPartial-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-172051-2533333356",
+          "EnvironmentID": "benchmark-20261027-172051-2533333356/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-patterns/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "select-gt-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-select-ordered-bits-v1",
+            "Parameters": "threshold=float32:0xbf800000",
+            "Elements": 16,
+            "Input": {
+              "GeneratorID": "predicate-float32-v1/shuffled/seed=123",
+              "SHA256": "bdca23f53c8fa4d3a80b609182d39642a0746ac4919ac09910a38a56a05e9e3a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 960,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSelection/n=16/SIMDPartial-16"
+      }
+    ]
+  }
+}

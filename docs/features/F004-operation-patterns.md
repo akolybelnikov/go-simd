@@ -1,12 +1,11 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **extended requirements and implementation backlog**, 2026-10-27.
-No kernels, catalogue registration, CLI flags, or measurement behavior are added
-by this review. Architecture M0-M3 are now complete; new kernels remain separate.
-M2 supplied the shared catalogue for existing kernels, descriptor traffic and
-`simdbench -list`. The new patterns below remain an implementation backlog.
-M3 supplies the standalone compiled report engine and shared CLI listing/aliases;
-it does not implement these proposed operation patterns.
+Status: **first broadcast/predicate slice implemented**, 2026-10-27.
+Architecture M0-M3 are complete. F004 adds five operations and ten bindings:
+scale, affine, threshold, selection and rangefilter. The catalogue totals seven
+operations/sixteen implementations. See the
+[implementation and acceptance record](F004-broadcast-predicates.md).
+Remaining reduction, FMA, clamp, export, movement and type stages stay planned.
 
 ## Purpose and evidence
 
@@ -29,26 +28,29 @@ The SDK inventory is not a list of implemented lab commands.
 
 ## Current coverage
 
-Six callable kernels implement only two array-to-array operations: addition and
-`a*a + b*b + a*b`. Existing addition variants compare partial vectors, full
+The six original kernels implement addition and `a*a + b*b + a*b`.
+Ten new scalar/SIMD kernels add per-call broadcast constants, strict comparisons,
+masking, IfElse selection and range-mask And composition. Existing addition variants compare partial vectors, full
 vectors/scalar tails, and per-call parallel work. The expression composes
 element-wise `Mul` and `Add`; it is neither a reduction nor an FMA benchmark.
 Loads, stores, and tails are exercised inside those kernels, not isolated as
-primitive latency experiments. There are no broadcast parameters, masks,
-selection kernels, accumulator loops, scalar-output reductions, or permutations.
+primitive latency experiments. Scalar parameter bits and predicate fixture
+distributions are now recorded. Accumulators, reductions, predicate export,
+clamp, FMA and permutations remain absent.
 
 ## Pattern gap ledger
 
-All proposed operation IDs below are design candidates, not registered IDs or
-new CLI selectors. M2 preserves existing M0 IDs in the shared runtime catalogue.
+Scale/affine/threshold/selection/range IDs are registered as documented in the
+implementation record; other candidate IDs below remain proposals. M2/M3 IDs
+and existing kernel timing paths are preserved.
 
 | Pattern | Present in the lab | Verified API / boundary | Proposed useful experiment |
 | --- | --- | --- | --- |
 | Contiguous load/operate/store | Yes, both operations | Portable full/partial loads and stores | Retain current arithmetic controls; add copy only to answer a movement question |
-| Broadcast scalar parameters | No | `simd.BroadcastFloat32s` | `scale-f32`: `out[i]=alpha*x[i]`; `affine-f32`: `alpha*x[i]+beta` |
-| Comparisons / predicate output | No | `Float32s.Greater`, related comparisons; `Mask32s` | `predicate-gt-f32`: export a defined logical mask, with representation conversion cost declared |
-| Mask composition | No | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Combine lower/upper predicates; test none/some/all true and valid tail lanes |
-| Masking / selection | No | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with identical scalar result contracts |
+| Broadcast scalar parameters | Implemented: scale/affine | `simd.BroadcastFloat32s` | Scalar/SIMD controls; no prepared-vector variant |
+| Comparisons / predicate output | Comparisons implemented; exported masks pending | `Float32s.Greater`, related comparisons; `Mask32s` | `predicate-gt-f32`: export a defined logical mask, with conversion cost declared |
+| Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
+| Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
 | Explicit multiply-add | No; ordinary `Mul`/`Add` composition exists | Portable `MulAdd(y,z)`; semantics need a reference gate | `muladd-f32`, with separately identified fused/unfused modes |
 | Streaming accumulation / reduction | No | No portable `Sum` or horizontal-pair method in the inspected inventory | `sum-f32`, using a declared fold; portable vector-store/final scalar fold is a possible composition |
@@ -71,8 +73,8 @@ matching both output and conversion boundaries.
    parameters, output kind, semantics, requirements, and work/byte accounting.
    Keep M2's migration commit focused on the existing kernels; new patterns are
    separately reviewable slices. M3's standalone measurement foundation is complete.
-2. **First pattern slice:** float32 broadcast scale/affine plus predicate-driven
-   threshold/selection. These exercise scalar parameters and masks while retaining
+2. **First pattern slice (complete):** float32 broadcast scale/affine plus predicate-driven
+   threshold/selection and range-mask composition. These exercise scalar parameters and masks while retaining
    an array output. Keep explicit `Mul`/`Add` separate from a gated FMA variant.
 3. **Accumulation slice:** sum, then dot product and accumulator-count experiments,
    once scalar-output preparation/retention, fold semantics, and accounting are
@@ -178,7 +180,8 @@ These are candidate *logical* byte counts for float32 kernels, not DRAM counters
 | Float32 dot product | `8*n + 4` |
 
 Record constant setup, scratch traffic, mask packing, output kind and byte units
-explicitly. The current `12*n` helper must not be reused for every descriptor.
+explicitly. Current descriptors derive `8*n` or `12*n`; future output shapes
+must retain their own logical traffic model.
 Exclude zero-work sizes from throughput claims; retain them in correctness tests.
 Do not pool contexts with different parameters, mask representation, fusion,
 fold order, width, worker policy, or backend/harness boundaries.
