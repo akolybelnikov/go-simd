@@ -1,6 +1,8 @@
-Usage: simdbench [-group addition|computation|all] [-addition] [-computation] [-list]
+Usage: simdbench [flags]
 
-Benchmarks scalar and SIMD operations on a fixed 1,048,576-element input.
+Quick comparison on 1,048,576 float32 elements; -list inspects without measuring.
+
+Options:
   -addition
     	alias for -group addition
   -computation
@@ -8,6 +10,11 @@ Benchmarks scalar and SIMD operations on a fixed 1,048,576-element input.
   -function string
     	deprecated alias: add, compute, or all
   -group string
-    	benchmark group: addition, computation, or all
+    	benchmark group: addition, computation, or all (default "all")
   -list
     	list implemented kernels and runtime capabilities without benchmarking
+
+Examples:
+  simdbench -list
+  simdbench -group addition
+  simdbench -group computation

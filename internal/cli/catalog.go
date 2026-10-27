@@ -1,35 +1,22 @@
-package main
+package cli
 
 import (
 	"fmt"
 	"io"
-	"runtime"
-	"simd"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 )
-
-type capabilities struct {
-	goVersion, os, arch string
-	bits, lanes, procs  int
-	emulated            bool
-}
-
-func currentCapabilities() capabilities {
-	var vector simd.Float32s
-	return capabilities{runtime.Version(), runtime.GOOS, runtime.GOARCH,
-		simd.VectorBitSize(), vector.Len(), runtime.GOMAXPROCS(0), simd.Emulated()}
-}
 
 // Listing consumes metadata only: no fixture allocation, kernel binding,
 // calibration, benchmark invocation, Go subprocess, or artifact creation.
-func printCatalog(w io.Writer, group string, machine capabilities) error {
+func PrintCatalog(w io.Writer, group string, machine platform.Info) error {
 	var out strings.Builder
 	fmt.Fprintln(&out, "Implemented laboratory catalogue (no benchmarks run)")
 	fmt.Fprintf(&out, "go: %s\nplatform: %s/%s\nSIMD bits: %d\nSIMD float32 lanes: %d\nemulated: %t\nGOMAXPROCS: %d\n",
-		machine.goVersion, machine.os, machine.arch, machine.bits, machine.lanes, machine.emulated, machine.procs)
+		machine.GoVersion, machine.OS, machine.Arch, machine.Bits, machine.Lanes, machine.Emulated, machine.Procs)
 	for _, op := range catalog.All() {
 		if group != "all" && group != op.Group {
 			continue
@@ -52,7 +39,7 @@ func printCatalog(w io.Writer, group string, machine capabilities) error {
 			mode := "scalar"
 			if variant.UsesSIMD {
 				mode = "portable hardware"
-				if machine.emulated {
+				if machine.Emulated {
 					mode = "portable emulation"
 				}
 			}

@@ -52,12 +52,16 @@ func TestReportRejectsInvalidOptionsBeforeArtifacts(t *testing.T) {
 		args []string
 		want string
 	}{
-		{"unknown group", []string{"-group=unknown"}, `unknown group "unknown"`},
+		{"unknown group", []string{"-group=unknown"}, `unknown group "unknown" (choose addition, computation, or all)`},
 		{"zero count", []string{"-count=0"}, "count must be positive"},
 		{"negative count", []string{"-count=-1"}, "count must be positive"},
 		{"unsupported format", []string{"-format=html"}, `unsupported format "html" (choose txt, md, or csv)`},
 		{"empty format", []string{"-format="}, `unsupported format "" (choose txt, md, or csv)`},
-		{"positional argument", []string{"extra"}, "unexpected positional arguments"},
+		{"positional argument", []string{"extra"}, "unexpected positional arguments: extra"},
+		{"unknown backend", []string{"-backend=automatic"}, `unknown backend "automatic" (choose compiled or go-test)`},
+		{"invalid duration", []string{"-benchtime=invalid"}, `invalid benchtime "invalid": use a positive duration or iteration count Nx`},
+		{"zero duration", []string{"-benchtime=0s"}, `invalid benchtime "0s": use a positive duration or iteration count Nx`},
+		{"zero iterations", []string{"-benchtime=0x"}, `invalid benchtime "0x": use a positive duration or iteration count Nx`},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			output := filepath.Join(t.TempDir(), "reports")

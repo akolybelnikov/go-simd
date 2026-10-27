@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"testing"
 	"text/tabwriter"
 
 	"github.com/akolybelnikov/go-simd/internal/benchutil"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
+	"github.com/akolybelnikov/go-simd/internal/cli"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 )
 
 const benchmarkSize = 1 << 20
@@ -56,7 +57,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 	if opts.list {
-		return printCatalog(stdout, opts.group, currentCapabilities())
+		return cli.PrintCatalog(stdout, opts.group, platform.Current())
 	}
 
 	a, b, out := benchutil.MakeBenchmarkSlices(benchmarkSize)
@@ -92,59 +93,21 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 func parseOptions(args []string, stderr io.Writer) (options, error) {
 	opts := options{}
-	var legacy, group string
-	var add, compute bool
+	var selection cli.Selection
 	flags := flag.NewFlagSet("simdbench", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	flags.StringVar(&legacy, "function", "", "deprecated alias: add, compute, or all")
-	flags.StringVar(&group, "group", "", "benchmark group: addition, computation, or all")
-	flags.BoolVar(&add, "addition", false, "alias for -group addition")
-	flags.BoolVar(&compute, "computation", false, "alias for -group computation")
-	flags.BoolVar(&opts.list, "list", false, "list implemented kernels and runtime capabilities without benchmarking")
+	selection.Register(flags)
 	flags.Usage = func() {
-		fmt.Fprintln(stderr, "Usage: simdbench [-group addition|computation|all] [-addition] [-computation] [-list]")
-		fmt.Fprintln(stderr, "\nBenchmarks scalar and SIMD operations on a fixed 1,048,576-element input.")
-		flags.PrintDefaults()
+		cli.Help(stderr, flags, "Quick comparison on 1,048,576 float32 elements; -list inspects without measuring.", "simdbench -list", "simdbench -group addition", "simdbench -group computation")
 	}
 	if err := flags.Parse(args); err != nil {
 		return options{}, err
 	}
-	if flags.NArg() != 0 {
-		return options{}, fmt.Errorf("unexpected positional arguments: %s", strings.Join(flags.Args(), " "))
+	group, err := selection.Resolve(flags)
+	if err != nil {
+		return options{}, err
 	}
-	selections := []string{}
-	flags.Visit(func(f *flag.Flag) {
-		switch f.Name {
-		case "function":
-			selections = append(selections, legacy)
-		case "group":
-			selections = append(selections, group)
-		case "addition":
-			if add {
-				selections = append(selections, "addition")
-			}
-		case "computation":
-			if compute {
-				selections = append(selections, "computation")
-			}
-		}
-	})
-	opts.group = "all"
-	for i, selection := range selections {
-		switch selection {
-		case "add":
-			selection = "addition"
-		case "compute":
-			selection = "computation"
-		case "addition", "computation", "all":
-		default:
-			return options{}, fmt.Errorf("unknown group %q (choose addition, computation, or all)", selection)
-		}
-		if i > 0 && selection != opts.group {
-			return options{}, fmt.Errorf("conflicting group selections cannot be used together")
-		}
-		opts.group = selection
-	}
+	opts.group, opts.list = group, selection.List
 	return opts, nil
 }
 

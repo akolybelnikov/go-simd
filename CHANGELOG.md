@@ -5,6 +5,32 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### Architecture migration M3 — 2026-10-27
+
+- Made compiled `testing.Benchmark` the default report backend. Built/installed
+  commands run from arbitrary directories without Go or source at runtime.
+  Retained `-backend go-test` as an explicit developer option, with no fallback.
+- Added an internal engine boundary, validated positive duration/Nx/count and
+  Go-compatible benchmark selection, typed prepared calls, exact duration/N and
+  fractional ns/op/counters, plus returned kernel errors and partial observations.
+- Serialized the documented testing flag API and restored timing configuration;
+  retained Go calibration/GC, existing fixtures, kernels and per-call workers.
+- Added runtime/vector/emulation/embedded-build capture without runtime tools;
+  missing VCS facts and unsupported CPU model detection remain explicitly unknown.
+- Added versioned `go-simd.measurements/v1` JSON evidence under a distinct
+  `.measurements.json` extension; explicit developer runs retain `.raw` text.
+  Existing table formats, medians and missing-value conventions are unchanged.
+- Shared group/alias/list/help definitions between both CLIs. Report now accepts
+  the same aliases and listing; diagnostics and help examples are consistent.
+- Added Make help/list/build/install, BIN_DIR, and ARGS forwarding for quick group
+  shortcuts. Reorganized README/Wiki around installed/Go/Make equivalents, a clear
+  flag catalogue, bounded experiments and remote installation/use examples.
+- Verified full tests/vet, format/identity compatibility, native-selector parity,
+  adapter precision/error/settings tests, actual isolated binary reporting with
+  no Go/source, temporary installation and Make workflows. Updated smoke evidence
+  and guide sources. Worker manifests/cancellation and new F004 kernels remain
+  outside this milestone.
+
 ### Architecture migration M2 — 2026-10-27
 
 - Added a shared ordinary-source catalogue for the existing two float32
