@@ -1,11 +1,9 @@
 package benchutil
 
 import (
-	"bytes"
 	"reflect"
 	"simd"
 	"slices"
-	"strings"
 	"testing"
 )
 
@@ -68,39 +66,6 @@ func TestLegacyGeneratedFixtureWraparound(t *testing.T) {
 		if value != 0 {
 			t.Fatalf("output[%d] is not initially zero: %v", i, value)
 		}
-	}
-}
-
-func TestPrintComparison(t *testing.T) {
-	var output bytes.Buffer
-	err := PrintComparison(&output, "Addition", []int{1}, BenchmarkResults{
-		1: {"Scalar": 10, "SIMD": 8},
-	}, []string{"Scalar", "SIMD"})
-	if err != nil {
-		t.Fatalf("PrintComparison() error = %v", err)
-	}
-	for _, want := range []string{
-		"Addition benchmark comparison",
-		"ELEMENTS",
-		"1",
-		"10.00",
-		"8.00",
-		"-20.0%",
-	} {
-		if !strings.Contains(output.String(), want) {
-			t.Errorf("PrintComparison() output missing %q: %s", want, output.String())
-		}
-	}
-}
-
-func TestPrintComparisonAllowsMissingTiming(t *testing.T) {
-	var out bytes.Buffer
-	err := PrintComparison(&out, "Addition", []int{4}, BenchmarkResults{4: {"SIMD": 8}}, []string{"Scalar", "SIMD"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if strings.Contains(out.String(), "Inf") || !strings.Contains(out.String(), "—") {
-		t.Fatalf("unexpected table: %s", out.String())
 	}
 }
 

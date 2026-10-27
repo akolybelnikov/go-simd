@@ -5,6 +5,8 @@ Usage of simdreport:
     	duration or iteration count per measurement (default "100ms")
   -count int
     	measurement repetitions (default 5)
+  -format string
+    	saved report format: txt, md, or csv (terminal stays text) (default "txt")
   -group string
     	addition, computation, or all (default "all")
   -output string

@@ -1,15 +1,11 @@
 package benchutil
 
 import (
-	"fmt"
-	"io"
 	"slices"
 	"testing"
-	"text/tabwriter"
-)
 
-// BenchmarkResults stores nanoseconds per operation by input size and variant.
-type BenchmarkResults map[int]map[string]float64
+	"github.com/akolybelnikov/go-simd/internal/input"
+)
 
 var benchmarkSink float32
 
@@ -37,14 +33,7 @@ func BenchmarkSizes(width int) []int {
 
 // MakeBenchmarkSlices creates deterministic inputs and a reusable output slice.
 func MakeBenchmarkSlices(size int) (a, inputB, out []float32) {
-	a = make([]float32, size)
-	inputB = make([]float32, size)
-	out = make([]float32, size)
-	for i := range a {
-		a[i] = float32(i%100) / 10
-		inputB[i] = float32(i%50-25) / 10
-	}
-	return a, inputB, out
+	return input.MakeFloat32Slices(size)
 }
 
 // Measure runs a benchmark with preallocated inputs and includes call overhead.
@@ -60,74 +49,4 @@ func Measure(b *testing.B, size int, out []float32, run func() error) {
 	if size > 0 {
 		benchmarkSink = out[size-1]
 	}
-}
-
-// PrintComparison writes a formatted time comparison table.
-func PrintComparison(
-	w io.Writer,
-	title string,
-	sizes []int,
-	results BenchmarkResults,
-	names []string,
-) error {
-	if _, err := fmt.Fprintf(w, "\n%s benchmark comparison (ns/op; change vs scalar)\n", title); err != nil {
-		return err
-	}
-	table := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	if _, err := fmt.Fprint(table, "ELEMENTS\t"); err != nil {
-		return err
-	}
-	for _, name := range names {
-		if _, err := fmt.Fprintf(table, "%s ns/op\t", name); err != nil {
-			return err
-		}
-		if name != "Scalar" {
-			if _, err := fmt.Fprintf(table, "%s change\t", name); err != nil {
-				return err
-			}
-		}
-	}
-	if _, err := fmt.Fprintln(table); err != nil {
-		return err
-	}
-
-	for _, size := range sizes {
-		timings := results[size]
-		scalar := timings["Scalar"]
-		if _, err := fmt.Fprintf(table, "%d\t", size); err != nil {
-			return err
-		}
-		for _, name := range names {
-			elapsed, ok := timings[name]
-			if !ok {
-				if _, err := fmt.Fprint(table, "—\t"); err != nil {
-					return err
-				}
-				if name != "Scalar" {
-					if _, err := fmt.Fprint(table, "—\t"); err != nil {
-						return err
-					}
-				}
-				continue
-			}
-			if _, err := fmt.Fprintf(table, "%.2f\t", elapsed); err != nil {
-				return err
-			}
-			if name != "Scalar" {
-				if scalar <= 0 {
-					if _, err := fmt.Fprint(table, "—\t"); err != nil {
-						return err
-					}
-					continue
-				}
-				if _, err := fmt.Fprintf(table, "%+.1f%%\t", (elapsed-scalar)/scalar*100); err != nil {
-					return err
-				}
-			}
-		}
-		if _, err := fmt.Fprintln(table); err != nil {
-			return err
-		}
-	}
-	return table.Flush()
 }

@@ -1,10 +1,33 @@
 package main
 
 import (
+	"bytes"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/akolybelnikov/go-simd/internal/report"
+	"github.com/akolybelnikov/go-simd/internal/result"
 )
+
+// Preserve M0's fixtures against the extracted public package boundaries.
+func comparison(raw, title string) (string, error) {
+	run, err := result.ReadLegacy(strings.NewReader(raw), result.LegacyOptions{RunID: "fixture"})
+	if err != nil {
+		return "", err
+	}
+	summaries, err := result.Summarize(run.Observations)
+	if err != nil {
+		return "", err
+	}
+	table, err := result.Compare(title, summaries)
+	if err != nil {
+		return "", err
+	}
+	var out bytes.Buffer
+	err = report.Write(&out, report.TXT, table, "")
+	return out.String(), err
+}
 
 func TestComparison(t *testing.T) {
 	raw := `goos: windows
