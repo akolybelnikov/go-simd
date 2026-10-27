@@ -2,9 +2,11 @@
 
 Status: **extended requirements and implementation backlog**, 2026-10-27.
 No kernels, catalogue registration, CLI flags, or measurement behavior are added
-by this review. Architecture M0-M2 are now complete; M3 is the next checkpoint.
+by this review. Architecture M0-M3 are now complete; new kernels remain separate.
 M2 supplied the shared catalogue for existing kernels, descriptor traffic and
 `simdbench -list`. The new patterns below remain an implementation backlog.
+M3 supplies the standalone compiled report engine and shared CLI listing/aliases;
+it does not implement these proposed operation patterns.
 
 ## Purpose and evidence
 
@@ -68,7 +70,7 @@ matching both output and conversion boundaries.
    descriptors. Descriptors must be able to describe array operands, scalar
    parameters, output kind, semantics, requirements, and work/byte accounting.
    Keep M2's migration commit focused on the existing kernels; new patterns are
-   separately reviewable slices. M3 remains the standalone measurement checkpoint.
+   separately reviewable slices. M3's standalone measurement foundation is complete.
 2. **First pattern slice:** float32 broadcast scale/affine plus predicate-driven
    threshold/selection. These exercise scalar parameters and masks while retaining
    an array output. Keep explicit `Mul`/`Add` separate from a gated FMA variant.

@@ -1,218 +1,229 @@
-# 03 — Complete command registry
+# 03 — Command catalogue
 
-Baseline: M2 / Feature 1. Run examples from the repository root with
-`GOEXPERIMENT=simd` enabled. This page distinguishes project flags from Go-tool
-flags; options supported by `go test` are not automatically project CLI options.
+Baseline: M3, reviewed 2026-10-27. Installed binaries run from any directory.
+Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
+flags work through every launcher.
 
-## Command surfaces
+## Pick a task
 
-| Command | Purpose | Saves files? |
+| Task | Installed / on PATH | Go from checkout | Make from checkout |
+| --- | --- | --- | --- |
+| List operations and runtime context | `simdreport -list` | `go run ./cmd/simdreport -list` | `make list` |
+| Quick comparison | `simdbench` | `go run ./cmd/simdbench` | `make run` |
+| Quick addition | `simdbench -group addition` | `go run ./cmd/simdbench -group addition` | `make run-addition` |
+| Quick expression | `simdbench -group computation` | `go run ./cmd/simdbench -group computation` | `make run-computation` |
+| Markdown sweep | `simdreport -format md` | `go run ./cmd/simdreport -format md` | `make report ARGS="-format md"` |
+| Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |
+| Quick help | `simdbench -h` | `go run ./cmd/simdbench -h` | `make run ARGS="-h"` |
+
+Bare executable names assume their directory is on PATH. Use an absolute path,
+`./simdreport` on POSIX, or `.\simdreport.exe` in PowerShell otherwise.
+`make help` prints the short target catalogue; each CLI's `-h` prints options
+and examples. Listing is identical through either executable.
+
+## Shared options: both commands
+
+| Flag | Default | Meaning / example |
 | --- | --- | --- |
-| `go run ./cmd/simdbench` | Quick fixed-size comparison, both groups | No |
-| `go run ./cmd/simdbench -list` | Implemented kernels and current runtime SIMD context; no measurement | No |
-| `go run ./cmd/simdreport` | Repeated size sweep and summary export, both groups | Yes: selected report + raw per group |
-| `go run ./examples/basic` | Deterministic six-kernel usage example | No |
-| `go test ./...` | Tests, including short real CLI export tests | Test temporary files |
-| `go test ... -bench ...` | Native Go benchmark workflow | Only if you redirect output |
-| `go vet ./...` | Static checks | No report artifacts |
-| `gofmt -l ...` / `gofmt -w ...` | Inspect / apply Go formatting | `-w` edits source |
-| `go doc ...` | Inspect local package documentation | No |
-| `go build ...` | Compile local commands | Writes binaries |
-| `make <target>` | Convenience wrapper described below | Depends on target |
+| `-group` | `all` | `addition`, `computation`, `all`; `add` and `compute` also normalize to canonical names |
+| `-addition` | `false` | Boolean alias for addition: `-addition` |
+| `-computation` | `false` | Boolean alias for computation: `-computation=true` |
+| `-function` | Unset | Deprecated alias: `add`, `compute`, `all`; canonical group names also accepted |
+| `-list` | `false` | Show registered kernels and live runtime context without measuring |
+| `-h`, `-help` | — | Help to stderr; success without measurements |
 
-## `simdbench`: quick comparison
+Explicit selectors must agree. `-group addition -function add` is accepted;
+`-group all -addition` is rejected. False boolean aliases do not select a
+group. No explicit selection means both groups. Positional arguments are
+rejected. Repeating a flag uses Go's normal last-value rule.
 
-```powershell
-go run ./cmd/simdbench
-go run ./cmd/simdbench -group addition
-go run ./cmd/simdbench -group computation
-go run ./cmd/simdbench -list -group addition
-go run ./cmd/simdbench -h
-```
-
-In measurement mode every variant uses **1,048,576 float32 elements**. There is no quick-CLI size,
-count, duration, report-format, or output-file flag. It uses compiled
-`testing.Benchmark` calibration and prints one result per strategy, with
-allocation counters and change versus scalar. Its displayed ns/op comes from
-Go's integer `NsPerOp()` result, unlike the report importer's parsed precision.
-
-### All quick-CLI flags
-
-| Flag | Default | Accepted values / behavior | Example |
-| --- | --- | --- | --- |
-| `-group` | Effective default `all` | Canonical values: `addition`, `computation`, `all` | `-group addition` |
-| `-function` | Unset | Deprecated alias: `add`, `compute`, `all`; parser also accepts canonical group names | `-function add` |
-| `-addition` | `false` | Boolean alias selecting addition when true | `-addition` |
-| `-computation` | `false` | Boolean alias selecting computation when true | `-computation=true` |
-| `-list` | `false` | List registered kernels and runtime context without measuring; existing selectors filter the listing | `-list -group addition` |
-| `-h`, `-help` | — | Print help to stderr and succeed without measurements | `-h` |
-
-The quick parser also normalizes `add`/`compute` when supplied through `-group`;
-use the canonical names in new commands. Explicit selections must agree:
+`-list` prints this process's Go version, OS/architecture, SIMD bits/float32
+lanes, emulation and GOMAXPROCS, followed by operation/type/strategy IDs, labels,
+semantics, expressions, input/output shapes, parameter count and worker policies.
+Both current operations account for 12 logical bytes at one element.
+Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
+no artifacts. It advertises only implemented kernels, not proposed SDK patterns.
+Runtime emulation context does not guarantee acceleration or a speedup.
 
 ```powershell
-# Accepted: the selectors mean the same group.
-go run ./cmd/simdbench -group addition -function add
-
-# Rejected: all and addition are conflicting explicit selections.
-go run ./cmd/simdbench -group all -addition
+simdreport -list
+simdbench -list -group addition
+simdreport -list -function compute
 ```
 
-Setting a boolean alias to false does not select that group. With no true aliases
-or explicit group/function selection, both groups run. Positional arguments are
-rejected. Failures from the built command exit **2**; help exits **0**.
+`-list=false` selects normal measurement. Report-specific arguments are still
+validated by `simdreport` when listing. The listing is human-readable diagnostic
+text, not a versioned machine-data export.
 
-### Inspect capabilities without a benchmark
+## Quick comparison: simdbench
 
-```powershell
-go run ./cmd/simdbench -list
-go run ./cmd/simdbench -list -function compute
-```
+Each strategy uses **1,048,576 generated float32 elements**. Go calibrates one
+`testing.Benchmark` result per strategy, with allocation counters and change
+versus scalar. Displayed ns/op retains Go's integer `NsPerOp()` presentation.
 
-The header reports this process's Go version, OS/architecture, SIMD bit width,
-float32 lanes, `simd.Emulated()` and GOMAXPROCS. Each operation lists its stable
-operation/type/strategy IDs, legacy labels, expression/semantics, input/output
-shapes, scalar parameters (currently zero), logical traffic and worker policy.
-Both current operations account for 12 logical bytes at one element: two float32
-reads and one write. This is effective traffic, not measured DRAM traffic.
+The shared flags above are its entire CLI. It has no size/count/benchtime/report
+format/output/backend flag. Errors exit **2**; success/help exit **0**.
 
-Listing runs before fixture allocation, binding or benchmark calibration. It
-does not execute kernels, invoke Go subprocesses or create artifacts. Only
-registered pairs appear; proposed broadcast/mask/reduction experiments are
-absent. SIMD variants use portable hardware or emulation according to the live
-flag; that context does not establish a speedup. Output is a human-readable
-diagnostic, not a versioned JSON/CSV schema. `-list=false` runs normal comparisons.
+## Repeated reports: simdreport
 
-## `simdreport`: sweep and export
+| Additional flag | Default | Meaning / example |
+| --- | --- | --- |
+| `-bench` | `.` | Go-style slash-separated regex; `^BenchmarkAddition$/^n=1024$/^Scalar$` |
+| `-count` | `5` | Positive independent measurement count per selected case |
+| `-benchtime` | `100ms` | Positive duration or iteration count: `500ms`, `10x` |
+| `-format` | `txt` | Exactly `txt`, `md`, `csv`; terminal stays readable text |
+| `-output` | `artifacts` | Output root, e.g. `-output 'results/my run'`; group directories are added |
+| `-backend` | `compiled` | `compiled` standalone, or explicit `go-test` developer backend |
 
-```powershell
-go run ./cmd/simdreport -group addition -count 5 -benchtime 100ms -format md
-```
+Flags accept `-name value` or `-name=value`. `-count` counts measurements,
+not kernel calls. Duration mode calibrates iteration counts; `10x` reports ten
+iterations, with possible extra calibration/setup calls. `1x` is a plumbing
+check, not a sound performance conclusion. Nonpositive/invalid timing, regex,
+count, format, backend and selectors fail before artifacts.
 
-### All report-CLI flags
+Each completed group saves a summary and `.measurements.json` under the chosen
+root. The compiled backend captures exact duration/iterations and build/runtime
+facts without invoking Go. Explicit `-backend go-test` requires Go, source and
+the experiment setting, retains legacy `.raw`, and never silently falls back.
+See [reports and evidence](https://github.com/akolybelnikov/go-simd/wiki/05-Reports-and-evidence)
+for schema, precision and failure behavior. Errors exit **1**; success/help **0**.
+The outer `go run` process can also print `exit status 1`.
 
-| Flag | Default | Meaning | Example |
-| --- | --- | --- | --- |
-| `-group` | `all` | Exactly `addition`, `computation`, or `all` | `-group computation` |
-| `-count` | `5` | Positive number of repetitions per selected case | `-count 10` |
-| `-benchtime` | `100ms` | Go benchmark target duration or fixed iteration syntax | `-benchtime 500ms`, `-benchtime 10x` |
-| `-bench` | `.` | Go slash-separated regular-expression selection | `-bench '^BenchmarkAddition$/^n=1024$/^Scalar$'` |
-| `-output` | `artifacts` | Output root; group directories are added below it | `-output 'results/my run'` |
-| `-format` | `txt` | Saved report format: exactly `txt`, `md`, or `csv` | `-format csv` |
-| `-h`, `-help` | — | Print help to stderr and succeed without measurements | `-help` |
+### Names and selection
 
-Flags may use `-name value` or `-name=value`. Keep quoted regex expressions as
-single shell arguments. Group shortcuts from `simdbench` are not report flags.
-
-`-count 5` repeats measurements; it does not mean five kernel calls. Duration
-mode calibrates iteration counts. In `10x` mode the reported measurement uses
-ten iterations; Go may perform additional calibration/setup invocations.
-`1x` is useful for plumbing checks and poor for performance conclusions.
-
-`-format` changes the saved summary only. Terminal output is always a readable
-text table. Every successful group produces `.raw` plus one `.txt`, `.md`, or
-`.csv` file. Metadata remains available in raw even for CSV.
-
-The built report command exits **1** on failure and **0** on success/help. The
-outer `go run` process may additionally print `exit status 1`; distinguish Go
-wrapper status from the built program's own exit code in scripts.
-
-### Benchmark names and variants
-
-Names are case-sensitive:
-
-| Group | Top-level name | Variant component |
+| Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
 | `addition` | `BenchmarkAddition` | `Scalar`, `SIMDPartial`, `SIMDTail`, `SIMDParallel` |
 | `computation` | `BenchmarkComputation` | `Scalar`, `SIMD` |
 
-The shape is `BenchmarkAddition/n=1024/SIMDPartial-16`. The numeric suffix is
-Go's concurrency annotation, not a variant name or SIMD lane count. Depending
-on concurrency, the suffix can be absent.
+The selector name is `BenchmarkAddition/n=1024/SIMDPartial`. A numeric suffix in
+native output, e.g. `-16`, is GOMAXPROCS context, not a variant or lane count.
+The sweep contains powers of two from 1 through 16,777,216 plus positive
+sizes around one and two vector widths. Regex selects existing cases only.
 
-The size sweep contains powers of two from 1 to 16,777,216 plus sizes immediately
-around one and two native vector widths. You can select existing sizes; a regex
-does not create a new arbitrary size.
-
-### Selection recipes
-
-| Intent | `-group` | `-bench` expression |
+| Intent | Group | Expression |
 | --- | --- | --- |
-| All addition cases | `addition` | `.` |
-| One exact scalar case | `addition` | `^BenchmarkAddition$/^n=1024$/^Scalar$` |
-| Three sizes, serial variants | `addition` | `^BenchmarkAddition$/^n=(128\|1024\|8192)$/^(Scalar\|SIMDPartial\|SIMDTail)$` |
-| Partial-vector only | `addition` | `^BenchmarkAddition$/^n=1024$/^SIMDPartial$` |
+| All addition | `addition` | `.` |
+| Exact scalar case | `addition` | `^BenchmarkAddition$/^n=1024$/^Scalar$` |
+| Serial strategies, three sizes | `addition` | `^BenchmarkAddition$/^n=(128\|1024\|8192)$/^(Scalar\|SIMDPartial\|SIMDTail)$` |
 | Scalar and parallel | `addition` | `^BenchmarkAddition$/^n=1048576$/^(Scalar\|SIMDParallel)$` |
-| Compute scalar and SIMD | `computation` | `^BenchmarkComputation$/^n=1024$/^(Scalar\|SIMD)$` |
-| Both groups, two sizes | `all` | `^Benchmark(Addition\|Computation)$/^n=(8\|16)$/^(Scalar\|SIMD.*)$` |
+| Expression strategies | `computation` | `^BenchmarkComputation$/^n=1024$/^(Scalar\|SIMD)$` |
+| Both groups, portable small sizes | `all` | `^Benchmark(Addition\|Computation)$/^n=(8\|16)$/^(Scalar\|SIMD.*)$` |
 
-Go matches slash-separated regex components. Anchors matter: unanchored `n=1`
-also matches `n=16`, `n=128`, and other names containing that substring.
-`-group all` runs each group separately; if your expression matches only addition,
-the subsequent computation group has no observations and the command fails.
-Use the matching group or an expression covering both.
+Matching preserves Go's component regex, top-level alternatives, parentheses,
+character classes, escapes and unanchored semantics. Unanchored `n=1` also
+matches `n=16` and `n=128`. An empty expression selects nothing. Paths deeper
+than the registered benchmark/size/variant leaves have no matching cases.
+With `-group all`, match both groups or the unmatched group will fail with
+`no benchmark measurements found`, retaining failed evidence.
 
-An empty selection leaves raw evidence and reports `no benchmark measurements
-found`. With filtered SIMD-only results, changes are unavailable because scalar
-was not measured; TXT/Markdown show an em dash and CSV uses an empty field.
-
-### Ready-to-copy exports
+### Copy a bounded first experiment
 
 ```powershell
-# TXT: default behavior, selected cases, repeated measurements.
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -count 5 -benchtime 100ms
-
-# Markdown: same experiment with a shareable table and metadata.
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -count 5 -benchtime 100ms -format md
-
-# CSV: exact numeric cells for downstream tables or charts.
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -count 5 -benchtime 100ms -format csv -output 'results/my run'
-
-# Full default sweep: both groups; can take several minutes.
-go run ./cmd/simdreport
+simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -count 3 -benchtime 100ms -format md
 ```
 
-Different invocations measure again; changing `-format` does not re-render an
-existing raw file. An offline analysis/import CLI is not implemented yet.
+For a source run, replace `simdreport` with `go run ./cmd/simdreport` and keep
+the same flags. Filtered SIMD-only tables leave baseline changes unavailable.
+The full default sweep can take minutes and allocates about 192 MiB for three
+slices at its largest point.
 
-## Native Go benchmark commands
+## Build, install and run remotely
+
+On a build host, enable the experiment and build or install:
 
 ```powershell
-# List top-level benchmark names, not every nested size/variant.
-go test ./internal/addition ./internal/computation -list '^Benchmark'
-
-# Native benchmark output with memory counters.
-go test ./internal/addition -run='^$' -bench='^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -benchmem -count=5 -benchtime=100ms
-
-# Native concurrency sweep: use this interface for -cpu.
-go test ./internal/addition -run='^$' -bench='^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -benchmem -count=5 -benchtime=100ms -cpu=1,4
+$env:GOEXPERIMENT = 'simd'
+go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport
+go install ./cmd/simdbench ./cmd/simdreport
+.\bin\simdreport.exe -list
 ```
 
-| Native flag | Meaning |
+On POSIX shells use `export GOEXPERIMENT=simd` and `./bin/simdreport`.
+`make build` and `make install` do the same jobs. `go install` uses `GOBIN`,
+otherwise the Go workspace's `bin` directory; put that directory on PATH.
+The checkout's current revision is installed by these commands. No prebuilt
+release download or package-manager installer is supplied yet.
+
+To build Linux/amd64 from a POSIX build shell and copy to a server:
+
+```bash
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 GOEXPERIMENT=simd go build -o dist/linux-amd64/ ./cmd/simdbench ./cmd/simdreport
+ssh user@server 'mkdir -p ~/bin'
+scp dist/linux-amd64/simdbench dist/linux-amd64/simdreport user@server:~/bin/
+ssh user@server '~/bin/simdreport -list'
+ssh user@server '~/bin/simdreport -group addition -bench BenchmarkAddition/n=1024/Scalar -count 3 -benchtime 100ms -format md'
+```
+
+Results are created on the server under its current directory's `artifacts/`;
+use `-output` to choose a different directory and copy evidence back with scp.
+The target needs a matching OS/architecture binary, not Go, Make, the checkout
+or the GOEXPERIMENT environment setting. Inspect `-list` on that target.
+Windows/amd64 and Linux/amd64 execute in CI; cross-compilation does not prove
+execution or performance on other targets. Remote provisioning/job management
+is outside these commands. There is no unified `simd` executable or
+`--version` flag at this milestone.
+
+## Complete Make catalogue
+
+Make requires GNU Make and a POSIX shell. All run/list/report targets forward
+`ARGS`. Report targets also supply `COUNT`, `BENCHTIME`, `ARTIFACT_ROOT`.
+
+| Target | Purpose |
 | --- | --- |
-| `-run '^$'` | Skip ordinary tests for a focused benchmark invocation |
-| `-bench <regex>` | Select benchmark names/components |
-| `-benchmem` | Print allocation counters |
-| `-count N` | Repeat the selected benchmarks |
-| `-benchtime T` | Duration target or `Nx` iteration mode |
-| `-cpu 1,4` | Run with each listed GOMAXPROCS value |
-| `-list <regex>` | List matching top-level test/benchmark names |
-| `-race` | Enable race instrumentation for correctness checking; do not treat its timings as normal performance data |
+| `help` | Readable target catalogue |
+| `list` | Quick CLI's shared `-list` surface |
+| `run` | Quick comparison, both groups |
+| `run-addition` | Quick addition; forwards ARGS |
+| `run-computation` | Quick expression; forwards ARGS |
+| `report` | Reports, both groups |
+| `report-addition` | Addition report |
+| `report-computation` | Expression report |
+| `build` | Build both commands into BIN_DIR |
+| `install` | Install both commands via go install |
+| `test` | Full Go tests |
+| `vet` | Go vet |
+| `fmt` | Format cmd and internal source |
+| `fmt-check` | Check formatting without edits |
+| `check` | Formatting check, tests, vet |
+| `clean` | Go clean and recursive removal of ARTIFACT_ROOT |
 
-These are Go tool flags, not additional `simdreport` options. Native output can
-be saved with shell redirection or PowerShell `Tee-Object`; add your own source
-and environment notes when retaining it.
+| Make variable | Default | Meaning |
+| --- | --- | --- |
+| `GOEXPERIMENT` | `simd` | Exported build experiment |
+| `GO` | `go` | Go executable used by Make; developer backend finds go on PATH |
+| `ARGS` | Empty | Extra flags for every run/list/report target |
+| `BENCHTIME` | `100ms` | Report target measurement timing |
+| `COUNT` | `5` | Report target repetitions |
+| `ARTIFACT_ROOT` | `artifacts` | Report output and directory deleted by clean |
+| `BIN_DIR` | `bin` | Build output directory |
 
-## Correctness, formatting, and source inspection
+```bash
+make list ARGS="-group addition"
+make run-addition ARGS="-list"
+make report-addition COUNT=3 BENCHTIME=100ms ARGS="-format csv -bench BenchmarkAddition/n=1024/Scalar"
+make build BIN_DIR=bin
+make install
+```
+
+Prefer direct Go/installed commands for complex quoting, anchored regex with
+`$` or paths with spaces. Make introduces shell quoting and dollar expansion.
+`make clean` deletes saved reports recursively; preserve needed evidence first.
+
+## Native Go and developer tools
+
+These need Go/source and GOEXPERIMENT. They are not installed CLI options.
 
 ```powershell
-go test ./...
+go test ./internal/addition ./internal/computation -list '^Benchmark'
+go test ./internal/addition -run='^$' -bench='^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial)$' -benchmem -count=5 -benchtime=100ms
+go test ./internal/addition -run='^$' -bench='^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -benchmem -count=3 -benchtime=100ms -cpu=1,4
 go test ./... -count=1
-go test ./internal/addition -run '^TestImplementations$'
-go vet ./...
 go test -race ./...
+go vet ./...
 gofmt -l cmd internal examples
 gofmt -w examples/basic/main.go
+go run ./examples/basic
 go doc ./internal/addition
 go doc ./internal/computation
 go doc ./internal/result
@@ -223,95 +234,35 @@ git rev-parse HEAD
 git status --short
 ```
 
-`-count=1` avoids reuse of cached test results. `gofmt -w` edits source; use `-l`
-to inspect first. Race checks need a suitable C toolchain. Use source and raw
-evidence to diagnose behavior before interpreting a noisy timing change.
-
-## Build local binaries
-
-PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force bin | Out-Null
-go build -o ./bin/simdbench.exe ./cmd/simdbench
-go build -o ./bin/simdreport.exe ./cmd/simdreport
-.\bin\simdbench.exe -group addition
-.\bin\simdbench.exe -list
-.\bin\simdreport.exe -group addition -bench '^BenchmarkAddition$/^n=1$/^Scalar$' -count 1 -benchtime 1x -format csv
-```
-
-POSIX shell:
-
-```bash
-mkdir -p bin
-go build -o ./bin/simdbench ./cmd/simdbench
-go build -o ./bin/simdreport ./cmd/simdreport
-./bin/simdbench -group addition
-```
-
-The quick binary uses compiled measurement facilities. The report binary still
-launches `go env` and repository-relative `go test`; building it does not remove
-its runtime Go/source dependency. Keep the experiment enabled for its child Go
-commands. A built `simdbench -list` works from any directory without Go on PATH;
-`go run` itself still needs Go and source. There is no `--version`, unified
-`simd` executable, or separate capabilities subcommand at this baseline.
-
-## Every Make target
-
-GNU Make targets are optional; they require a POSIX shell even on Windows.
-
-| Target | Action | Argument forwarding |
-| --- | --- | --- |
-| `make help` | Show common invocations | None |
-| `make run` | Run `simdbench`, both groups by default | `ARGS` |
-| `make run-addition` | Run quick addition comparison | Fixed group; no `ARGS` forwarding |
-| `make run-computation` | Run quick computation comparison | Fixed group; no `ARGS` forwarding |
-| `make report` | Run report CLI, both groups by default | Count, benchtime, output root, `ARGS` |
-| `make report-addition` | Run addition report | Count, benchtime, output root, `ARGS` |
-| `make report-computation` | Run computation report | Count, benchtime, output root, `ARGS` |
-| `make test` | Run `go test ./...` | None |
-| `make vet` | Run `go vet ./...` | None |
-| `make fmt` | Format `cmd` and `internal` in place | None |
-| `make fmt-check` | Fail when those directories need formatting | None |
-| `make check` | Formatting check, tests, and vet | None |
-| `make clean` | `go clean ./...`, then remove configured report root | Destructive for reports: see below |
-
-### Every Make variable
-
-| Variable | Default | Meaning |
-| --- | --- | --- |
-| `GOEXPERIMENT` | `simd` | Exported experiment setting |
-| `GO` | `go` | Go executable used by Make's own commands; the report process still finds `go` on PATH |
-| `ARGS` | Empty | Additional CLI arguments where forwarding is supported |
-| `BENCHTIME` | `100ms` | Report measurement duration/iteration mode |
-| `COUNT` | `5` | Report repetitions |
-| `ARTIFACT_ROOT` | `artifacts` | Report root and the directory removed by `make clean` |
-
-```bash
-make run ARGS="-group computation"
-make report-addition COUNT=5 BENCHTIME=100ms ARGS="-format md -bench BenchmarkAddition/n=1024/Scalar"
-make report-computation COUNT=5 BENCHTIME=100ms ARGS="-format csv"
-```
-
-Prefer direct Go commands for complex regex alternatives or paths with spaces;
-Make adds another layer of shell quoting and dollar-sign expansion. In particular,
-prefer direct Go commands for anchored expressions containing `$`.
-`make clean` recursively deletes
-`ARTIFACT_ROOT`, including saved raw observations. Use a dedicated generated
-directory and preserve evidence you want to retain before cleaning.
-
-## Environment controls
-
-| Setting | Supported use |
+| Native Go flag | Purpose |
 | --- | --- |
-| `GOEXPERIMENT=simd` | Required when building/running code that imports `simd` |
-| `GOMAXPROCS` | Bounds the runtime concurrency used by current parallel addition |
-| `GOTOOLCHAIN` | Go's toolchain-selection setting; record it with results |
-| `GOAMD64`, `GOARM64` | Target-specific Go settings recorded by reports; changing them changes the experimental environment |
+| `-run '^$'` | Skip ordinary tests |
+| `-bench` | Benchmark name/component selection |
+| `-benchmem` | Allocation counters |
+| `-count` | Repeat benchmarks; -count=1 also avoids cached test results |
+| `-benchtime` | Duration or Nx |
+| `-cpu 1,4` | Native GOMAXPROCS sweep |
+| `-list` | Matching top-level test/benchmark names |
+| `-race` | Correctness instrumentation; timings are not normal performance data |
 
-There is no project `-workers` flag. Use `GOMAXPROCS` for separate report runs,
-or native `go test -cpu` for concurrency sweeps. Do not change an environment
-string inside a running process and assume already-initialized SIMD state changed.
+`gofmt -w` edits source; `-l` only lists formatting issues. Race builds need a
+suitable C toolchain. Native output can be saved using redirection or
+PowerShell `Tee-Object`; add source/environment notes.
+
+## Environment settings
+
+| Setting | Scope |
+| --- | --- |
+| `GOEXPERIMENT=simd` | Required for builds, go run/tests and explicit go-test backend; not for running standalone binaries |
+| `GOMAXPROCS` | Runtime concurrency and current parallel addition's worker bound |
+| `GOBIN` | Go installation destination; must be absolute when set |
+| `GOTOOLCHAIN` | Build-host Go toolchain selection |
+| `GOOS`, `GOARCH`, `CGO_ENABLED` | Cross-compilation/build settings |
+| `GOAMD64`, `GOARM64` | Target assumptions embedded in build information when supplied |
+
+There is no project `-workers` flag. Use GOMAXPROCS in separate processes or
+native `-cpu` sweeps. Do not change a string environment variable inside an
+already running process and assume its initialized runtime/SIMD state changed.
 
 Next: [operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide)
 and [experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experiment-recipes).

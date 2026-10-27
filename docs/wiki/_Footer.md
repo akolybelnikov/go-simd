@@ -1,4 +1,4 @@
-Experimental Go SIMD laboratory · Guide baseline: M2 / Feature 1 · Reviewed
+Experimental Go SIMD laboratory · Guide baseline: M3 / Feature 1 · Reviewed
 2026-10-27 · [Editable guide sources](https://github.com/akolybelnikov/go-simd/tree/main/docs/wiki)
 · [Changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md)
 

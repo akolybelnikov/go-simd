@@ -1,6 +1,6 @@
 # 11 — Glossary and capability ledger
 
-Reviewed against M2 / Feature 1 on 2026-10-27. This is a ledger of implemented
+Reviewed against M3 / Feature 1 on 2026-10-27. This is a ledger of implemented
 capabilities, not a promise to deliver every possible extension.
 
 ## Capability ledger
@@ -21,25 +21,26 @@ capabilities, not a promise to deliver every possible extension.
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
 | Shared runtime catalogue | Two operation descriptors / six typed bindings shared by CLI and native benchmarks; logical traffic and stable identities |
-| Runtime listing | `simdbench -list`, optionally group-filtered; no fixtures or benchmarks; live Go/platform/vector/emulation/GOMAXPROCS context |
+| Runtime listing | Both CLIs share `-list`, aliases/help and group filtering; no fixtures/benchmarks; live Go/platform/vector/emulation/GOMAXPROCS context |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
-| Retained observations | Legacy raw Go benchmark text plus environment context |
+| Retained observations | Default direct exact-duration/iteration JSON evidence; explicit developer backend retains legacy text |
 | Typed internal model | Case/run/environment identity, repetitions, iterations, optional counters, provenance |
-| Public structured raw schema | Not published; internal identities are not all exported |
+| Structured evidence schema | `go-simd.measurements/v1` in `.measurements.json`; complete run/observations and runtime/build facts; worker manifest deferred |
 | Statistics | Median summaries and ratios of medians; no inference/significance verdict |
 | Concurrency control | GOMAXPROCS environment or native Go `-cpu`; no project worker flag |
 | Parallel scalar control | Not implemented |
 | Platform execution evidence | Current Windows/amd64 and Linux/amd64 CI; other targets require execution evidence |
-| ISA/emulation claims | `-list` shows live `simd.Emulated()`; vector API success alone does not establish acceleration, and report raw metadata still has no emulation flag |
-| Installed standalone report runner | Not implemented; report still invokes Go from the checkout |
+| ISA/emulation claims | Both listing and compiled evidence retain live emulation/vector context; this does not establish acceleration |
+| Installed standalone report runner | Implemented; default compiled backend needs no Go/source; `go install` or copy a compatible built binary |
+| CPU/build metadata | CPU model currently unknown; Go/VCS/build facts come from the executable, with missing VCS explicitly unknown |
 | HTML/TUI/advisor/cost model | Not implemented |
 | Process CPU / RSS / resource attribution | Not implemented; Go allocation counters are different metrics |
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M2's shared runtime catalogue is complete; M3's standalone report backend is
-pending. No new broadcast, mask or reduction kernels shipped in M2. Broader
+M0-M3 are complete. New broadcast, mask and reduction kernels remain planned.
+Worker isolation, cancellation recovery and advanced manifests remain deferred. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.
 
 ## Glossary
@@ -69,13 +70,13 @@ workers/resources/frontends remain conditional on observed laboratory needs.
 | GOMAXPROCS | Go runtime bound on concurrent execution; used by this parallel kernel's worker policy |
 | Goroutine | A Go runtime task; starting more of them does not create more physical cores |
 | Case identity | Operation, type, strategy, size, semantics, parameters, input, workers, and execution mode |
-| Backend | Measurement mechanism; currently legacy Go benchmark text for report import |
+| Backend | Measurement mechanism; compiled testing.Benchmark by default, or explicit go-test developer comparison |
 | Harness | The timed dispatch/setup/accounting contract around the kernel |
 | Fixture fingerprint | SHA-256 over the declared input-bit encoding, computed outside measurement for fresh generated inputs |
 | Emulation | Vector semantics implemented without the native acceleration a reader might assume; status must be observed, not guessed |
 | FMA | Fused multiply-add, whose rounding semantics need deliberate comparison with unfused arithmetic |
 | Throughput | Effective bytes per second from the benchmark's declared work accounting |
-| Raw companion | The `.raw` file retaining individual Go benchmark observations and tool output |
+| Evidence companion | `.measurements.json` for compiled observations, or `.raw` for explicit developer/native Go text |
 
 Return to [Home](https://github.com/akolybelnikov/go-simd/wiki), or use the
 [command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)

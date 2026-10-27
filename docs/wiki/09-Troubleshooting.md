@@ -1,7 +1,8 @@
 # 09 — Troubleshooting
 
-Start from the repository root, inspect the exact command, and retain error/raw
-output. The current report command depends on both the checkout and Go on PATH.
+Inspect the exact command and retain error/evidence output. Installed commands
+run anywhere with the default compiled backend. Go/Make launchers and the
+explicit `-backend go-test` developer option need Go and the source checkout.
 
 ## Setup and build failures
 
@@ -10,14 +11,15 @@ output. The current report command depends on both the checkout and Go on PATH.
 | `unknown GOEXPERIMENT simd` or missing `simd` package | Selected Go toolchain does not provide this experiment | Check `go version`, `go env GOTOOLCHAIN`, and `go env GOEXPERIMENT`; use a toolchain satisfying this module and experiment |
 | Toolchain download/version failure | Go selection, network, or local installation | Inspect the module's Go directive and your selected installation; changing `go.mod` does not implement SIMD in another compiler |
 | `cannot find main module` / missing `go.mod` | Wrong working directory | Change to the checkout root |
-| Report cannot find `./internal/addition` or computation | Report child command runs outside its expected checkout | Run the report from this repository root, even when using a built report binary |
-| `exec: go ... not found` | Report runtime dependency | Put the matching Go executable on PATH and retain `GOEXPERIMENT=simd` for child builds |
+| Developer backend cannot find `./internal/addition` or computation | `-backend go-test` runs outside its checkout | Use the default compiled backend, or run the developer option from the repository root |
+| `exec: go ... not found` | Explicit developer backend requires Go | Use the default compiled backend, or provide Go/source/experiment for go-test |
 | `use of internal package ... not allowed` | Import from an external module | Use the module-local example; there is no public import API yet |
 | `make`, `printf`, shell syntax, or quoting failures | Make/POSIX shell unavailable or incompatible | Use direct PowerShell Go commands from the registry |
 
 ## Rejected options
 
-- `simdreport -addition` is not supported; use `-group addition`.
+- Both commands support `-addition`, `-computation` and `-function` aliases;
+  conflicting selections fail consistently.
 - `simdbench -format csv` is not supported; report format selection belongs to
   `simdreport`.
 - `-workers`, `-input`, `-type`, `--version`, and TUI/advisor subcommands are not
@@ -30,14 +32,14 @@ output. The current report command depends on both the checkout and Go on PATH.
 Use `go run ./cmd/simdbench -h` and `go run ./cmd/simdreport -h` to inspect the
 installed source's actual command definitions.
 
-`simdbench -list` is available from M2; `simdreport -list` is not a supported
-flag. The compiled quick listing needs neither Go nor a source checkout, while
-`go run` and the report runner still do. Listing only the current float32 pairs
+Both commands support `-list` from M3 and produce the same catalogue. Their built
+binaries need neither Go nor source; `go run` still does. Only the explicit
+developer report backend launches Go. Listing only the current float32 pairs
 is expected: it does not advertise planned SDK methods as implemented kernels.
 
 ## No benchmark measurements found
 
-The Go subprocess can succeed without a matching benchmark case. Verify:
+Either backend can have no matching benchmark case. Verify:
 
 1. Top-level name: `BenchmarkAddition` or `BenchmarkComputation`.
 2. Variant name: addition uses `SIMDPartial`/`SIMDTail`/`SIMDParallel`; computation

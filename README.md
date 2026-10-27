@@ -1,106 +1,153 @@
 # go-simd
 
-An experimental Go project comparing scalar and SIMD operations on float32 slices.
-This is a learning and benchmarking workspace. Results depend on hardware,
-toolchain, workload and background load; SIMD is not always faster.
+An experimental Go SIMD laboratory: compare four addition strategies and two
+implementations of `a*a + b*b + a*b` over generated `float32` slices. Run a quick
+comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
+on hardware, toolchain, size and background load; SIMD can be slower.
 
-Start with the [user Wiki](https://github.com/akolybelnikov/go-simd/wiki):
-progressive experiments, the complete command registry, kernel examples, report
-interpretation, and troubleshooting. Its editable sources live in
-[`docs/wiki`](docs/wiki/Home.md). Run `go run ./examples/basic` for a small
-module-local example of all six kernels.
+**M3:** both commands run as standalone binaries on a compatible local machine,
+cloud VM or remote server. The default report backend needs neither Go nor the
+source checkout at runtime. Reports stay on the machine where you run the CLI.
 
-The [architecture migration record](docs/migration/README.md) documents completed
-milestones, compatibility contracts, and baseline evidence. See the
-[changelog](CHANGELOG.md) for changes and validation notes.
+## Start here
 
-## Requirements
-
-- Go 1.27.3 or later with the `simd` experiment available.
-- Set `GOEXPERIMENT=simd` for builds, tests and benchmarks.
-- Optional: GNU Make and a POSIX shell for the convenience targets below.
-  The Go commands also work directly in PowerShell without Make or Bash.
-
-## Run and verify
-
-From the repository root in PowerShell:
+From a source checkout in PowerShell:
 
 ```powershell
 $env:GOEXPERIMENT = 'simd'
-go run ./cmd/simdbench
-go run ./cmd/simdbench -group addition
-go run ./cmd/simdbench -list
-go test ./...
-go vet ./...
-gofmt -l cmd internal
+go run ./cmd/simdreport -list
+go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md
 ```
 
-The CLI accepts `-group addition|computation|all` (default: all). Existing
-`-addition`, `-computation`, and `-function add|compute|all` aliases remain
-available; conflicting explicit selections are rejected.
+This bounded experiment saves a comparison and a `.measurements.json` companion
+under `artifacts/addition/`. The full default sweep reaches 16,777,216 elements
+and can take several minutes.
 
-Use `-list` (optionally with `-group`) to inspect implemented operations, stable
-strategy identities, logical traffic, and this process's runtime SIMD context
-without running benchmarks. The compiled quick binary can list from any working
-directory without Go on PATH. The report runner's standalone migration is M3.
+## Choose how to run
 
-With Make, use `make run`, `make run-addition`, `make run-computation`,
-`make check`, and `make fmt`. Make enables the experiment automatically.
-`make clean` removes generated reports and Go build artifacts.
+Flags are the same for installed commands, `go run` and Make. Only the launcher
+changes. Make and `go run` need Go and the checkout. Installed binaries run from
+any working directory.
 
-## Benchmark reports
+| Task | Installed / on PATH | Go from checkout | Make from checkout |
+| --- | --- | --- | --- |
+| List operations and runtime context | `simdreport -list` | `go run ./cmd/simdreport -list` | `make list` |
+| Quick comparison, both groups | `simdbench` | `go run ./cmd/simdbench` | `make run` |
+| Quick addition comparison | `simdbench -group addition` | `go run ./cmd/simdbench -group addition` | `make run-addition` |
+| Save a Markdown sweep | `simdreport -format md` | `go run ./cmd/simdreport -format md` | `make report ARGS="-format md"` |
+| Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |
+| Quick help | `simdbench -h` | `go run ./cmd/simdbench -h` | `make run ARGS="-h"` |
+
+Use `-group computation` for the expression experiment. Every Make run, list
+and report target forwards `ARGS`, including group shortcuts:
+
+```bash
+make help
+make list ARGS="-group addition"
+make run-computation ARGS="-list"
+make report-addition COUNT=3 BENCHTIME=100ms ARGS="-format md -bench BenchmarkAddition/n=1024/Scalar"
+```
+
+Prefer direct commands for complex regex or paths needing careful shell quoting.
+
+## Command reference
+
+Both commands share these options:
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `-group addition\|computation\|all` | `all` | Choose the operation group |
+| `-list` | `false` | Implemented operations and runtime context; no measurements or artifacts |
+| `-addition`, `-computation` | `false` | Group shortcuts |
+| `-function add\|compute\|all` | Unset | Deprecated group alias retained for compatibility |
+| `-h`, `-help` | — | Readable usage, options and examples |
+
+Explicit group selections must agree. False boolean aliases do not select a
+group. There is no public type/input-file selector yet.
+
+`simdbench` measures a fixed 1,048,576-element input and prints a quick table.
+It has no report/count/timing flags. `simdreport` adds:
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `-bench` | `.` | Go-style regex over benchmark / size / variant |
+| `-count` | `5` | Independent measurements per selected case |
+| `-benchtime` | `100ms` | Positive duration or fixed iteration count, e.g. `10x` |
+| `-format` | `txt` | Saved summary: `txt`, `md`, `csv`; terminal stays text |
+| `-output` | `artifacts` | Output root, relative to the current directory unless absolute |
+| `-backend` | `compiled` | Standalone backend; `go-test` explicitly selects the developer backend |
+
+Names are case-sensitive. For example,
+`-bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial)$'` selects two cases.
+Regex selects existing sizes, not arbitrary new sizes. With `-group all`, it
+must match cases in both groups. Invalid timing, regex, format, backend or
+selectors fail before artifacts are created.
+
+## Build or install
+
+Build hosts need Go **1.27.3** with `GOEXPERIMENT=simd`. GNU Make plus a POSIX
+shell is optional. A compatible target binary needs neither Go nor the
+`GOEXPERIMENT` environment setting at runtime.
 
 ```powershell
-go run ./cmd/simdreport -count 5 -benchtime 100ms
-go run ./cmd/simdreport -group addition -count 5 -benchtime 500ms
-go run ./cmd/simdreport -group addition -format md
-go run ./cmd/simdreport -group computation -format csv
-# A quick filtered smoke measurement (not a performance conclusion):
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^Scalar$' -count 1 -benchtime 1x
+$env:GOEXPERIMENT = 'simd'
+go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport
+go install ./cmd/simdbench ./cmd/simdreport
 ```
 
-Reports save median comparison tables and raw output to `artifacts/<group>/`.
-They retain environment metadata, individual measurements, allocations, and
-throughput. Use repeated runs on an idle machine before drawing conclusions.
-The full sweep reaches 16 million elements and can take several minutes.
+Make equivalents: `make build` and `make install`. Installation uses `GOBIN`,
+or the Go workspace's `bin` directory when unset; add it to PATH. Windows builds
+produce `bin/simdbench.exe` and `bin/simdreport.exe`; POSIX builds omit `.exe`.
+Copy compatible binaries to a server or invoke them by absolute path. A prebuilt
+release download/package-manager installer is not supplied yet.
 
-Choose `-format txt|md|csv` for the saved report; `txt` is the default. Terminal
-comparisons stay readable text for every format, and every report retains its
-companion `.raw` measurements. Unknown formats fail before measuring or creating
-artifacts. Markdown includes environment metadata below the table. CSV contains
-only a header and data rows: timings and numeric percentage-point changes
-(`-20.0` means 20% less time than scalar), with empty fields for unavailable
-values. CSV metadata stays in the raw companion file.
+See [installation and remote use](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry#build-install-and-run-remotely)
+for cross-compilation, copying binaries and SSH examples. Windows/amd64 and
+Linux/amd64 execution are covered by CI. Run `-list` on the target to inspect
+its vector width, emulation state and GOMAXPROCS.
 
-Equivalent Make targets: `make report`, `make report-addition`, and
-`make report-computation`; configure `COUNT=5 BENCHTIME=500ms` and `ARGS`.
-For example: `make report-addition ARGS="-format md"`.
+## Reports and evidence
 
-## Structure
+Every completed group saves a summary and matching evidence:
 
-- `cmd/simdbench`: concise fixed-size CLI comparisons.
-- `cmd/simdreport`: benchmark execution, raw output capture and median reports.
-- `internal/result`: typed run/case observations, legacy text import, medians,
-  and scalar comparisons.
-- `internal/report`: TXT, Markdown, and CSV renderers over shared comparisons.
-- `internal/input`: deterministic generated inputs and input-bit fingerprints.
-- `internal/catalog`: shared operation/strategy metadata and logical byte models.
-- `internal/catalog/kernels`: typed bindings to the existing six kernels.
-- [`internal/addition`](internal/addition/README.md): four addition variants.
-- [`internal/computation`](internal/computation/README.md): scalar and SIMD
-  implementations of `a*a + b*b + a*b`.
-- [`internal/benchutil`](internal/benchutil/README.md): shared benchmark setup,
-  interpretation and historical example results.
-- `.github/workflows`: formatting, tests, vet and filtered benchmark checks.
+- Default `compiled`: `.measurements.json`, schema `go-simd.measurements/v1`,
+  retains exact duration/iterations, observations, case/input identities,
+  allocation counters and runtime/build facts.
+- Explicit `-backend go-test`: legacy `.raw` text. This developer option needs
+  Go on PATH and the repository root. There is no automatic fallback.
 
-Operations accept disjoint output or exact in-place output aliasing either input.
-Partial overlap is unsupported. Length errors leave output unchanged.
+TXT/Markdown include environment metadata below the table. CSV contains numeric
+rows; metadata stays in the companion. Negative change means less time than
+scalar. Missing baselines stay unavailable. Throughput uses logical work bytes,
+not measured DRAM traffic. CPU model detection is currently `unknown`; source
+revision/modified state are recorded when embedded by the Go build.
 
-The report command prints the comparison table in the terminal and saves it in
-the selected format: one row per sample size, scalar timing,
-each SIMD timing, and its percentage change from scalar. Negative percentages
-mean less time than scalar; positive percentages mean more time. Environment
-metadata follows TXT/Markdown tables, and `.raw` files retain individual
-measurements. Filtered variants work without a scalar baseline; their changes
-are unavailable rather than invented. The runner still requires Go and the
-repository root during this migration stage.
+Keep backend/harness identities separate when comparing results. Failed or empty
+compiled measurements retain a failed capture and no successful group summary.
+Abrupt termination recovery and worker manifests remain later work.
+
+## Develop and learn
+
+```powershell
+go test ./... -count=1
+go vet ./...
+gofmt -l cmd internal examples
+go run ./examples/basic
+```
+
+Make equivalents include `make check`, `make test`, `make vet`, `make fmt` and
+`make fmt-check`. `make clean` removes generated reports and Go build artifacts.
+The [complete command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)
+lists every Make target/variable, CLI flag and native Go benchmark control.
+
+The [progressive Wiki](https://github.com/akolybelnikov/go-simd/wiki) includes
+kernel examples, recipes, numerical contracts, troubleshooting and credited SIMD
+reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md)
+and [migration record](docs/migration/README.md).
+
+Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
+`internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
+Kernels remain in [addition](internal/addition/README.md) and
+[computation](internal/computation/README.md). They support disjoint output and
+exact in-place aliases; partial overlap is unsupported and length errors leave
+output unchanged. These internal packages are not a stable public API.

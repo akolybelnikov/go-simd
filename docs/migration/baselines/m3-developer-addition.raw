@@ -1,0 +1,27 @@
+date: 2026-10-27T16:07:41Z
+go: go1.27.3-X:simd
+platform: windows/amd64
+GOMAXPROCS: 16
+SIMD float32 lanes: 8
+command: go test ./internal/addition -run=^$ -bench=^Benchmark(Addition|Computation)$/^n=8$ -benchmem -benchtime=2x -count=2
+toolchain environment: {
+	"GOAMD64": "v1",
+	"GOARM64": "",
+	"GOEXPERIMENT": "simd",
+	"GOTOOLCHAIN": "auto"
+}
+
+goos: windows
+goarch: amd64
+pkg: github.com/akolybelnikov/go-simd/internal/addition
+cpu: AMD Ryzen 7 7435HS
+BenchmarkAddition/n=8/Scalar-16  	       2	       100.0 ns/op	 960.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/Scalar-16  	       2	       100.0 ns/op	 960.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	       2	       100.0 ns/op	 960.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDPartial-16         	       2	       100.0 ns/op	 960.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	       2	       150.0 ns/op	 640.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDTail-16            	       2	       100.0 ns/op	 960.00 MB/s	       0 B/op	       0 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	       2	      7400 ns/op	  12.97 MB/s	    1392 B/op	      10 allocs/op
+BenchmarkAddition/n=8/SIMDParallel-16        	       2	      5550 ns/op	  17.30 MB/s	    2408 B/op	      12 allocs/op
+PASS
+ok  	github.com/akolybelnikov/go-simd/internal/addition	1.013s

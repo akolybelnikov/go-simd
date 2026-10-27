@@ -13,7 +13,7 @@ reviewed at a stopping point before the next milestone starts.
 | M0 | Freeze behavior, retain native observations, decide identity/versioning/compatibility contracts | Complete, 2026-10-27 |
 | M1 | Extract typed results, aggregation, and rendering; implement TXT/MD/CSV against the extracted model | Complete, 2026-10-27 |
 | M2 | Share runtime operation descriptors between commands and developer benchmarks | Complete, 2026-10-27 |
-| M3 | Add a compiled `testing.Benchmark` backend; validate outside the source checkout without Go on PATH | Pending |
+| M3 | Add a compiled `testing.Benchmark` backend; validate outside the source checkout without Go on PATH | Complete, 2026-10-27 |
 | Later, conditional | Worker isolation, resource instrumentation, workload adapters, advanced analysis, optional TUI | Requires an observed laboratory or pilot need |
 
 The committed product is an open-source laboratory measuring its implemented Go
@@ -64,11 +64,21 @@ compatibility checks, and retained before/after observations. The quick CLI,
 native benchmark trees, report group selection, and legacy identity importer now
 consume the catalogue. Kernel bodies and existing report formats are unchanged.
 
-## Next checkpoint: M3
+## M3 deliverables
 
-Extract the compiled benchmark backend and remove the report runner's runtime
-Go/source dependency. M2 stops at shared registration and `simdbench -list`;
-`simdreport` still launches `go env` and repository-relative `go test`.
+The [M3 implementation record](m3-standalone.md) describes the compiled default
+report engine, exact typed observations, versioned JSON evidence, validation and
+metadata boundaries. Both commands share selectors/help/listing; Make, Go and
+installed launchers use consistent flags. `-backend go-test` is an explicit
+developer comparison path, never a fallback. Source and Go are no longer
+runtime requirements for default installed reporting.
+
+## M3 stopping point
+
+M3 is complete. M4 worker isolation, cancellation recovery and artifact manifests
+remain deferred pending an observed laboratory need. No M4 work or new F004
+kernels are included in this checkpoint. The existing commands remain available;
+there is no unified executable migration or public workload platform.
 
 ## Related operation backlog
 

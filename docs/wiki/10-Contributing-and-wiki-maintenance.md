@@ -57,8 +57,17 @@ New top-level operations also need a native benchmark wrapper that delegates to
 Metadata must remain independent of SIMD and `testing`, so offline import and
 render packages continue to work without the experiment. Parameter descriptions
 and scalar-output shapes are seams only; implementing those kernels requires
-typed preparation, identity, output retention and numerical contracts. M3's
-standalone report backend is still the next architecture checkpoint.
+typed preparation, identity, output retention and numerical contracts. M3 adds
+`internal/engine` for compiled measurements, `internal/platform` for executable
+facts and `internal/cli` for shared flags/help/listing. Keep command and Make
+examples aligned: new shared flags belong in one definition, and every launcher
+must forward them. Worker isolation/manifest work remains a later checkpoint.
+
+The engine serializes the documented testing flag API, sets/restores benchtime,
+and captures actual T/N directly. Do not concurrently invoke unrelated
+`testing.Benchmark` users in that process or replace this with unsafe internals.
+Test installed execution outside source with PATH empty, exact iterations,
+fractional timing, error/partial capture and selectors against native Go.
 
 ## Local validation commands
 

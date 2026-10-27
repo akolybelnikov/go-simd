@@ -1,0 +1,463 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "addition",
+  "config": {
+    "count": 2,
+    "benchtime": "2x",
+    "bench": "^Benchmark(Addition|Computation)$/^n=8$"
+  },
+  "machine": {
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261027-160741-3799769125",
+    "Environment": {
+      "ID": "benchmark-20261027-160741-3799769125/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-10-27T16:07:41Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone/v1\ngroup: addition\nselection: \"^Benchmark(Addition|Computation)$/^n=8$\"\n-count=2\n-benchtime=2x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\n",
+    "Observations": [
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 480,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 150,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 640,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/Scalar-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 480,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDPartial-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 960,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDPartial-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-scalar-tail",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDTail",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 300,
+        "DurationNS": 600,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 320,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDTail-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-scalar-tail",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDTail",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 150,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 640,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDTail-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-parallel-scalar-tail",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 8,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDParallel",
+        "Repetition": 1,
+        "Iterations": 2,
+        "NanosecondsPerOp": 26800,
+        "DurationNS": 53600,
+        "BytesPerOp": {
+          "Value": 4104,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 16,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3.582089552238806,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDParallel-16"
+      },
+      {
+        "Key": {
+          "RunID": "benchmark-20261027-160741-3799769125",
+          "EnvironmentID": "benchmark-20261027-160741-3799769125/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OperationID": "add",
+            "TypeID": "float32",
+            "StrategyID": "simd-parallel-scalar-tail",
+            "ArithmeticID": "go-float32-add-v1",
+            "Parameters": "",
+            "Elements": 8,
+            "Input": {
+              "GeneratorID": "generated-float32-v1",
+              "SHA256": "7202c8c8d4e5671a00ecc20591a9f6113e8fd90fc5f13b3b9c6b835895ef671e"
+            },
+            "Workers": {
+              "Value": 8,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDParallel",
+        "Repetition": 2,
+        "Iterations": 2,
+        "NanosecondsPerOp": 3750,
+        "DurationNS": 7500,
+        "BytesPerOp": {
+          "Value": 968,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 9.5,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 25.6,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkAddition/n=8/SIMDParallel-16"
+      }
+    ]
+  }
+}
