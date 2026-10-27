@@ -1,23 +1,24 @@
 # 05 — Reports and retained evidence
 
-The report command measures first, summarizes its individual observations by
-median, and renders the same comparison model in the selected format.
+`simdreport` uses the compiled backend by default. It summarizes each case's
+observations by median and renders one comparison model as TXT, Markdown or CSV.
+Installed binaries work from any directory; `-output` is resolved from there.
 
 ## Artifact layout
 
 ```text
 artifacts/
   addition/
-    benchmark-<UTC timestamp>-<unique suffix>.raw
+    benchmark-<UTC timestamp>-<unique suffix>.measurements.json
     benchmark-<UTC timestamp>-<unique suffix>.md
   computation/
-    benchmark-<UTC timestamp>-<unique suffix>.raw
+    benchmark-<UTC timestamp>-<unique suffix>.measurements.json
     benchmark-<UTC timestamp>-<unique suffix>.csv
 ```
 
-The report extension depends on that invocation's `-format`. Matching stems tie
-the summary to its raw companion. `-output` changes the root; the command adds
-the group directory. Unique names preserve previous successful captures.
+Matching stems tie each summary to its evidence. Every invocation measures again;
+changing format does not re-render a previous capture. Unique names preserve
+earlier successful captures. The developer `go-test` backend retains `.raw`.
 
 ## Format reference
 
@@ -28,89 +29,81 @@ the group directory. Unique names preserve previous successful captures.
 | Timing precision | Two decimals, ns/op | Two decimals, ns/op | Two decimals, ns/op |
 | Changes | Signed one decimal and `%` | Signed one decimal and `%` | Numeric percentage points, one decimal |
 | Missing value | Em dash | Em dash | Empty field |
-| Environment metadata | Below table | Literal text below table | Raw companion only |
+| Environment metadata | Below table | Literal text below table | Evidence companion only |
 | Terminal comparison | Readable text | Readable text | Readable text |
 
-CSV uses a proper encoder, including quoting for commas, quotes, and embedded
-newlines. A value such as `-20.0` means 20% less time than scalar. It is not the
-ratio `-0.2`; apply a spreadsheet percent style only after converting units as
-appropriate for that spreadsheet.
-
-### Illustrative CSV
+An illustrative CSV row with invented values:
 
 ```csv
 ELEMENTS,Scalar ns/op,SIMDPartial ns/op,SIMDPartial change
 1024,100.00,80.00,-20.0
 ```
 
-These values are invented to demonstrate the schema. An unmeasured scalar
-baseline does not become zero and does not produce an infinite speedup.
+`-20.0` means 20% less time than scalar, not the ratio `-0.2`. CSV quoting handles
+commas, quotes and embedded newlines. Absent scalar is not a measured zero.
 
-## What raw files retain
+## Compiled evidence: go-simd.measurements/v1
 
-- UTC capture date and the report process's Go version and platform.
-- Parent GOMAXPROCS and observed float32 lane count.
-- Exact child `go test` command, selection, repetition count, and benchtime.
-- `GOEXPERIMENT`, `GOAMD64`, `GOARM64`, and `GOTOOLCHAIN` from `go env`.
-- Child Go benchmark OS/architecture/CPU headers where available.
-- Every measured repetition, iteration count, displayed ns/op, throughput,
-  allocation counters, and tool output.
+| Top-level key | Contents |
+| --- | --- |
+| `schema` | Exactly `go-simd.measurements/v1` |
+| `status`, `error` | `complete` or `failed`; reason on failure |
+| `group` | Measured group |
+| `config` | Normalized `count`, `benchtime`, `bench` |
+| `machine` | Measuring process's Go/OS/architecture, vector bits/lanes, emulation, GOMAXPROCS, source revision/modified state and embedded Go build information |
+| `run` | Typed run and individual observations; model fields retain Go names in v1, e.g. `Observations` and `DurationNS` |
 
-Keep the distinction between parent metadata and child-reported facts. A parent
-lane count is context, not proof of a different process's capabilities. The
-current raw format does not provide complete source identity, an emulation flag,
-or an exact total duration recoverable from rounded ns/op. Record source revision
-and local changes separately; do not fabricate missing evidence.
+Observations retain complete measurement keys, operation/type/strategy IDs,
+semantics, input generator/fingerprint, size, workers, execution mode, repetition,
+actual `Iterations`, exact `DurationNS`, unrounded `NanosecondsPerOp`, available
+allocation/throughput counters and the legacy selection alias. Direct ns/op is
+duration divided by iterations, preserving fractional nanoseconds. Allocation
+metrics divide total counters by actual iterations.
 
-M2's `simdbench -list` can capture live emulation/vector context separately.
-It does not add those fields to the report's raw format or establish a child
-process's capabilities. Shared descriptors preserve current `12*n` effective
-bytes; throughput still does not measure DRAM transactions.
+Backend is `testing-benchmark/v1`, harness `standalone/v1`. Go controls GC and
+calibration; calibration calls are not independent samples. Whole adapter
+duration is not kernel CPU/op for final N. Preparation, fingerprints and binding
+stay outside the callback. Validation, callback/function-pointer dispatch and
+per-call workers remain measured. Typed output is retained once after the
+repeated loop, without a full checksum.
 
-## Internal observations versus exported files
-
-M1 introduces typed observations with case/run/environment identity, individual
-repetitions, optional metrics, and backend/harness provenance. Fresh generated
-inputs have bit-level fingerprints in that internal model; historical text
-imports do not assume those fingerprints.
-
-The current TXT/MD/CSV exports are wide summary tables, not a public raw-data
-schema. The complete internal identity model is not serialized into these
-formats. JSON/NDJSON export, a saved-run analyzer, and an offline re-render CLI
-are not available yet. Changing `-format` starts a new measurement run.
-
-## Inspect reports in PowerShell
+CPU model detection is explicitly `unknown`. Missing embedded VCS information
+also stays `unknown`; `go run` and copied builds can lack it. Build settings come
+from the executable, without runtime `go env`. This is a minimal versioned
+evidence document, not M4's proposed worker/manifest bundle.
 
 ```powershell
-Get-ChildItem ./artifacts/addition
-
-# Pick a path printed by your completed command.
-$report = Get-ChildItem ./artifacts/addition/*.csv | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-Import-Csv $report.FullName | Format-Table
+$path = Get-ChildItem ./artifacts/addition/*.measurements.json | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$capture = Get-Content $path.FullName -Raw | ConvertFrom-Json
+$capture.machine
+$capture.run.Observations | Select-Object Label, Repetition, Iterations, DurationNS, NanosecondsPerOp
 ```
 
-An empty CSV field is missing, not a measured zero. Use explicit numeric parsing
-if doing arithmetic; `Import-Csv` starts with text-valued fields. Preserve the
-raw companion when making a chart or copying a summary into an issue.
+## Explicit developer backend
 
-## Failure behavior
+`-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
+It needs the checkout, matching Go on PATH and `GOEXPERIMENT=simd`; it never
+falls back to compiled execution. Its `.raw` companion retains native text,
+backend `go-test-text/v1`, harness `legacy-report/v1`.
 
-Unsupported `-format`, unknown group, nonpositive count, and unexpected
-positionals fail before report artifacts are created. Invalid Go timing/regex
-arguments can fail in the child runner after the raw file exists.
+Legacy text retains tool/environment output, repetitions, iterations, displayed
+timing, allocations and throughput. It cannot recover exact duration from rounded
+ns/op and lacks complete build/emulation identity. Parent metadata does not
+establish child capabilities. Historical fingerprints stay unknown; old evidence
+is never silently converted. Both backends feed the same summary renderers, but
+their results must remain separate series because harness/precision differ.
+Throughput remains effective `12*n` work, not measured DRAM traffic.
 
-Benchmark failure leaves raw output and reports its path. Empty selections also
-retain raw and produce no successful summary. With `-group all`, an earlier
-group can succeed before a later group fails; inspect each group's artifacts
-and the command's final exit status.
+## Failure and sharing
 
-Disk/output failures can prevent a report from being saved; retain any raw path
-reported in the error. There is no finalized versioned manifest or general
-process-cancellation artifact protocol at this milestone.
+Invalid format, group, count, duration/iteration mode, regex, backend and
+positionals fail before artifacts. An empty compiled selection or unexpected
+measured failure retains a failed capture, including completed earlier samples
+when available, and no successful summary for that group. With both groups, one
+can complete before the next fails; inspect the final exit status.
 
-## Share an evidence bundle
-
-Include the summary and raw companion, source revision/local-change notes,
-your experiment question, important environment settings, and limitations.
-The laboratory does not silently upload reports or input data. Sharing a Wiki
-example is separate from publishing your own machine metadata.
+Disk errors or abrupt process termination can leave incomplete files. Atomic
+bundles, cancellation recovery and worker isolation are deferred. A saved-run
+analyzer/offline re-render CLI is not implemented. Preserve evidence companions,
+source context, the experiment question and limitations when sharing summaries.
+The lab does not upload data or provision infrastructure automatically.

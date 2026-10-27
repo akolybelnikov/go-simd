@@ -6,6 +6,11 @@ required for the laboratory commands.
 
 ## 1. Requirements
 
+The steps below build from source. To run an already built compatible binary,
+you need only that executable and a writable report directory. Go, Make, Git and
+GOEXPERIMENT are build-host requirements; see
+[installation and remote use](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry#build-install-and-run-remotely).
+
 - The module declares Go **1.27.3**. The selected toolchain must also provide the
   experimental `simd` package and recognize `GOEXPERIMENT=simd`.
 - Git, or GitHub CLI (`gh`), to obtain the source.
@@ -98,7 +103,21 @@ go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^(Scal
 ```
 
 Expect a readable terminal table and two paths: a `.txt` summary and matching
-`.raw` observations under `artifacts/addition/`. Timing values vary by machine.
+`.measurements.json` observations under `artifacts/addition/`. Timing values vary by machine.
 You have completed setup when the command succeeds and both files are present.
 
 Continue to [your first experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment).
+
+## 7. Build or install the commands
+
+```powershell
+go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport
+go install ./cmd/simdbench ./cmd/simdreport
+.\bin\simdreport.exe -list
+```
+
+The Make equivalents are `make build` and `make install`. Put `GOBIN` (or Go's
+default workspace bin directory) on PATH to invoke `simdbench` and `simdreport`
+by name. POSIX output names omit `.exe`. Built commands work from any directory
+without Go on PATH; reports are relative to that directory unless `-output` is
+absolute. Both commands accept the same group aliases, `-list` and help flags.

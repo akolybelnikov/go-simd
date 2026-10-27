@@ -4,7 +4,9 @@ Question: for a modest input size on this machine, how do serial partial-vector
 addition and scalar-tail addition compare with the scalar loop?
 
 Prerequisites: finish [getting started](https://github.com/akolybelnikov/go-simd/wiki/01-Getting-started).
-Use the repository root and keep `GOEXPERIMENT=simd` enabled.
+For these `go run` examples use the repository root and `GOEXPERIMENT=simd`.
+With an installed command, replace `go run ./cmd/simdreport` with `simdreport`;
+all flags stay the same and neither Go nor the checkout is needed at runtime.
 
 ## Step 1: measure one size and three serial strategies
 
@@ -24,7 +26,8 @@ repeat later if the pattern matters to a decision.
 
 The terminal remains text even though the saved report is Markdown. Open the
 paths printed by the command. The `.md` contains the table and environment
-metadata; the `.raw` contains individual measurements and Go's counters.
+metadata; `.measurements.json` contains individual direct measurements, exact
+duration/iterations, identities, runtime/build context and allocation counters.
 
 An **illustrative**, invented row might be:
 

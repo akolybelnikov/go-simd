@@ -1,6 +1,8 @@
 # 07 — Focused experiment recipes
 
-All commands use the repository root and `GOEXPERIMENT=simd`. Keep raw companions
+These source commands use the repository root and `GOEXPERIMENT=simd`. For an
+installed binary, replace `go run ./cmd/simdreport` with `simdreport`; flags stay
+the same and it runs from any directory without Go. Keep evidence companions
 and record source revision/local changes. Examples use bounded selections so you
 can learn one behavior before running the full sweep.
 
