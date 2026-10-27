@@ -23,6 +23,10 @@ jobs:
           if [ -n "$files" ]; then printf '%s\n' "$files"; exit 1; fi
       - run: go test ./...
       - run: go vet ./...
+      - name: Check portable pattern emulation
+        env:
+          GODEBUG: simd=0
+        run: go test ./internal/patterns ./internal/catalog/kernels -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...

@@ -33,8 +33,8 @@ type Value struct {
 	ElementBytes int64
 }
 
-// Parameter is a preparation/identity seam. No current operation has parameters.
-// Parameters are not counted as array traffic. Adding bindings is separate work.
+// Parameter describes a scalar preparation/identity value, excluded from array
+// traffic. The input configuration retains its exact IEEE-754 bits.
 type Parameter struct {
 	Name, TypeID, Encoding string
 }
@@ -74,6 +74,7 @@ func (v Variant) WorkerCount(elements, procs int) (int, bool) {
 }
 
 type Operation struct {
+	NativePackage                              string // Explicit developer benchmark package, not a runtime dependency.
 	ID, Group, Title, BenchmarkName            string
 	Category, TypeID, ArithmeticID, Expression string
 	ReferenceVariantID, ExecutionMode          string
@@ -113,7 +114,7 @@ func (op Operation) LogicalBytes(elements int) (int64, error) {
 	return total, nil
 }
 
-var operations = []Operation{
+var operations = append([]Operation{
 	{
 		ID: Add, Group: "addition", Title: "Addition", BenchmarkName: "BenchmarkAddition",
 		Category: "arithmetic", TypeID: Float32, ArithmeticID: "go-float32-add-v1",
@@ -136,7 +137,7 @@ var operations = []Operation{
 		Output:   Value{"out", Float32, Array, 4},
 		Variants: []Variant{{Scalar, "Scalar", 0, false, Serial}, {SIMDPartial, "SIMD", 1, true, Serial}},
 	},
-}
+}, patternOperations()...)
 
 // All returns independent descriptors in the frozen legacy group/variant order.
 func All() []Operation {

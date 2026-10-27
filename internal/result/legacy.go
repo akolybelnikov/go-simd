@@ -2,6 +2,7 @@ package result
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -13,10 +14,12 @@ import (
 
 const LegacyBackendID = "go-test-text/v1"
 const LegacyHarnessID = "legacy-report/v1"
+const LegacyPatternHarnessID = "legacy-report-patterns/v1"
 
 type LegacyOptions struct {
-	RunID    string
-	Metadata string
+	InputOptions *input.Options
+	RunID        string
+	Metadata     string
 	// Set only for a fresh run of this checkout's known generated fixtures.
 	// Historical text alone cannot establish its input fingerprint.
 	GeneratedInputs bool
@@ -32,13 +35,23 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		BackendID: LegacyBackendID, HarnessID: LegacyHarnessID,
 		SourceFormat: "go-benchmark-text", Metadata: options.Metadata}
 	counts := map[MeasurementKey]int{}
-	fingerprints := map[int]string{}
+	fingerprints := map[string]string{}
 	scanner := bufio.NewScanner(reader)
 	scanner.Buffer(make([]byte, 4096), 1024*1024)
 	lineNumber := 0
 	for scanner.Scan() {
 		lineNumber++
 		line := scanner.Text()
+		if strings.HasPrefix(line, "input configuration: ") {
+			var decoded input.Options
+			if err := json.Unmarshal([]byte(strings.TrimPrefix(line, "input configuration: ")), &decoded); err != nil {
+				return Run{}, fmt.Errorf("invalid input configuration: %w", err)
+			}
+			if options.InputOptions != nil && *options.InputOptions != decoded {
+				return Run{}, fmt.Errorf("conflicting input configuration")
+			}
+			options.InputOptions = &decoded
+		}
 		for prefix, destination := range map[string]*string{
 			"goos:": &run.Environment.GOOS, "goarch:": &run.Environment.GOARCH, "cpu:": &run.Environment.CPU,
 		} {
@@ -83,15 +96,38 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			return Run{}, fmt.Errorf("line %d: invalid iteration count", lineNumber)
 		}
 		c := legacyCase(parts[0], label, size, procs)
-		if options.GeneratedInputs && c.TypeID == "float32" {
-			fingerprint, ok := fingerprints[size]
-			if !ok {
-				fingerprint = input.GeneratedFloat32Fingerprint(size)
-				fingerprints[size] = fingerprint
+		harness := LegacyHarnessID
+		op, knownOp := catalog.ByBenchmark(parts[0])
+		if knownOp && op.Parameterized() {
+			harness = LegacyPatternHarnessID
+			c.Parameters = "unknown"
+			if options.InputOptions != nil {
+				c.Parameters = options.InputOptions.Identity(op)
 			}
-			c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}
 		}
-		key := MeasurementKey{run.ID, run.Environment.ID, run.BackendID, run.HarnessID, procs, c}
+		if options.GeneratedInputs && c.TypeID == "float32" {
+			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
+			fingerprint, ok := fingerprints[cacheKey]
+			if !ok {
+				if !op.Parameterized() {
+					fingerprint = input.GeneratedFloat32Fingerprint(size)
+				} else if options.InputOptions != nil {
+					fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
+				}
+				fingerprints[cacheKey] = fingerprint
+			}
+			if !op.Parameterized() {
+				c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}
+			} else if options.InputOptions != nil {
+				c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
+			}
+		}
+		if len(run.Observations) == 0 {
+			run.HarnessID = harness
+		} else if run.HarnessID != harness {
+			run.HarnessID = "mixed"
+		}
+		key := MeasurementKey{run.ID, run.Environment.ID, run.BackendID, harness, procs, c}
 		counts[key]++
 		run.Observations = append(run.Observations, Observation{
 			Key: key, Label: label, Repetition: counts[key], Iterations: iterations,

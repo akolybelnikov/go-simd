@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/engine"
 	"github.com/akolybelnikov/go-simd/internal/evidence"
 	"github.com/akolybelnikov/go-simd/internal/platform"
@@ -50,10 +51,10 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 	if files, _ := os.ReadDir(workDir); len(files) != 0 {
 		t.Fatal("listing created artifacts")
 	}
-	if stdout, stderr, err := invoke("-bench=^Benchmark(Addition|Computation)$/^n=(8|16)$", "-count=2", "-benchtime=2x", "-format=md"); err != nil || !strings.Contains(stdout, "benchmark comparison") {
+	if stdout, stderr, err := invoke("-bench=^Benchmark.*$/^n=(8|16)$", "-count=2", "-benchtime=2x", "-format=md"); err != nil || !strings.Contains(stdout, "benchmark comparison") {
 		t.Fatalf("report: %v\n%s\n%s", err, stdout, stderr)
 	}
-	for _, group := range []string{"addition", "computation"} {
+	for _, group := range catalog.Groups() {
 		paths, err := filepath.Glob(filepath.Join(workDir, "artifacts", group, "*.measurements.json"))
 		if err != nil || len(paths) != 1 {
 			t.Fatal(paths, err)

@@ -35,9 +35,15 @@ func FingerprintFloat32(a, b []float32) string {
 
 // GeneratedFloat32Fingerprint computes the same hash without allocating slices.
 func GeneratedFloat32Fingerprint(size int) string {
+	return fingerprintGenerated(size, true, generatedPair)
+}
+
+func fingerprintGenerated(size int, binary bool, pair func(int) (float32, float32)) string {
 	h := sha256.New()
-	hashValues(h, size, func(i int) float32 { a, _ := generatedPair(i); return a })
-	hashValues(h, size, func(i int) float32 { _, b := generatedPair(i); return b })
+	hashValues(h, size, func(i int) float32 { a, _ := pair(i); return a })
+	if binary {
+		hashValues(h, size, func(i int) float32 { _, b := pair(i); return b })
+	}
 	return hex.EncodeToString(h.Sum(nil))
 }
 

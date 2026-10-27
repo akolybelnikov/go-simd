@@ -5,12 +5,16 @@ Repeated kernel measurements and TXT/MD/CSV reports. Runs standalone by default.
 Options:
   -addition
     	alias for -group addition
+  -alpha value
+    	float32 scale/affine multiplier (broadcast per call) (default 1.5)
   -backend string
     	measurement backend: compiled or go-test (developer checkout only) (default "compiled")
   -bench string
     	Go benchmark selection expression (default ".")
   -benchtime string
     	duration or iteration count per measurement (default "100ms")
+  -beta value
+    	float32 affine offset (unfused) (default -0.5)
   -computation
     	alias for -group computation
   -count int
@@ -20,11 +24,21 @@ Options:
   -function string
     	deprecated alias: add, compute, or all
   -group string
-    	benchmark group: addition, computation, or all (default "all")
+    	operation group (use -list to see available groups) (default "all")
   -list
     	list implemented kernels and runtime capabilities without benchmarking
+  -lower value
+    	float32 exclusive lower range bound (default -1)
   -output string
     	report directory (default "artifacts")
+  -pattern string
+    	predicate fixture: none, all, alternating, clustered, shuffled (default "alternating")
+  -seed uint
+    	deterministic shuffled predicate seed (default 42)
+  -threshold value
+    	float32 threshold for threshold/selection
+  -upper value
+    	float32 exclusive upper range bound (default 1)
 
 Examples:
   simdreport -list

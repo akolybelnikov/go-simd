@@ -52,7 +52,7 @@ func TestReportRejectsInvalidOptionsBeforeArtifacts(t *testing.T) {
 		args []string
 		want string
 	}{
-		{"unknown group", []string{"-group=unknown"}, `unknown group "unknown" (choose addition, computation, or all)`},
+		{"unknown group", []string{"-group=unknown"}, `unknown group "unknown" (use -list to see available groups)`},
 		{"zero count", []string{"-count=0"}, "count must be positive"},
 		{"negative count", []string{"-count=-1"}, "count must be positive"},
 		{"unsupported format", []string{"-format=html"}, `unsupported format "html" (choose txt, md, or csv)`},

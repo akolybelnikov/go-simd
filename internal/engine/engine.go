@@ -49,12 +49,17 @@ type Case struct {
 }
 
 type Plan struct {
+	Input  input.Options
 	Config Config
 	Cases  []Case
 }
 
 // Prepare resolves every selection and binding before allocating large fixtures.
 func Prepare(group string, c Config, width int) (Plan, error) {
+	return PrepareWithOptions(group, c, width, input.DefaultOptions())
+}
+
+func PrepareWithOptions(group string, c Config, width int, options input.Options) (Plan, error) {
 	if err := c.Validate(); err != nil {
 		return Plan{}, err
 	}
@@ -62,12 +67,15 @@ func Prepare(group string, c Config, width int) (Plan, error) {
 	if !ok {
 		return Plan{}, fmt.Errorf("unknown group %q", group)
 	}
+	if err := options.ValidateFor(op); err != nil {
+		return Plan{}, err
+	}
 	bound, err := kernels.Lookup(op.ID, op.TypeID)
 	if err != nil {
 		return Plan{}, err
 	}
 	match, _ := compileSelection(c.Bench)
-	plan := Plan{Config: c}
+	plan := Plan{Config: c, Input: options}
 	for _, n := range benchutil.BenchmarkSizes(width) {
 		bytes, err := op.LogicalBytes(n)
 		if err != nil {
@@ -109,13 +117,16 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 	fingerprint := ""
 	for _, c := range plan.Cases {
 		if c.Elements != previous {
-			a, b, out = input.MakeFloat32Slices(c.Elements)
+			a, b, out = input.MakeForOperation(c.Operation, c.Elements, plan.Input)
 			fingerprint = input.FingerprintFloat32(a, b)
 			previous = c.Elements
 		}
 		// Native developer benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
+		if c.Operation.Parameterized() {
+			prepared.Run = c.Implementation.BindConfigured(a, b, out, plan.Input)
+		}
 		workers, known := c.Implementation.Descriptor.WorkerCount(c.Elements, procs)
 		key := result.MeasurementKey{
 			RunID: run.ID, EnvironmentID: run.Environment.ID,
@@ -125,7 +136,8 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				OperationID: c.Operation.ID, TypeID: c.Operation.TypeID,
 				StrategyID: c.Implementation.Descriptor.ID, ArithmeticID: c.Operation.ArithmeticID,
 				Elements:      c.Elements,
-				Input:         result.InputIdentity{GeneratorID: input.GeneratedFloat32ID, SHA256: fingerprint},
+				Parameters:    plan.Input.Identity(c.Operation),
+				Input:         result.InputIdentity{GeneratorID: plan.Input.Generator(c.Operation), SHA256: fingerprint},
 				Workers:       result.OptionalInt{Value: workers, Known: known},
 				ExecutionMode: c.Operation.ExecutionMode,
 			},

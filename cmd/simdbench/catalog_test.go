@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/cli"
 	"github.com/akolybelnikov/go-simd/internal/platform"
 )
@@ -37,9 +38,10 @@ func TestListSelectors(t *testing.T) {
 func TestCatalogListing(t *testing.T) {
 	for _, emulated := range []bool{false, true} {
 		var output bytes.Buffer
-		err := cli.PrintCatalog(&output, "all", platform.Info{GoVersion: "go-fixture", OS: "fixture-os", Arch: "fixture-arch", Bits: 256, Lanes: 8, Procs: 4, Emulated: emulated})
-		if err != nil {
-			t.Fatal(err)
+		for _, group := range catalog.Groups() {
+			if err := cli.PrintCatalog(&output, group, platform.Info{GoVersion: "go-fixture", OS: "fixture-os", Arch: "fixture-arch", Bits: 256, Lanes: 8, Procs: 4, Emulated: emulated}); err != nil {
+				t.Fatal(err)
+			}
 		}
 		text := output.String()
 		for _, want := range []string{
@@ -56,8 +58,8 @@ func TestCatalogListing(t *testing.T) {
 		if emulated {
 			mode = "portable emulation"
 		}
-		if strings.Count(text, mode) != 4 {
-			t.Errorf("expected four SIMD variants in %q mode:\n%s", mode, text)
+		if strings.Count(text, mode) != 9 {
+			t.Errorf("expected nine SIMD variants in %q mode:\n%s", mode, text)
 		}
 		if strings.Contains(text, "ns/op") || strings.Contains(text, "broadcast/") {
 			t.Fatal("listing contains measurements or planned kernels")

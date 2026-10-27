@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/benchutil"
+	"github.com/akolybelnikov/go-simd/internal/input"
 )
 
 func TestParseOptions(t *testing.T) {
@@ -57,6 +58,38 @@ func TestParseOptions(t *testing.T) {
 	}
 }
 
+func TestConfiguredQuickBuffersAndParameters(t *testing.T) {
+	for _, tt := range []struct {
+		group, pattern string
+		want           []float32
+		bytes          int64
+	}{
+		{"scale", "alternating", []float32{-8, -7.5, -7}, 24},
+		{"selection", "none", []float32{-2, -1.75, -1.5}, 36},
+		{"selection", "all", []float32{1, 1, 1}, 36},
+	} {
+		o := input.DefaultOptions()
+		o.Alpha = 0x40000000
+		o.Pattern = tt.pattern
+		groups, err := benchmarkGroupsForSize(tt.group, 3, nil, nil, nil, o)
+		if err != nil || len(groups) != 1 {
+			t.Fatalf("%v %v", groups, err)
+		}
+		group := groups[0]
+		if group.logicalBytes != tt.bytes {
+			t.Fatal("wrong quick traffic")
+		}
+		for _, v := range group.variants {
+			if err := v.run(); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(group.output, tt.want) {
+				t.Fatalf("%s/%s: got %v want %v", tt.group, v.name, group.output, tt.want)
+			}
+		}
+	}
+}
+
 func TestParseOptionsHelp(t *testing.T) {
 	var stderr bytes.Buffer
 	_, err := parseOptions([]string{"-h"}, &stderr)
@@ -86,6 +119,9 @@ func TestLegacyVariantRegistration(t *testing.T) {
 	}
 	var names [][]string
 	for _, group := range groups {
+		if group.name != "Addition" && group.name != "Compute-heavy expression: a*a + b*b + a*b" {
+			continue
+		}
 		row := []string{group.name}
 		for _, variant := range group.variants {
 			row = append(row, variant.name)
@@ -147,7 +183,7 @@ func TestBenchmarkGroups(t *testing.T) {
 	}{
 		{function: "add", want: 1},
 		{function: "compute", want: 1},
-		{function: "all", want: 2},
+		{function: "all", want: 7},
 	} {
 		groups, err := benchmarkGroups(tt.function, a, b, out)
 		if err != nil {

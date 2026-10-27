@@ -5,6 +5,36 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 1 — Broadcast and predicate catalogue — 2026-10-27
+
+- Added scalar/SIMDPartial scale, explicitly unfused affine, threshold-to-zero,
+  bit-preserving conditional selection and strict range-mask And composition.
+  The catalogue now has seven operations and sixteen implementations.
+- Added shared float32 alpha/beta/threshold/lower/upper flags, predicate
+  none/all/alternating/clustered/shuffled arrangements and a deterministic seed.
+  Relevant parameter bits and fixture identities/fingerprints survive evidence;
+  impossible true distributions fail before preparation/artifacts.
+- Added unary fixture preparation and descriptor-derived 8*n accounting;
+  two-array selection retains 12*n logical work. Constants broadcast per kernel
+  call; parameter extraction and buffer binding remain outside timing.
+- Preserved existing addition/computation kernels and timed bindings. New
+  configured callbacks have explicitly distinct pattern harness identities.
+  The capture's optional config.input stores scalar uint32 bits safely for NaNs.
+- Supported the same operations/options through quick, standalone report, native
+  developer backend, Go/Make and installed launchers. Shared-package native runs
+  select exact requested leaves; raw metadata retains configuration, while absent
+  historical context remains unknown.
+- Made default -list compact, with parameter/strategy/semantic details behind
+  -list -group. Added examples/patterns, the complete README catalogue, a worked
+  Wiki chapter and a detailed implementation contract retaining article credit.
+- Tested independent scalar/SIMD oracles, aliases, invalid lengths/canaries,
+  vector/tail boundaries, signed zero, NaNs/Inf, unfused rounding, fixture truth
+  distributions and fingerprints, context parity, exports and standalone use.
+  Full tests/vet and pure packages pass; forced portable emulation passes and is
+  now checked by CI alongside normal execution and Linux race coverage.
+- Stopped after this slice. Reductions/dot, FMA, clamp, mask export, conversions,
+  new numeric types and architecture-specific movement remain planned.
+
 ### Architecture migration M3 — 2026-10-27
 
 - Made compiled `testing.Benchmark` the default report backend. Built/installed

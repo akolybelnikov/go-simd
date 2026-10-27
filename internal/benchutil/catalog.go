@@ -17,6 +17,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if operation.Descriptor.Parameterized() {
+		benchmarkPattern(b, operation)
+		return
+	}
 	if b.Name() != operation.Descriptor.BenchmarkName {
 		b.Fatalf("native benchmark %q differs from catalogue alias %q", b.Name(), operation.Descriptor.BenchmarkName)
 	}
