@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3, reviewed 2026-10-27. Installed binaries run from any directory.
+Baseline: M3 / F004 slice 1, reviewed 2026-10-27. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -25,7 +25,7 @@ and examples. Listing is identical through either executable.
 
 | Flag | Default | Meaning / example |
 | --- | --- | --- |
-| `-group` | `all` | `addition`, `computation`, `all`; `add` and `compute` also normalize to canonical names |
+| `-group` | `all` | `all` or any group in the operation table below; `add` and `compute` remain aliases |
 | `-addition` | `false` | Boolean alias for addition: `-addition` |
 | `-computation` | `false` | Boolean alias for computation: `-computation=true` |
 | `-function` | Unset | Deprecated alias: `add`, `compute`, `all`; canonical group names also accepted |
@@ -34,13 +34,13 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means both groups. Positional arguments are
+group. No explicit selection means all seven groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints this process's Go version, OS/architecture, SIMD bits/float32
-lanes, emulation and GOMAXPROCS, followed by operation/type/strategy IDs, labels,
-semantics, expressions, input/output shapes, parameter count and worker policies.
-Both current operations account for 12 logical bytes at one element.
+`-list` prints runtime context and a compact seven-row operation table.
+Add `-group <name>` for expression/semantics, operands, scalar values/bits,
+fixture identity, strategy labels/IDs and worker policy.
+Logical traffic is 8 bytes per element for unary patterns and 12 for addition, computation and two-array selection.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
 no artifacts. It advertises only implemented kernels, not proposed SDK patterns.
 Runtime emulation context does not guarantee acceleration or a speedup.
@@ -54,6 +54,24 @@ simdreport -list -function compute
 `-list=false` selects normal measurement. Report-specific arguments are still
 validated by `simdreport` when listing. The listing is human-readable diagnostic
 text, not a versioned machine-data export.
+
+## Pattern options: both commands
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `-alpha` | `1.5` | Scale/affine float32 multiplier |
+| `-beta` | `-0.5` | Affine float32 offset, without FMA |
+| `-threshold` | `0` | Threshold/selection strict comparison |
+| `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds |
+| `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
+| `-seed` | `42` | Deterministic shuffled pattern seed |
+
+Scalars parse to float32 and are recorded as exact bits. Settings apply only to
+operations declaring them. Predicate fixtures guarantee none/all truth or mixed
+arrangements; shuffled is approximately 50%, with the seed in input identity.
+Impossible true distributions fail before fixtures/artifacts; `-pattern none`
+permits all-false bounds. See [the worked pattern guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
+for NaN/Inf/signed-zero, alias and rounding rules.
 
 ## Quick comparison: simdbench
 
@@ -95,6 +113,16 @@ The outer `go run` process can also print `exit status 1`.
 | --- | --- | --- |
 | `addition` | `BenchmarkAddition` | `Scalar`, `SIMDPartial`, `SIMDTail`, `SIMDParallel` |
 | `computation` | `BenchmarkComputation` | `Scalar`, `SIMD` |
+| `scale` | `BenchmarkScale` | `Scalar`, `SIMDPartial` |
+| `affine` | `BenchmarkAffine` | `Scalar`, `SIMDPartial` |
+| `threshold` | `BenchmarkThreshold` | `Scalar`, `SIMDPartial` |
+| `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
+| `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
+
+New native benchmark wrappers share `./internal/patterns`. The developer report
+backend restricts it to the requested group's validated cases and records exact
+input/parameter context. Direct native commands use defaults; choose the report
+CLI with `-backend go-test` for recorded custom parameters.
 
 The selector name is `BenchmarkAddition/n=1024/SIMDPartial`. A numeric suffix in
 native output, e.g. `-16`, is GOMAXPROCS context, not a variant or lane count.
@@ -108,13 +136,13 @@ sizes around one and two vector widths. Regex selects existing cases only.
 | Serial strategies, three sizes | `addition` | `^BenchmarkAddition$/^n=(128\|1024\|8192)$/^(Scalar\|SIMDPartial\|SIMDTail)$` |
 | Scalar and parallel | `addition` | `^BenchmarkAddition$/^n=1048576$/^(Scalar\|SIMDParallel)$` |
 | Expression strategies | `computation` | `^BenchmarkComputation$/^n=1024$/^(Scalar\|SIMD)$` |
-| Both groups, portable small sizes | `all` | `^Benchmark(Addition\|Computation)$/^n=(8\|16)$/^(Scalar\|SIMD.*)$` |
+| All groups, portable small sizes | `all` | `^Benchmark.*$/^n=(8\|16)$/^(Scalar\|SIMD.*)$` |
 
 Matching preserves Go's component regex, top-level alternatives, parentheses,
 character classes, escapes and unanchored semantics. Unanchored `n=1` also
 matches `n=16` and `n=128`. An empty expression selects nothing. Paths deeper
 than the registered benchmark/size/variant leaves have no matching cases.
-With `-group all`, match both groups or the unmatched group will fail with
+With `-group all`, match every selected group or the unmatched group will fail with
 `no benchmark measurements found`, retaining failed evidence.
 
 ### Copy a bounded first experiment
@@ -173,10 +201,10 @@ Make requires GNU Make and a POSIX shell. All run/list/report targets forward
 | --- | --- |
 | `help` | Readable target catalogue |
 | `list` | Quick CLI's shared `-list` surface |
-| `run` | Quick comparison, both groups |
+| `run` | Quick comparison, all groups |
 | `run-addition` | Quick addition; forwards ARGS |
 | `run-computation` | Quick expression; forwards ARGS |
-| `report` | Reports, both groups |
+| `report` | Reports, all groups |
 | `report-addition` | Addition report |
 | `report-computation` | Expression report |
 | `build` | Build both commands into BIN_DIR |
@@ -212,6 +240,11 @@ Prefer direct Go/installed commands for complex quoting, anchored regex with
 
 ## Native Go and developer tools
 
+Direct new-operation benchmarks:
+`go test ./internal/patterns -run='^$' -bench='^BenchmarkScale$/^n=1024$' -benchmem -benchtime=100ms`.
+They use default scalar/fixture options. For custom recorded settings, prefer
+`simdreport -backend go-test -group scale -alpha 2 ...` from the checkout.
+
 These need Go/source and GOEXPERIMENT. They are not installed CLI options.
 
 ```powershell
@@ -224,6 +257,7 @@ go vet ./...
 gofmt -l cmd internal examples
 gofmt -w examples/basic/main.go
 go run ./examples/basic
+go run ./examples/patterns
 go doc ./internal/addition
 go doc ./internal/computation
 go doc ./internal/result

@@ -1,8 +1,9 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** catalogue review and proposed experiments, reviewed 2026-10-27.
-The lab still implements the six kernels in the operation guide. Patterns below
-are not new CLI flags or benchmark variants.
+**Status:** first F004 slice implemented, reviewed 2026-10-27.
+The lab has seven operations/sixteen implementations. The
+[worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
+separates the delivered patterns from the remaining proposals below.
 
 ## Reading credit
 
@@ -18,9 +19,9 @@ The small numerical sketches below are our own planning examples.
 | Pattern | Current lab coverage | Useful proposed experiment |
 | --- | --- | --- |
 | Contiguous loads/stores and partial/scalar tails | Exercised in existing addition/expression kernels | Keep as controls; isolate movement only for a concrete question |
-| Broadcast constants | No parameterized kernel | Scale or affine transform with scalar parameters |
-| Comparisons and mask logic | No predicate kernels | Threshold distributions, range predicates, explicit mask representation |
-| Masking and conditional selection | No masked/blended output | Keep-or-zero and choose-between-inputs transforms |
+| Broadcast constants | Scale/affine implemented | Compare per-call broadcasts and matched scalar controls |
+| Comparisons and mask logic | Threshold/selection/rangefilter implemented | Distribution/seed controls and range-mask And; exported masks deferred |
+| Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | No clamp kernel | Compare branches, selection, and min/max only under matching numerical rules |
 | FMA and streaming accumulation | Existing expression uses `Mul`/`Add`, without reduction | A separate multiply-add mode; sum/dot and accumulator strategies |
 | Permutes, horizontal folds, extraction | No lane-rearrangement or scalar-result study | An explicitly scoped architecture-specific experiment or portable composed reduction |
@@ -88,14 +89,15 @@ element rather than assuming addition's tail treatment works for every pattern.
 
 1. M2 foundation is complete: shared descriptors/bindings for the existing six
    kernels preserve current identities. Scalar parameter descriptions and output
-   shapes are seams; new typed preparation/retention remains implementation work.
-2. Add a focused float32 broadcast and predicate/selection slice with equivalent
-   scalar references. Cover none/mixed/all-true predicate arrangements.
+   shapes support the implemented array-parameter slice; scalar-result retention
+   remains future work.
+2. First slice complete: scale/affine, threshold/selection and range mask
+   composition, with scalar controls and none/mixed/all-true arrangements.
 3. Add sum/dot experiments after scalar-output and reduction-order contracts.
    Gate fused variants on a valid FMA reference, independently of fold order.
 4. Add movement, conversion, or a gated `archsimd` experiment when it answers a
    documented learning question; grow numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
-migration sequence. No broadcast, mask, permutation, sum, or dot command has
-been implemented. M2 adds catalogue inspection through `simdbench -list`.
+migration sequence. Broadcast/masking/selection are implemented. Permutation,
+sum/dot, explicit FMA and output-mask representations remain deferred.

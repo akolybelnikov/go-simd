@@ -37,6 +37,14 @@ binaries need neither Go nor source; `go run` still does. Only the explicit
 developer report backend launches Go. Listing only the current float32 pairs
 is expected: it does not advertise planned SDK methods as implemented kernels.
 
+## Pattern input errors
+
+Unknown patterns and unrepresentable float32 parameter text fail before artifacts.
+A pattern needing true lanes also fails for a NaN/+Inf threshold or an empty
+strict interval. Use `-pattern none` for those deliberate all-false experiments.
+Unrelated scalar flags do not affect an operation's case identity. Inspect the
+selected context with `-list -group selection -threshold 0 -pattern shuffled`.
+
 ## No benchmark measurements found
 
 Either backend can have no matching benchmark case. Verify:
@@ -46,7 +54,7 @@ Either backend can have no matching benchmark case. Verify:
    uses `SIMD`.
 3. The size is actually in the generated sweep.
 4. Slash-separated regex components and shell quoting are intact.
-5. `-group all` is not selecting a second group your regex excludes.
+5. `-group all` is not selecting additional groups your regex excludes.
 
 Start with this known small selection:
 
@@ -74,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers both groups and many sizes up to 16,777,216 elements. That
+The default covers all seven groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.

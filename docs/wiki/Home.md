@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / Feature 1, reviewed 2026-10-27.
+**Guide baseline:** architecture M3 / F004 slice 1, reviewed 2026-10-27.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -24,11 +24,14 @@ explicitly. This guide grows alongside each delivered feature.
 | Contribute and keep this Wiki current | [10 — Contribution and Wiki maintenance](https://github.com/akolybelnikov/go-simd/wiki/10-Contributing-and-wiki-maintenance) |
 | Check terminology and current capability limits | [11 — Glossary and capabilities](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities) |
 | Explore missing SIMD patterns and credited reading | [12 — SIMD patterns and reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading) |
+| Try broadcast constants, masks and predicate arrangements | [13 — Broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments) |
 
 ## What you can do today
 
 - Compare four addition strategies and two implementations of `a*a + b*b + a*b`
   over generated `float32` slices.
+- Compare scalar/SIMD scale, affine, threshold, selection and range masking,
+  with exact scalar parameters and controlled predicate distributions.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
 - Inspect registered operations and live SIMD context with either CLI's `-list`.
 - Run installed commands on a compatible local or remote machine without Go.
@@ -65,6 +68,7 @@ useful repeated measurement.
 | 2026-10-27 | F004 pattern-gap review, portable/architecture API checks, and credit to Jesús Espino's *SIMD and Go* |
 | 2026-10-27 | M2 shared catalogue, typed bindings, descriptor traffic, runtime listing and contributor workflow |
 | 2026-10-27 | M3 standalone reports, exact structured evidence, consistent flags/Make launchers, installation and remote-use guide |
+| 2026-10-27 | F004 first slice: five broadcast/predicate operations, scalar bits, seeded arrangements, compact catalogue and worked examples |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

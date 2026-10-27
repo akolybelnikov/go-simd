@@ -1,7 +1,8 @@
 # 04 — Operation and kernel guide
 
-The lab currently contains two element-wise operations on `float32` slices.
-Every kernel takes two input slices and one caller-provided output slice.
+The lab contains seven element-wise operations and sixteen implementations on
+`float32` slices. Kernels have one or two declared array inputs, scalar parameters
+where needed, and one caller-provided output slice.
 
 ## Complete kernel reference
 
@@ -13,6 +14,11 @@ Every kernel takes two input slices and one caller-provided output slice.
 | `internal/addition` | `AddSIMDParallel(a, b, out []float32) error` | `SIMDParallel` | Contiguous worker chunks, each using full vectors and a scalar tail |
 | `internal/computation` | `ComputeHeavyScalar(a, b, out []float32) error` | `Scalar` | Ordinary loop computing `a*a + b*b + a*b` |
 | `internal/computation` | `ComputeHeavySIMD(a, b, out []float32) error` | `SIMD` | Partial-vector loads, explicit vector `Mul`/`Add`, partial stores |
+| `internal/patterns` | `ScaleScalar` / `ScaleSIMD(x,out []float32,alpha float32) error` | Scalar / SIMDPartial | Broadcast scale |
+| `internal/patterns` | `AffineScalar` / `AffineSIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | Explicit unfused float32 multiply/add |
+| `internal/patterns` | `ThresholdZeroScalar` / `ThresholdZeroSIMD(x,out []float32,t float32) error` | Scalar / SIMDPartial | Strict predicate, false to +0 |
+| `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
+| `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -86,7 +92,7 @@ infinities, NaNs, and toolchain lowering need explicit semantics before expandin
 that coverage. Do not claim bit-for-bit fused/unfused equivalence from ordinary
 integer-valued test examples.
 
-## Shared input/output contract
+## Original addition/computation input/output contract
 
 - All three slices must have equal lengths.
 - A mismatch returns that package's `ErrLengthMismatch` before modifying output.
@@ -99,7 +105,7 @@ integer-valued test examples.
 The two packages have separate error sentinels; use `errors.Is` with the sentinel
 from the package whose operation you called.
 
-## Benchmark data and accounting
+## Original addition/computation data and accounting
 
 The generated fixture is `generated-float32-v1`:
 
@@ -112,6 +118,10 @@ The current benchmark allocates and fills the buffers before timing and reuses
 the output. It reports `12 * elements` effective bytes per operation: two
 float32 reads and one write. At 16,777,216 elements, each slice is 64 MiB and the
 three slices total 192 MiB, excluding other runtime overhead.
+
+New unary scale/affine/threshold/range account for `8*n`; two-array selection
+accounts for `12*n`. Numerical, alias and fixture rules are in
+[broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments).
 
 ## Internal machine identifiers
 
@@ -133,14 +143,13 @@ M2 defines these identities once in
 [`internal/catalog`](https://github.com/akolybelnikov/go-simd/tree/main/internal/catalog).
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
-and runtime context. The six typed bindings preserve the original kernels and
-their validation/call boundaries; no new arithmetic patterns are enabled.
+and runtime context. The original six bindings preserve their kernel/call paths;
+ten new configured bindings add the broadcast/predicate slice.
 
 ## Pattern gaps and reading credit
 
 [SIMD and Go, by Jesús Espino](https://internals-for-interns.com/posts/go-simd/)
 is credited as the reading prompt for our
 [SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
-That review identifies planned broadcast, mask/selection, accumulation and
-movement experiments, and checks the portable/`archsimd` API boundary. The six
-kernels documented above remain the currently implemented catalogue.
+That review distinguishes implemented broadcast/masking/selection from planned
+accumulation/movement experiments and checks the portable/`archsimd` boundary.

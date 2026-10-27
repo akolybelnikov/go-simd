@@ -101,8 +101,10 @@ distinct sentinels. Zero-length equal slices succeed, including nil slices.
 
 Use `go run ./cmd/simdbench -list` to see implemented descriptors before choosing
 a kernel. The catalogue and typed bindings are internal extension points, not a
-public plugin API. Broadcast parameters, scalar-returning reductions and new
-output types still need explicit bindings and correctness contracts.
+public plugin API. F004 adds configured scalar-parameter bindings for float32
+arrays; run `go run ./examples/patterns` and follow the
+[broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments).
+Scalar-returning reductions and new output types still need explicit contracts.
 
 The functions accept caller-supplied `[]float32` inside the module, so you can
 write a local program that prepares different values and checks results. The

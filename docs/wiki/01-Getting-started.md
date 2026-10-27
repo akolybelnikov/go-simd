@@ -81,7 +81,8 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or `-group computation`; only the existing six kernels are registered.
+or any group in the compact catalogue. Seven operations/sixteen implementations
+are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
 CI runs this check. A local `runtime/cgo` build failure is a toolchain problem
@@ -95,6 +96,10 @@ go run ./examples/basic
 
 This calls all six kernels and demonstrates in-place output, unchanged output
 on length mismatch, and empty input. It prints values, not benchmark claims.
+
+Run `go run ./examples/patterns` for the five new broadcast/predicate operations;
+the [worked guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
+explains constants, masks and seeded input arrangements.
 
 ## 6. Check report generation
 

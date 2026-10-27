@@ -49,7 +49,7 @@ commas, quotes and embedded newlines. Absent scalar is not a measured zero.
 | `schema` | Exactly `go-simd.measurements/v1` |
 | `status`, `error` | `complete` or `failed`; reason on failure |
 | `group` | Measured group |
-| `config` | Normalized `count`, `benchtime`, `bench` |
+| `config` | Normalized `count`, `benchtime`, `bench`, optional `input` (scalar uint32 bits, pattern and seed) |
 | `machine` | Measuring process's Go/OS/architecture, vector bits/lanes, emulation, GOMAXPROCS, source revision/modified state and embedded Go build information |
 | `run` | Typed run and individual observations; model fields retain Go names in v1, e.g. `Observations` and `DurationNS` |
 
@@ -60,7 +60,8 @@ allocation/throughput counters and the legacy selection alias. Direct ns/op is
 duration divided by iterations, preserving fractional nanoseconds. Allocation
 metrics divide total counters by actual iterations.
 
-Backend is `testing-benchmark/v1`, harness `standalone/v1`. Go controls GC and
+Backend is `testing-benchmark/v1`, harness `standalone/v1` for the original kernels and `standalone-patterns/v1`
+for new parameterized bindings. Go controls GC and
 calibration; calibration calls are not independent samples. Whole adapter
 duration is not kernel CPU/op for final N. Preparation, fingerprints and binding
 stay outside the callback. Validation, callback/function-pointer dispatch and
@@ -84,7 +85,9 @@ $capture.run.Observations | Select-Object Label, Repetition, Iterations, Duratio
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
 It needs the checkout, matching Go on PATH and `GOEXPERIMENT=simd`; it never
 falls back to compiled execution. Its `.raw` companion retains native text,
-backend `go-test-text/v1`, harness `legacy-report/v1`.
+backend `go-test-text/v1`, harness `legacy-report/v1` for original cases or `legacy-report-patterns/v1`
+for parameterized cases. New raw headers record input configuration; absent
+historical parameter/fixture context remains unknown.
 
 Legacy text retains tool/environment output, repetitions, iterations, displayed
 timing, allocations and throughput. It cannot recover exact duration from rounded
@@ -92,14 +95,15 @@ ns/op and lacks complete build/emulation identity. Parent metadata does not
 establish child capabilities. Historical fingerprints stay unknown; old evidence
 is never silently converted. Both backends feed the same summary renderers, but
 their results must remain separate series because harness/precision differ.
-Throughput remains effective `12*n` work, not measured DRAM traffic.
+Throughput is descriptor-specific logical work: `8*n` for unary patterns and
+`12*n` for the binary operations, not measured DRAM traffic.
 
 ## Failure and sharing
 
 Invalid format, group, count, duration/iteration mode, regex, backend and
 positionals fail before artifacts. An empty compiled selection or unexpected
 measured failure retains a failed capture, including completed earlier samples
-when available, and no successful summary for that group. With both groups, one
+when available, and no successful summary for that group. With multiple selected groups, one
 can complete before the next fails; inspect the final exit status.
 
 Disk errors or abrupt process termination can leave incomplete files. Atomic

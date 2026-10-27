@@ -1,6 +1,6 @@
 # 11 — Glossary and capability ledger
 
-Reviewed against M3 / Feature 1 on 2026-10-27. This is a ledger of implemented
+Reviewed against M3 / F004 slice 1 on 2026-10-27. This is a ledger of implemented
 capabilities, not a promise to deliver every possible extension.
 
 ## Capability ledger
@@ -15,13 +15,13 @@ capabilities, not a promise to deliver every possible extension.
 | Input CSV/JSON inference | Not implemented |
 | Other numeric types / comprehensive operation catalog | Not implemented |
 | MulAdd/FMA mode | Not implemented; numerical semantics need an explicit contract |
-| Broadcast scale/affine kernels | Planned in F004; SDK broadcast exists, but no lab kernel or selector is registered |
-| Predicate/mask/selection kernels | Planned in F004; no benchmark kernels yet |
+| Broadcast scale/affine kernels | Implemented, Scalar/SIMDPartial, exact float32 scalar parameters; broadcasts per call |
+| Predicate/mask/selection kernels | Implemented threshold, selection and rangefilter; strict comparisons, bit-preserving selection, Masked/IfElse/And |
 | Sum/dot reductions | Planned composed kernels; scalar-result and numerical-order contracts pending |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Two operation descriptors / six typed bindings shared by CLI and native benchmarks; logical traffic and stable identities |
-| Runtime listing | Both CLIs share `-list`, aliases/help and group filtering; no fixtures/benchmarks; live Go/platform/vector/emulation/GOMAXPROCS context |
+| Shared runtime catalogue | Seven operations / sixteen implementations; shared descriptors, configured and legacy typed bindings |
+| Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
 | Retained observations | Default direct exact-duration/iteration JSON evidence; explicit developer backend retains legacy text |
@@ -39,7 +39,8 @@ capabilities, not a promise to deliver every possible extension.
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M0-M3 are complete. New broadcast, mask and reduction kernels remain planned.
+M0-M3 and F004's first broadcast/predicate slice are complete. Reductions, FMA,
+clamp, mask export, conversions and new types remain planned.
 Worker isolation, cancellation recovery and advanced manifests remain deferred. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.
 
