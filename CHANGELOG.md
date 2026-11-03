@@ -5,6 +5,32 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 2a — Ordered float32 sum — 2026-11-03
+
+- Added sum-f32 with Scalar left-to-right and SIMDStriped full-vector accumulation,
+  low-to-high lane fold and scalar tail. Each addition rounds to float32; empty
+  input returns +0. Input is unchanged and no caller output slice is required.
+- Implemented typed float32-returning bindings and separate quick/compiled/native
+  reduction callbacks. Final extraction/fold/tail stays timed; the last returned
+  value is retained once after timing. Existing array kernel paths stay intact.
+- Added additive scalar-result uint32 bits and fold identity (order, observed
+  process lanes, vector accumulator count, tail) to v1 evidence. New reduction
+  harness IDs separate these timings; native metrics retain exact bits/width and
+  reject missing or malformed facts. Mixed-width comparisons are rejected.
+- Shared -sum-input balanced/cancellation/mixed-magnitude across both CLIs and
+  Go/Make/installed launchers. Fixtures allocate only x, fingerprint its bits,
+  and account for 4*n+4 logical bytes per call. Catalogue totals are eight
+  operations and eighteen implementations.
+- Tested independent rational float32 fold oracles, two directions of rounding
+  loss, eligible finite error bounds, vector/tail boundaries, exceptional values,
+  signed zero, immutability, zero current-width allocations, raw-bit retention,
+  compiled/native parity, exports and no-Go/no-source standalone execution.
+  Full tests/vet, pure packages and forced emulation pass; CI now includes sum.
+- Added runnable cancellation examples, the numerical contract, retained smoke
+  evidence and a worked Wiki chapter; updated README/command/capability guides
+  and preserved credit to Jesús Espino's SIMD and Go article.
+- Stopped after sum. Dot, multiple vector accumulators, FMA and M4 remain pending.
+
 ### F004 slice 1 — Broadcast and predicate catalogue — 2026-10-27
 
 - Added scalar/SIMDPartial scale, explicitly unfused affine, threshold-to-zero,

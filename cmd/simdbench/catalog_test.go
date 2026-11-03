@@ -58,8 +58,8 @@ func TestCatalogListing(t *testing.T) {
 		if emulated {
 			mode = "portable emulation"
 		}
-		if strings.Count(text, mode) != 9 {
-			t.Errorf("expected nine SIMD variants in %q mode:\n%s", mode, text)
+		if strings.Count(text, mode) != 10 {
+			t.Errorf("expected ten SIMD variants in %q mode:\n%s", mode, text)
 		}
 		if strings.Contains(text, "ns/op") || strings.Contains(text, "broadcast/") {
 			t.Fatal("listing contains measurements or planned kernels")

@@ -44,6 +44,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.Parameterized() {
 		run.Metadata += "parameters: " + plan.Input.Identity(op) + "\nfixture: " + plan.Input.Generator(op) + "\n"
 	}
+	if op.ScalarResult() {
+		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nnumerics: " + op.NumericalPolicy + "\nlogical traffic: 4*n + 4 bytes/call\n"
+	}
 	if _, err := fmt.Fprintf(stdout, "Measuring %s (%d repetitions; compiled backend)...\n", group, plan.Config.Count); err != nil {
 		captureFile.Close()
 		return err

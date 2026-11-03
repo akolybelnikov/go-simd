@@ -12,13 +12,14 @@ const NativeOptionsEnv = "GO_SIMD_INPUT_OPTIONS"
 
 // Scalars are stored as exact IEEE-754 bits; JSON never contains NaN/Inf numbers.
 type Options struct {
+	SumInput                             string
 	Alpha, Beta, Threshold, Lower, Upper uint32
 	Pattern                              string
 	Seed                                 uint64
 }
 
 func DefaultOptions() Options {
-	return Options{math.Float32bits(1.5), math.Float32bits(-0.5), 0, math.Float32bits(-1), math.Float32bits(1), "alternating", 42}
+	return Options{Alpha: math.Float32bits(1.5), Beta: math.Float32bits(-0.5), Lower: math.Float32bits(-1), Upper: math.Float32bits(1), Pattern: "alternating", Seed: 42, SumInput: "balanced"}
 }
 
 func (o Options) Bits(name string) uint32 {
@@ -52,6 +53,11 @@ func IsPredicate(op catalog.Operation) bool {
 }
 
 func (o Options) Validate() error {
+	switch o.SumFixture() {
+	case "balanced", "cancellation", "mixed-magnitude":
+	default:
+		return fmt.Errorf("unknown sum-input %q (choose balanced, cancellation, or mixed-magnitude)", o.SumInput)
+	}
 	switch o.Pattern {
 	case "none", "all", "alternating", "clustered", "shuffled":
 		return nil
@@ -112,6 +118,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.Sum {
+		return "generated-sum-float32-v1/" + o.SumFixture()
+	}
 	if !op.Parameterized() {
 		return GeneratedFloat32ID
 	}
@@ -125,6 +134,25 @@ func (o Options) Generator(op catalog.Operation) string {
 }
 
 func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
+	if op.ID == catalog.Sum {
+		switch o.SumFixture() {
+		case "cancellation":
+			switch i % 64 {
+			case 0:
+				return 16777216, 0
+			case 1:
+				return 1, 0
+			case 32:
+				return -16777216, 0
+			}
+			return 0, 0
+		case "mixed-magnitude":
+			values := [8]float32{1e-20, 1, 1e20, -1e20, -1, 3, -3, 1e-20}
+			return values[i%8], 0
+		default:
+			return float32(i%33-16) / 4, 0
+		}
+	}
 	if !op.Parameterized() {
 		return generatedPair(i)
 	}
@@ -138,8 +166,16 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 	return float32(i%33-16) / 4, 0
 }
 
-// MakeForOperation allocates only the declared arrays and one output.
+// MakeForOperation allocates the declared input arrays and an array output only
+// when required. Scalar-returning reductions have no output slice.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if op.ScalarResult() {
+		a = make([]float32, n)
+		for i := range a {
+			a[i], _ = o.pair(op, i, n)
+		}
+		return
+	}
 	if !op.Parameterized() {
 		return MakeFloat32Slices(n)
 	}
@@ -158,8 +194,19 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ScalarResult() {
+		return fingerprintGenerated(n, false, func(i int) (float32, float32) { return o.pair(op, i, n) })
+	}
 	if !op.Parameterized() {
 		return GeneratedFloat32Fingerprint(n)
 	}
 	return fingerprintGenerated(n, len(op.Inputs) == 2, func(i int) (float32, float32) { return o.pair(op, i, n) })
+}
+
+// Empty means the original default when decoding older option records.
+func (o Options) SumFixture() string {
+	if o.SumInput == "" {
+		return "balanced"
+	}
+	return o.SumInput
 }

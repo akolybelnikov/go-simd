@@ -17,7 +17,11 @@ func TestPatternFixturesAndFingerprints(t *testing.T) {
 					t.Fatal(err)
 				}
 				a, b, out := MakeForOperation(op, n, o)
-				if len(a) != n || len(out) != n || len(op.Inputs) == 2 && len(b) != n || len(op.Inputs) == 1 && len(b) != 0 {
+				wantOutput := n
+				if op.ScalarResult() {
+					wantOutput = 0
+				}
+				if len(a) != n || len(out) != wantOutput || len(op.Inputs) == 2 && len(b) != n || len(op.Inputs) == 1 && len(b) != 0 {
 					t.Fatal("operand arity mismatch")
 				}
 				if got, want := FingerprintFloat32(a, b), FingerprintForOperation(op, n, o); got != want {
@@ -51,6 +55,28 @@ func TestPatternFixturesAndFingerprints(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestSumFixturesUseNoOutputArray(t *testing.T) {
+	op, _ := catalog.ByGroup("sum")
+	for _, fixture := range []string{"balanced", "cancellation", "mixed-magnitude", ""} {
+		for _, n := range []int{0, 1, 64, 1025} {
+			o := DefaultOptions()
+			o.SumInput = fixture
+			a, b, out := MakeForOperation(op, n, o)
+			if b != nil || out != nil || len(a) != n {
+				t.Fatal("scalar result disguised as an array")
+			}
+			if got, want := FingerprintFloat32(a, nil), FingerprintForOperation(op, n, o); got != want {
+				t.Fatal("sum fingerprint drift")
+			}
+		}
+	}
+	o := DefaultOptions()
+	o.SumInput = "invalid"
+	if err := o.Validate(); err == nil {
+		t.Fatal("unknown sum fixture accepted")
 	}
 }
 

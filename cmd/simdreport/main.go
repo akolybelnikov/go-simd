@@ -112,8 +112,9 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 		return err
 	}
 	op, _ := catalog.ByGroup(group)
+	configured := op.Parameterized() || op.ScalarResult()
 	requested := bench
-	if op.Parameterized() {
+	if configured {
 		bench = plan.NativeSelection()
 	}
 	args := []string{"test", op.NativePath(), "-run=^$", "-bench=" + bench, "-benchmem", "-benchtime=" + benchtime, "-count=" + strconv.Itoa(count)}
@@ -126,7 +127,7 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	}
 	metadata += "toolchain environment: " + string(envOutput) + "\n"
 	optionBytes, _ := json.Marshal(plan.Input)
-	if op.Parameterized() {
+	if configured {
 		metadata += "requested selection: " + requested + "\ninput configuration: " + string(optionBytes) + "\n"
 	}
 	if _, err := io.WriteString(raw, metadata); err != nil {
@@ -136,7 +137,7 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	fmt.Fprintf(stdout, "Measuring %s (%d repetitions)...\n", group, count)
 	var measurements bytes.Buffer
 	command := exec.Command("go", args...)
-	if op.Parameterized() {
+	if configured {
 		for _, entry := range os.Environ() {
 			key, _, _ := strings.Cut(entry, "=")
 			if key != input.NativeOptionsEnv {

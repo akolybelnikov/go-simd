@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 const LegacyBackendID = "go-test-text/v1"
 const LegacyHarnessID = "legacy-report/v1"
 const LegacyPatternHarnessID = "legacy-report-patterns/v1"
+const LegacyReductionHarnessID = "legacy-report-reduction/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -47,7 +49,13 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			if err := json.Unmarshal([]byte(strings.TrimPrefix(line, "input configuration: ")), &decoded); err != nil {
 				return Run{}, fmt.Errorf("invalid input configuration: %w", err)
 			}
-			if options.InputOptions != nil && *options.InputOptions != decoded {
+			decoded.SumInput = decoded.SumFixture()
+			var expected input.Options
+			if options.InputOptions != nil {
+				expected = *options.InputOptions
+				expected.SumInput = expected.SumFixture()
+			}
+			if options.InputOptions != nil && expected != decoded {
 				return Run{}, fmt.Errorf("conflicting input configuration")
 			}
 			options.InputOptions = &decoded
@@ -80,7 +88,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		for i := 2; i+1 < len(fields); i += 2 {
 			unit := fields[i+1]
 			switch unit {
-			case "ns/op", "B/op", "allocs/op", "MB/s":
+			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits":
 				value, err := strconv.ParseFloat(fields[i], 64)
 				if err != nil || !finite(value) || value < 0 {
 					return Run{}, fmt.Errorf("line %d: invalid %s measurement", lineNumber, unit)
@@ -98,6 +106,24 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		c := legacyCase(parts[0], label, size, procs)
 		harness := LegacyHarnessID
 		op, knownOp := catalog.ByBenchmark(parts[0])
+		var scalarBits *uint32
+		if knownOp && op.ScalarResult() {
+			harness = LegacyReductionHarnessID
+			lanes, bits := metrics["simd-lanes"], metrics["result-bits"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("sum measurement requires an integer simd-lanes metric")
+			}
+			if !bits.Available || bits.Value > math.MaxUint32 || math.Trunc(bits.Value) != bits.Value {
+				return Run{}, fmt.Errorf("sum measurement requires a uint32 result-bits metric")
+			}
+			fold, err := SumFold(c.StrategyID, int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Reduction = fold
+			value := uint32(bits.Value)
+			scalarBits = &value
+		}
 		if knownOp && op.Parameterized() {
 			harness = LegacyPatternHarnessID
 			c.Parameters = "unknown"
@@ -109,14 +135,14 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
 			if !ok {
-				if !op.Parameterized() {
+				if !op.Parameterized() && !op.ScalarResult() {
 					fingerprint = input.GeneratedFloat32Fingerprint(size)
 				} else if options.InputOptions != nil {
 					fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
 				}
 				fingerprints[cacheKey] = fingerprint
 			}
-			if !op.Parameterized() {
+			if !op.Parameterized() && !op.ScalarResult() {
 				c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}
 			} else if options.InputOptions != nil {
 				c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
@@ -133,7 +159,8 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			Key: key, Label: label, Repetition: counts[key], Iterations: iterations,
 			NanosecondsPerOp: metrics["ns/op"].Value,
 			BytesPerOp:       metrics["B/op"], AllocsPerOp: metrics["allocs/op"], MegabytesPerSec: metrics["MB/s"],
-			SourceBenchmark: fields[0],
+			SourceBenchmark:  fields[0],
+			ScalarResultBits: scalarBits,
 		})
 	}
 	if err := scanner.Err(); err != nil {

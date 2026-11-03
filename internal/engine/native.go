@@ -8,8 +8,12 @@ import (
 )
 
 const PatternHarnessID = "standalone-patterns/v1"
+const ReductionHarnessID = "standalone-reduction/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ScalarResult() {
+		return ReductionHarnessID
+	}
 	if op.Parameterized() {
 		return PatternHarnessID
 	}

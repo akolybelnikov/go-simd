@@ -74,6 +74,7 @@ func (v Variant) WorkerCount(elements, procs int) (int, bool) {
 }
 
 type Operation struct {
+	NumericalPolicy                            string
 	NativePackage                              string // Explicit developer benchmark package, not a runtime dependency.
 	ID, Group, Title, BenchmarkName            string
 	Category, TypeID, ArithmeticID, Expression string
@@ -137,7 +138,7 @@ var operations = append([]Operation{
 		Output:   Value{"out", Float32, Array, 4},
 		Variants: []Variant{{Scalar, "Scalar", 0, false, Serial}, {SIMDPartial, "SIMD", 1, true, Serial}},
 	},
-}, patternOperations()...)
+}, append(patternOperations(), sumOperation())...)
 
 // All returns independent descriptors in the frozen legacy group/variant order.
 func All() []Operation {

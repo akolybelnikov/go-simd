@@ -58,6 +58,32 @@ func TestParseOptions(t *testing.T) {
 	}
 }
 
+func TestQuickSumHasTypedScalarDestination(t *testing.T) {
+	o := input.DefaultOptions()
+	o.SumInput = "cancellation"
+	groups, err := benchmarkGroupsForSize("sum", 64, nil, nil, nil, o)
+	if err != nil || len(groups) != 1 {
+		t.Fatal(err)
+	}
+	group := groups[0]
+	if group.output != nil || group.scalar == nil || group.logicalBytes != 260 {
+		t.Fatal("sum is not a scalar-result group")
+	}
+	for _, v := range group.variants {
+		if v.run != nil || v.reduce == nil {
+			t.Fatal("sum uses array callback")
+		}
+		got := v.reduce()
+		want := float32(0)
+		if v.name == "SIMDStriped" {
+			want = 1
+		}
+		if got != want {
+			t.Fatal("wrong quick sum")
+		}
+	}
+}
+
 func TestConfiguredQuickBuffersAndParameters(t *testing.T) {
 	for _, tt := range []struct {
 		group, pattern string
@@ -183,7 +209,7 @@ func TestBenchmarkGroups(t *testing.T) {
 	}{
 		{function: "add", want: 1},
 		{function: "compute", want: 1},
-		{function: "all", want: 7},
+		{function: "all", want: 8},
 	} {
 		groups, err := benchmarkGroups(tt.function, a, b, out)
 		if err != nil {
