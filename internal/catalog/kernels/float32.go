@@ -16,6 +16,7 @@ type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
+	BindUnary         func(x, out []float32) func() error
 	BindUint8         func(x []float32, out []uint8, options input.Options) func() error
 	BindCheckedScalar func(x, y []float32) func() (float32, error)
 	BindScalar        func(x []float32) func() float32
@@ -72,6 +73,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.Copy {
+			bind, ok := copyBindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing copy binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUnary: bind})
+			continue
+		}
 		if descriptor.ID == catalog.PredicateGTPacked {
 			bind, ok := packedPredicateBindings[variant.ID]
 			if !ok {

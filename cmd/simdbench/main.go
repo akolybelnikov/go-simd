@@ -41,6 +41,7 @@ type result struct {
 }
 
 type benchmarkGroup struct {
+	copyOutput   bool
 	byteOutput   []uint8
 	scalar       *float32
 	output       []float32
@@ -129,6 +130,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 					b.StopTimer()
 					benchmarkByteSink = group.byteOutput
 				})
+			} else if group.copyOutput {
+				stats, runErr = measureQuickCopy(item.run, group.output, group.logicalBytes)
 			} else {
 				stats = testing.Benchmark(func(b *testing.B) {
 					b.ReportAllocs()
@@ -206,13 +209,17 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			return nil, err
 		}
 		x, y, resultOut := a, b, out
-		if descriptor.Parameterized() || descriptor.ScalarResult() {
+		if descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
 			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
 		} else if out == nil {
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
 			x, y, resultOut = a, b, out
 		}
 		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
+		if descriptor.ID == catalog.Copy {
+			item.copyOutput = true
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; disjoint buffers; GoCopy uses Go compiler/runtime copy"
+		}
 		if descriptor.ByteResult() {
 			length, err := descriptor.OutputElements(size)
 			if err != nil {
@@ -234,6 +241,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.name += "\nFMA32 vector gate: " + platform.Current().FMA32Path + "; scalar tails use software FMA32"
 		}
 		for _, implementation := range operation.Implementations {
+			if implementation.BindUnary != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUnary(x, resultOut)})
+				continue
+			}
 			if descriptor.ByteResult() {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUint8(x, item.byteOutput, options)})
 				continue

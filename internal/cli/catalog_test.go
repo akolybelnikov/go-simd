@@ -19,7 +19,8 @@ func TestCompactCatalogue(t *testing.T) {
 			t.Fatal("missing compact operation")
 		}
 	}
-	if strings.Contains(out.String(), "scalar reference:") || !strings.Contains(out.String(), "Use -list -group") || strings.Count(out.String(), "\n") > 25 {
+	// Fixed runtime/header lines plus one compact row per registered operation.
+	if strings.Contains(out.String(), "scalar reference:") || !strings.Contains(out.String(), "Use -list -group") || strings.Count(out.String(), "\n") > len(catalog.All())+12 {
 		t.Fatal("default catalogue is not compact")
 	}
 }

@@ -29,6 +29,7 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
+	Copy                                          CopyIdentity      `json:",omitzero"`
 	Predicate                                     PredicateIdentity `json:",omitzero"`
 	FMA                                           FMAIdentity       `json:",omitzero"`
 	Reduction                                     FoldIdentity      `json:",omitzero"`
@@ -47,6 +48,7 @@ type MeasurementKey struct {
 }
 
 type Observation struct {
+	ArrayResultSHA256   string  `json:",omitempty"` // Complete float32 output bits, little endian, hashed after timing.
 	ByteResultSHA256    string  `json:",omitempty"` // Full uint8 output, hashed only after measurement.
 	ArrayResultLastBits *uint32 `json:",omitempty"` // FMA checkpoint: last output element, not a full-array checksum.
 	ScalarResultBits    *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.
@@ -146,6 +148,7 @@ type Comparison struct {
 // comparisonContext omits strategy/workers for the legacy serial-scalar policy,
 // and size/fingerprint because the report intentionally sweeps input sizes.
 type comparisonContext struct {
+	Copy                                       CopyIdentity
 	Predicate                                  PredicateIdentity
 	FMARounding                                string
 	FMAVectorPath                              string
@@ -159,7 +162,7 @@ type comparisonContext struct {
 
 func contextFor(k MeasurementKey) comparisonContext {
 	c := k.Case
-	return comparisonContext{c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
+	return comparisonContext{c.Copy, c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
 		k.GOMAXPROCS, c.OperationID, c.TypeID, c.ArithmeticID,
 		c.Parameters, c.Input.GeneratorID, c.ExecutionMode}
 }
@@ -199,6 +202,9 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 		bySize[c.Elements][c.StrategyID] = s
 	}
 	table := Comparison{Title: title, BaselinePolicy: "legacy-serial-scalar/v1"}
+	if summaries[0].Key.Case.OperationID == catalog.Copy {
+		table.BaselinePolicy = "copy-source-loop/v1"
+	}
 	if summaries[0].Key.Case.OperationID == catalog.DotFMA {
 		table.BaselinePolicy = "specified-fused-float32-dot-folds/v1"
 	}

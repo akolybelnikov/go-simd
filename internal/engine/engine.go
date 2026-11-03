@@ -96,13 +96,14 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
-	ByteOutput    []uint8
-	ReduceChecked func() (float32, error)
-	Reduce        func() float32
-	Scalar        *float32
-	Run           func() error
-	Output        []float32
-	Bytes         int64
+	RetainOutputAfterTiming bool
+	ByteOutput              []uint8
+	ReduceChecked           func() (float32, error)
+	Reduce                  func() float32
+	Scalar                  *float32
+	Run                     func() error
+	Output                  []float32
+	Bytes                   int64
 }
 type Sample struct {
 	Iterations          int
@@ -114,7 +115,7 @@ type Backend interface {
 }
 
 // Execute retains successful samples on a later unexpected kernel/backend error.
-// Fixtures are reused per size, with no implicit warmup or output checksum.
+// Fixtures are reused per size; declared output digests are computed after samples.
 func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 	if len(plan.Cases) == 0 {
 		return run, fmt.Errorf("no benchmark measurements found")
@@ -138,10 +139,13 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				byteOut = make([]uint8, length)
 			}
 		}
-		// Native developer benchmarks retain the same callback -> typed function
+		// Original native benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.ByteResult() {
+		if c.Operation.ID == catalog.Copy {
+			prepared.Run = c.Implementation.BindUnary(a, out)
+			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ByteResult() {
 			prepared.Run = c.Implementation.BindUint8(a, byteOut, plan.Input)
 			prepared.ByteOutput = byteOut
 		} else if c.Operation.Parameterized() {
@@ -190,6 +194,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			}
 			key.Case.Predicate = identity
 		}
+		if c.Operation.ID == catalog.Copy {
+			var vector simd.Float32s
+			identity, err := result.NewCopyIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Copy = identity
+		}
 		if c.Operation.ID == catalog.AffineFMA {
 			var vector simd.Float32s
 			identity, err := result.NewFMAIdentity(c.Implementation.Descriptor.ID, fmacap.Path(), vector.Len())
@@ -235,6 +247,9 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			if c.Operation.ByteResult() {
 				digest := sha256.Sum256(byteOut)
 				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
+			}
+			if c.Operation.ID == catalog.Copy {
+				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat32(out, nil)
 			}
 			if c.Operation.ID == catalog.AffineFMA {
 				bits := math.Float32bits(out[len(out)-1])

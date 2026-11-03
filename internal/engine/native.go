@@ -14,8 +14,12 @@ const FMAHarnessID = "standalone-affine-fma/v1"
 const DotFMAHarnessID = "standalone-dot-fma/v1"
 const PredicateHarnessID = "standalone-predicate-export/v1"
 const PackedPredicateHarnessID = "standalone-packed-predicate/v1"
+const CopyHarnessID = "standalone-copy/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ID == catalog.Copy {
+		return CopyHarnessID
+	}
 	if op.ID == catalog.PredicateGTPacked {
 		return PackedPredicateHarnessID
 	}
