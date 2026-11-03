@@ -82,6 +82,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone FMA context/result lost")
 				}
 			}
+			if group == "predicate" {
+				if len(observation.ByteResultSHA256) != 64 || observation.Key.Case.Predicate.NativeLanes.Value != capture.Machine.Lanes {
+					t.Fatal("standalone byte output/width lost")
+				}
+			}
 			if group == "dotfma" {
 				if observation.Key.Case.FMA.VectorPathID != capture.Machine.FMA32Path || observation.Key.Case.FMA.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone fused-dot context lost")

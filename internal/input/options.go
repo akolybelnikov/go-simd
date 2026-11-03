@@ -51,7 +51,7 @@ func (o Options) Identity(op catalog.Operation) string {
 }
 
 func IsPredicate(op catalog.Operation) bool {
-	return op.ID == catalog.ThresholdZero || op.ID == catalog.SelectGT || op.ID == catalog.RangeZero
+	return op.ID == catalog.ThresholdZero || op.ID == catalog.SelectGT || op.ID == catalog.RangeZero || op.ID == catalog.PredicateGT
 }
 
 func (o Options) Validate() error {
@@ -228,8 +228,16 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 }
 
 // MakeForOperation allocates the declared input arrays and an array output only
-// when required. Scalar-returning reductions have no output slice.
+// when required. Scalar returns and byte outputs have no float32 output slice;
+// callers allocate the typed byte output separately outside measurement.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if op.ByteResult() {
+		a = make([]float32, n)
+		for i := range a {
+			a[i], _ = o.pair(op, i, n)
+		}
+		return
+	}
 	if op.ScalarResult() {
 		a = make([]float32, n)
 		if len(op.Inputs) == 2 {

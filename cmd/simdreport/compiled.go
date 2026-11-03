@@ -53,6 +53,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.ScalarResult() {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nnumerics: " + op.NumericalPolicy + fmt.Sprintf("\nlogical traffic: %d*n + 4 bytes/call\n", 4*len(op.Inputs))
 	}
+	if op.ByteResult() {
+		run.Metadata += "output: uint8-zero-one/v1; full ByteResultSHA256 retained after timing\nlogical traffic: 5*n bytes/call\nnumerics: " + op.NumericalPolicy + "\n"
+	}
 	if _, err := fmt.Fprintf(stdout, "Measuring %s (%d repetitions; compiled backend)...\n", group, plan.Config.Count); err != nil {
 		captureFile.Close()
 		return err

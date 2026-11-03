@@ -29,8 +29,9 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
-	FMA                                           FMAIdentity  `json:",omitzero"`
-	Reduction                                     FoldIdentity `json:",omitzero"`
+	Predicate                                     PredicateIdentity `json:",omitzero"`
+	FMA                                           FMAIdentity       `json:",omitzero"`
+	Reduction                                     FoldIdentity      `json:",omitzero"`
 	OperationID, TypeID, StrategyID, ArithmeticID string
 	Parameters                                    string
 	Elements                                      int
@@ -46,6 +47,7 @@ type MeasurementKey struct {
 }
 
 type Observation struct {
+	ByteResultSHA256    string  `json:",omitempty"` // Full uint8 output, hashed only after measurement.
 	ArrayResultLastBits *uint32 `json:",omitempty"` // FMA checkpoint: last output element, not a full-array checksum.
 	ScalarResultBits    *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.
 	Key                 MeasurementKey
@@ -144,6 +146,7 @@ type Comparison struct {
 // comparisonContext omits strategy/workers for the legacy serial-scalar policy,
 // and size/fingerprint because the report intentionally sweeps input sizes.
 type comparisonContext struct {
+	Predicate                                  PredicateIdentity
 	FMARounding                                string
 	FMAVectorPath                              string
 	FMANativeLanes                             OptionalInt
@@ -156,7 +159,7 @@ type comparisonContext struct {
 
 func contextFor(k MeasurementKey) comparisonContext {
 	c := k.Case
-	return comparisonContext{c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
+	return comparisonContext{c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
 		k.GOMAXPROCS, c.OperationID, c.TypeID, c.ArithmeticID,
 		c.Parameters, c.Input.GeneratorID, c.ExecutionMode}
 }

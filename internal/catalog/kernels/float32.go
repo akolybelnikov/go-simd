@@ -16,6 +16,7 @@ type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
+	BindUint8         func(x []float32, out []uint8, options input.Options) func() error
 	BindCheckedScalar func(x, y []float32) func() (float32, error)
 	BindScalar        func(x []float32) func() float32
 	BindConfigured    func(a, b, out []float32, options input.Options) func() error
@@ -71,6 +72,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.PredicateGT {
+			bind, ok := predicateBindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing predicate binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUint8: bind})
+			continue
+		}
 		if descriptor.ID == catalog.DotFMA {
 			var bind func([]float32, []float32) func() (float32, error)
 			switch variant.ID {

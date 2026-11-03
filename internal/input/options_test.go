@@ -18,7 +18,7 @@ func TestPatternFixturesAndFingerprints(t *testing.T) {
 				}
 				a, b, out := MakeForOperation(op, n, o)
 				wantOutput := n
-				if op.ScalarResult() {
+				if op.ScalarResult() || op.ByteResult() {
 					wantOutput = 0
 				}
 				if len(a) != n || len(out) != wantOutput || len(op.Inputs) == 2 && len(b) != n || len(op.Inputs) == 1 && len(b) != 0 {

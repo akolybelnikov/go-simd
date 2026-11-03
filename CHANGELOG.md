@@ -5,6 +5,41 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 5 — Canonical uint8 predicate export — 2026-11-03
+
+- Added predicate / predicate-gt-f32 / BenchmarkPredicate with Scalar and
+  SIMDPartial, bringing the catalogue to twelve operations/thirty-two
+  implementations. Input remains float32; output is a real uint8 array.
+- Define ordered strict x > threshold as canonical byte 1/0. Equality, either
+  zero at threshold zero and NaNs produce 0. Length errors precede writes,
+  equal empty/nil succeeds, input is preserved and storage must be disjoint.
+- SIMD selects explicit float32 0/1, converts/extracts through int32 scratch
+  and writes valid bytes only. Raw SDK mask representation never escapes;
+  padded zero lanes cannot corrupt a negative-threshold tail.
+- Add typed BindUint8/Prepared.ByteOutput preparation and separate compiled/
+  native predicate-export harnesses. Include validation, broadcasts, comparison,
+  normalization, conversion, extraction and stores in timing. Logical work is
+  5*n bytes; preparation/retention/output hashing stay outside timing.
+- Retain full ByteResultSHA256 per observation and Case.Predicate's canonical
+  encoding/actual lanes. Reject mixed widths/encodings. Import strict child
+  width and eight exact uint32 digest-word metrics; missing/duplicate/fractional/
+  invalid words fail. Keep unrelated v1 fields omitted and existing callbacks.
+- Reuse shared threshold/pattern/seed recipes and exact parameter/input identity;
+  do not allocate dummy float32 output or introduce new CLI flags.
+- Verify exact bytes over random raw float32 values, signed zeros, infinities,
+  subnormals/NaNs, length errors, input preservation, output canaries, lane/tail
+  boundaries and current zero allocations. Cover bindings, fixture identity,
+  mixed-context rejection, partial captures and timing-flag restoration.
+- Verify all five distributions through compiled/native backends at 1,w-1,w,w+1,
+  exact counts and complete output hashes, including forced emulation. Full
+  tests/vet, experiment-independent packages, standalone all-group/no-Go tests,
+  Go/installed/Make examples and hardware/software captures pass.
+- Extend Windows/Linux CI with native predicate smoke checks and Linux
+  forced-emulation backend parity. Add examples/predicate, the detailed feature
+  record, Wiki chapter 19 and synchronized human command/capability guides.
+- Stop after byte-mask export. Packed masks, clamp, three-array MulAdd, movement,
+  standalone conversions, other input types and architecture M4 stay pending.
+
 ### F004 slice 4 — Fused dot with specified folds — 2026-11-03
 
 - Added dotfma / dot-fma-f32 / BenchmarkDotFMA with Scalar and explicitly

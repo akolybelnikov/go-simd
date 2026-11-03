@@ -21,6 +21,7 @@ const LegacyReductionHarnessID = "legacy-report-reduction/v1"
 const LegacyDotHarnessID = "legacy-report-dot/v1"
 const LegacyFMAHarnessID = "legacy-report-affine-fma/v1"
 const LegacyDotFMAHarnessID = "legacy-report-dot-fma/v1"
+const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -95,6 +96,16 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		metrics := map[string]Metric{}
 		for i := 2; i+1 < len(fields); i += 2 {
 			unit := fields[i+1]
+			if strings.HasPrefix(unit, "output-sha256-") {
+				value, err := strconv.ParseFloat(fields[i], 64)
+				if err != nil || !finite(value) || value < 0 {
+					return Run{}, fmt.Errorf("line %d: invalid output digest metric", lineNumber)
+				}
+				if _, exists := metrics[unit]; exists {
+					return Run{}, fmt.Errorf("duplicate output digest metric")
+				}
+				metrics[unit] = Metric{value, true}
+			}
 			switch unit {
 			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits":
 				value, err := strconv.ParseFloat(fields[i], 64)
@@ -146,6 +157,23 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			}
 		}
 		var arrayBits *uint32
+		byteDigest := ""
+		if knownOp && op.ByteResult() {
+			harness = LegacyPredicateHarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("predicate requires an integer simd-lanes metric")
+			}
+			identity, err := NewPredicateIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Predicate = identity
+			byteDigest, err = predicateDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && op.ID == catalog.DotFMA {
 			vector, path := metrics["fma-vector"], metrics["fma-path"]
 			if !vector.Available || vector.Value != 0 && vector.Value != 1 || !path.Available || path.Value > 4 || math.Trunc(path.Value) != path.Value {
@@ -230,6 +258,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			SourceBenchmark:     fields[0],
 			ScalarResultBits:    scalarBits,
 			ArrayResultLastBits: arrayBits,
+			ByteResultSHA256:    byteDigest,
 		})
 	}
 	if err := scanner.Err(); err != nil {

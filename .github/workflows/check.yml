@@ -30,6 +30,7 @@ jobs:
           go test ./internal/patterns ./internal/reduction ./internal/catalog/kernels ./internal/engine -count=1
           go test ./cmd/simdreport -run='^TestFMAResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestDotFMAResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestPredicateResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -41,3 +42,5 @@ jobs:
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkAffineFMA$/^n=(8|16)$' -benchtime=1x
       - name: Check fused dot paths
         run: go test ./internal/reduction -run='^$' -bench='^BenchmarkDotFMA$/^n=(1|8|16)$' -benchtime=1x
+      - name: Check predicate export
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicate$/^n=(1|8|16)$' -benchtime=1x

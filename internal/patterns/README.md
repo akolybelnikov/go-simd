@@ -7,6 +7,29 @@ Old affine/dot remain unfused. Array alias/length rules and 8*n accounting match
 unary affine. Run `go run ./examples/fma`; see the
 [contract](../../docs/features/F004-fma.md) and [Wiki guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
+## Predicate byte export
+
+PredicateGTScalar/PredicateGTSIMD accept
+`(x []float32,out []uint8,threshold float32) error`. They export ordered strict
+comparison as canonical 0/1. Equality and NaN are false. Length errors precede
+writes; empty succeeds; input/output storage must be disjoint.
+
+SIMDPartial broadcasts threshold/one/zero, loads partial vectors, selects exact
+float32 0/1, converts/stores int32 scratch and writes only valid output bytes.
+No raw SDK mask encoding escapes, including padded true lanes under negative
+thresholds. Conversion/extraction/stores are timed. Logical work is `5*n`;
+current widths allocate zero per call. Typed byte bindings and separate harnesses
+retain full output SHA-256 after timing alongside width/encoding/input identity.
+
+```powershell
+go run ./examples/predicate
+go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 3 -benchtime 100ms -format md
+```
+
+Shared threshold/pattern/seed controls work through installed CLI, Go and Make.
+See the [contract](../../docs/features/F004-predicate-export.md) and
+[guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks). Packed bits and other representations remain separate work.
+
 ## Original broadcast/predicate slice
 
 Five operations each have Scalar and SIMDPartial implementations:

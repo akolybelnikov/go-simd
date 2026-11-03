@@ -9,7 +9,7 @@ import (
 func TestConfiguredBindingInventory(t *testing.T) {
 	count := 0
 	for _, op := range catalog.All() {
-		if !op.Parameterized() {
+		if !op.Parameterized() || op.ByteResult() {
 			continue
 		}
 		runtime, err := Lookup(op.ID, op.TypeID)
