@@ -5,6 +5,35 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 2b — Unfused float32 dot product — 2026-11-03
+
+- Added dot-f32 / BenchmarkDot with Scalar and SIMDStriped. Products round to
+  float32 before accumulation, with explicit left-to-right versus one-vector,
+  low-to-high lane-fold and scalar-tail orders. No FMA is used.
+- Added checked `(float32,error)` kernels/bindings and distinct quick/compiled/
+  native execution paths. Unequal lengths return +0,ErrLengthMismatch before
+  reading inputs; equal empty inputs return +0,nil. Inputs and read-only overlaps
+  are preserved. No output array is allocated.
+- Timed length validation, multiplication, extraction/fold and tail. Propagated
+  failures while retaining earlier observations; successful returned values are
+  retained once after timing. Sum and legacy array call paths stay intact.
+- Added separate dot harnesses, arithmetic/order identities and strict native
+  result-bits/simd-lanes retention. Existing v1 bit/fold fields preserve results
+  including NaN/Inf; mixed widths cannot pool. Historical option records without
+  DotInput resolve to balanced without changing prior kernel identities.
+- Shared -dot-input balanced/cancellation/mixed-magnitude through both CLIs and
+  installed/Go/Make launchers. Fixtures allocate/fingerprint both inputs, account
+  for 8*n+4 logical bytes and select only dot leaves in the shared native package.
+  Catalogue totals: nine operations and twenty implementations.
+- Tested independent rational product/fold oracles, eligible finite error bounds,
+  nonfusion at vector/tail boundaries, both rounding-loss directions, exceptional
+  values/subnormals, length errors, read-only overlap, immutability and zero
+  current-width allocations. Checked error/partial-result paths, all-fixture
+  backend parity, exports and standalone result/fold retention without Go/source.
+- Added a runnable dot example, detailed contract, retained smoke evidence and
+  Wiki chapter; synchronized command/capability guides and preserved article credit.
+- Stop after unfused dot. Multiple accumulators, FMA and M4 remain future phases.
+
 ### F004 slice 2a — Ordered float32 sum — 2026-11-03
 
 - Added sum-f32 with Scalar left-to-right and SIMDStriped full-vector accumulation,

@@ -52,7 +52,7 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		}
 		fmt.Fprintf(&out, "inputs: %s\noutput: %s\nscalar parameters: %d\n", strings.Join(inputs, ", "), describeValue(op.Output), len(op.Parameters))
 		if op.ScalarResult() {
-			fmt.Fprintf(&out, "fixture: %s\nlogical traffic model: 4*n + 4 bytes/call\nnumerics: %s\n", options.Generator(op), op.NumericalPolicy)
+			fmt.Fprintf(&out, "fixture: %s\nlogical traffic model: %d*n + 4 bytes/call\nnumerics: %s\n", options.Generator(op), 4*len(op.Inputs), op.NumericalPolicy)
 		}
 		if op.Parameterized() {
 			for _, p := range op.Parameters {

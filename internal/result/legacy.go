@@ -17,6 +17,7 @@ const LegacyBackendID = "go-test-text/v1"
 const LegacyHarnessID = "legacy-report/v1"
 const LegacyPatternHarnessID = "legacy-report-patterns/v1"
 const LegacyReductionHarnessID = "legacy-report-reduction/v1"
+const LegacyDotHarnessID = "legacy-report-dot/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -50,10 +51,12 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				return Run{}, fmt.Errorf("invalid input configuration: %w", err)
 			}
 			decoded.SumInput = decoded.SumFixture()
+			decoded.DotInput = decoded.DotFixture()
 			var expected input.Options
 			if options.InputOptions != nil {
 				expected = *options.InputOptions
 				expected.SumInput = expected.SumFixture()
+				expected.DotInput = expected.DotFixture()
 			}
 			if options.InputOptions != nil && expected != decoded {
 				return Run{}, fmt.Errorf("conflicting input configuration")
@@ -109,14 +112,17 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var scalarBits *uint32
 		if knownOp && op.ScalarResult() {
 			harness = LegacyReductionHarnessID
+			if op.ID == catalog.Dot {
+				harness = LegacyDotHarnessID
+			}
 			lanes, bits := metrics["simd-lanes"], metrics["result-bits"]
 			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
-				return Run{}, fmt.Errorf("sum measurement requires an integer simd-lanes metric")
+				return Run{}, fmt.Errorf("%s measurement requires an integer simd-lanes metric", op.Group)
 			}
 			if !bits.Available || bits.Value > math.MaxUint32 || math.Trunc(bits.Value) != bits.Value {
-				return Run{}, fmt.Errorf("sum measurement requires a uint32 result-bits metric")
+				return Run{}, fmt.Errorf("%s measurement requires a uint32 result-bits metric", op.Group)
 			}
-			fold, err := SumFold(c.StrategyID, int(lanes.Value))
+			fold, err := ReductionFold(op.ID, c.StrategyID, int(lanes.Value))
 			if err != nil {
 				return Run{}, err
 			}

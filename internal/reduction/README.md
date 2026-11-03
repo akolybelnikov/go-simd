@@ -1,4 +1,28 @@
-# Ordered float32 sum
+# Ordered float32 reductions
+
+## Unfused dot product
+
+`DotScalar(x,y []float32) (float32,error)` rounds each product to float32,
+then adds left to right from +0. `DotSIMD` uses separate vector Mul/Add with
+one accumulator, a low-to-high lane fold and rounded scalar-tail products.
+Length validation, multiplication, extraction/fold and tail are timed.
+Unequal lengths return +0,ErrLengthMismatch before reading either input;
+equal empty/nil inputs return +0,nil. Read-only overlap is allowed.
+
+```powershell
+go run ./examples/dot
+go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot$/^n=64$' -count 3 -benchtime 100ms -format md
+```
+
+`-dot-input` selects balanced, cancellation or mixed-magnitude fixtures, with
+both input arrays fingerprinted and no output array. Logical work is `8*n+4`.
+Typed checked callbacks propagate errors and retain result bits once after
+timing under distinct dot harnesses. Scalar is a timing baseline; order changes
+can alter rounding and exceptional values. FMA and multiple accumulators remain
+future work. See the [dot contract](../../docs/features/F004-dot.md) and
+[Wiki exercise](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
+
+## Sum
 
 `SumScalar(x []float32) float32` accumulates from +0 left to right.
 `SumSIMD(x []float32) float32` uses one native-width vector accumulator, extracts

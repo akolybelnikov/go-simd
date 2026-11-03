@@ -16,11 +16,12 @@ type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
-	BindScalar     func(x []float32) func() float32
-	BindConfigured func(a, b, out []float32, options input.Options) func() error
-	Descriptor     catalog.Variant
-	Run            Float32Kernel
-	Bind           Float32Binder
+	BindCheckedScalar func(x, y []float32) func() (float32, error)
+	BindScalar        func(x []float32) func() float32
+	BindConfigured    func(a, b, out []float32, options input.Options) func() error
+	Descriptor        catalog.Variant
+	Run               Float32Kernel
+	Bind              Float32Binder
 }
 
 type Operation struct {
@@ -70,6 +71,23 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.Dot {
+			var bind func([]float32, []float32) func() (float32, error)
+			switch variant.ID {
+			case catalog.Scalar:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotScalar(x, y) }
+				}
+			case catalog.SIMDStriped:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotSIMD(x, y) }
+				}
+			default:
+				return Operation{}, fmt.Errorf("missing dot binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindCheckedScalar: bind})
+			continue
+		}
 		if descriptor.ID == catalog.Sum {
 			var bind func([]float32) func() float32
 			switch variant.ID {

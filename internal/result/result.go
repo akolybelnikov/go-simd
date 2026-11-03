@@ -194,6 +194,9 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 	if summaries[0].Key.Case.OperationID == catalog.Sum {
 		table.BaselinePolicy = "specified-float32-folds/v1"
 	}
+	if summaries[0].Key.Case.OperationID == catalog.Dot {
+		table.BaselinePolicy = "specified-unfused-float32-dot-folds/v1"
+	}
 	for _, column := range columns {
 		table.Columns = append(table.Columns, column)
 	}

@@ -11,6 +11,8 @@ Options:
     	float32 affine offset (unfused) (default -0.5)
   -computation
     	alias for -group computation
+  -dot-input string
+    	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
   -function string
     	deprecated alias: add, compute, or all
   -group string
