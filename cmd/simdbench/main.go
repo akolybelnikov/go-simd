@@ -203,6 +203,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		if descriptor.ID == catalog.AffineFMA {
 			item.name += "\nFMA32 SIMD path: " + platform.Current().FMA32Path
 		}
+		if descriptor.ID == catalog.DotFMA {
+			item.name += "\nFMA32 vector gate: " + platform.Current().FMA32Path + "; scalar tails use software FMA32"
+		}
 		for _, implementation := range operation.Implementations {
 			if implementation.BindCheckedScalar != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, reduceChecked: implementation.BindCheckedScalar(x, y)})

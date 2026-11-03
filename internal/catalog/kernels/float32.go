@@ -71,6 +71,31 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.DotFMA {
+			var bind func([]float32, []float32) func() (float32, error)
+			switch variant.ID {
+			case catalog.Scalar:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotFMAScalar(x, y) }
+				}
+			case catalog.SIMDStriped:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotFMASIMD(x, y) }
+				}
+			case catalog.SIMDStriped2:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotFMASIMD2(x, y) }
+				}
+			case catalog.SIMDStriped4:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotFMASIMD4(x, y) }
+				}
+			default:
+				return Operation{}, fmt.Errorf("missing fused-dot binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindCheckedScalar: bind})
+			continue
+		}
 		if descriptor.ID == catalog.Dot {
 			var bind func([]float32, []float32) func() (float32, error)
 			switch variant.ID {

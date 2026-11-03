@@ -138,7 +138,7 @@ var operations = append([]Operation{
 		Output:   Value{"out", Float32, Array, 4},
 		Variants: []Variant{{Scalar, "Scalar", 0, false, Serial}, {SIMDPartial, "SIMD", 1, true, Serial}},
 	},
-}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation())...)
+}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation(), dotFMAOperation())...)
 
 // All returns independent descriptors in the frozen legacy group/variant order.
 func All() []Operation {

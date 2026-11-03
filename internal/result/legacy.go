@@ -20,6 +20,7 @@ const LegacyPatternHarnessID = "legacy-report-patterns/v1"
 const LegacyReductionHarnessID = "legacy-report-reduction/v1"
 const LegacyDotHarnessID = "legacy-report-dot/v1"
 const LegacyFMAHarnessID = "legacy-report-affine-fma/v1"
+const LegacyDotFMAHarnessID = "legacy-report-dot-fma/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -119,6 +120,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			if op.ID == catalog.Dot {
 				harness = LegacyDotHarnessID
 			}
+			if op.ID == catalog.DotFMA {
+				harness = LegacyDotFMAHarnessID
+			}
 			lanes, bits := metrics["simd-lanes"], metrics["result-bits"]
 			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
 				return Run{}, fmt.Errorf("%s measurement requires an integer simd-lanes metric", op.Group)
@@ -142,6 +146,31 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			}
 		}
 		var arrayBits *uint32
+		if knownOp && op.ID == catalog.DotFMA {
+			vector, path := metrics["fma-vector"], metrics["fma-path"]
+			if !vector.Available || vector.Value != 0 && vector.Value != 1 || !path.Available || path.Value > 4 || math.Trunc(path.Value) != path.Value {
+				return Run{}, fmt.Errorf("fused dot requires exact fma-vector/fma-path metrics")
+			}
+			vectorPath := fma32.SoftwarePath
+			if vector.Value == 1 {
+				vectorPath = fma32.VectorPath
+			}
+			identity, err := NewDotFMAIdentity(c.StrategyID, vectorPath, c.Reduction.NativeLanes.Value, size)
+			if err != nil {
+				return Run{}, err
+			}
+			code, err := DotFMAPathCode(identity.PathID)
+			if err != nil {
+				return Run{}, err
+			}
+			if path.Value != float64(code) {
+				return Run{}, fmt.Errorf("conflicting fused-dot case/path metrics")
+			}
+			c.FMA = identity
+			if len(run.Observations) == 0 {
+				run.Metadata += "Fused-dot child vector gate: " + vectorPath + "\n"
+			}
+		}
 		if knownOp && op.ID == catalog.AffineFMA {
 			harness = LegacyFMAHarnessID
 			vector, path, lanes, bits := metrics["fma-vector"], metrics["fma-path"], metrics["simd-lanes"], metrics["last-result-bits"]
