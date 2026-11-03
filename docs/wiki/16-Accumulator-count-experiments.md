@@ -60,8 +60,8 @@ changes. For n=8*w, other x entries zero and dot y all ones:
 
 | Nonzero x positions | Scalar | SIMDStriped | SIMDStriped2 | SIMDStriped4 |
 | --- | --- | --- | --- | --- |
-| x[0]=2^24, x[w]=1, x[2*w]=-2^24 | 0 | 0 | 1 | 0 |
-| x[0]=2^24, x[2*w]=1, x[4*w]=-2^24 | 0 | 0 | 0 | 1 |
+| `x[0]=2^24, x[w]=1, x[2*w]=-2^24` | 0 | 0 | 1 | 0 |
+| `x[0]=2^24, x[2*w]=1, x[4*w]=-2^24` | 0 | 0 | 0 | 1 |
 
 Both exact mathematical results are 1. These examples do not establish an
 accuracy ranking. NaNs/Inf and intermediate overflow also follow the declared
