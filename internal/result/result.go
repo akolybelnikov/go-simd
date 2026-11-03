@@ -29,6 +29,7 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
+	FMA                                           FMAIdentity  `json:",omitzero"`
 	Reduction                                     FoldIdentity `json:",omitzero"`
 	OperationID, TypeID, StrategyID, ArithmeticID string
 	Parameters                                    string
@@ -45,17 +46,18 @@ type MeasurementKey struct {
 }
 
 type Observation struct {
-	ScalarResultBits *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.
-	Key              MeasurementKey
-	Label            string
-	Repetition       int // One-based within the complete measurement key.
-	Iterations       uint64
-	NanosecondsPerOp float64
-	DurationNS       *int64 // Legacy rounded ns/op cannot recover exact duration.
-	BytesPerOp       Metric
-	AllocsPerOp      Metric
-	MegabytesPerSec  Metric
-	SourceBenchmark  string
+	ArrayResultLastBits *uint32 `json:",omitempty"` // FMA checkpoint: last output element, not a full-array checksum.
+	ScalarResultBits    *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.
+	Key                 MeasurementKey
+	Label               string
+	Repetition          int // One-based within the complete measurement key.
+	Iterations          uint64
+	NanosecondsPerOp    float64
+	DurationNS          *int64 // Legacy rounded ns/op cannot recover exact duration.
+	BytesPerOp          Metric
+	AllocsPerOp         Metric
+	MegabytesPerSec     Metric
+	SourceBenchmark     string
 }
 
 type Environment struct {
@@ -142,6 +144,9 @@ type Comparison struct {
 // comparisonContext omits strategy/workers for the legacy serial-scalar policy,
 // and size/fingerprint because the report intentionally sweeps input sizes.
 type comparisonContext struct {
+	FMARounding                                string
+	FMAVectorPath                              string
+	FMANativeLanes                             OptionalInt
 	ReductionNativeLanes                       OptionalInt
 	RunID, EnvironmentID, BackendID, HarnessID string
 	GOMAXPROCS                                 OptionalInt
@@ -151,7 +156,7 @@ type comparisonContext struct {
 
 func contextFor(k MeasurementKey) comparisonContext {
 	c := k.Case
-	return comparisonContext{c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
+	return comparisonContext{c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
 		k.GOMAXPROCS, c.OperationID, c.TypeID, c.ArithmeticID,
 		c.Parameters, c.Input.GeneratorID, c.ExecutionMode}
 }
@@ -191,6 +196,9 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 		bySize[c.Elements][c.StrategyID] = s
 	}
 	table := Comparison{Title: title, BaselinePolicy: "legacy-serial-scalar/v1"}
+	if summaries[0].Key.Case.OperationID == catalog.AffineFMA {
+		table.BaselinePolicy = "fused-software-reference/v1"
+	}
 	if summaries[0].Key.Case.OperationID == catalog.Sum {
 		table.BaselinePolicy = "specified-float32-folds/v1"
 	}

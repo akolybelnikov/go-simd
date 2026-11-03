@@ -12,6 +12,7 @@ const NativeOptionsEnv = "GO_SIMD_INPUT_OPTIONS"
 
 // Scalars are stored as exact IEEE-754 bits; JSON never contains NaN/Inf numbers.
 type Options struct {
+	FMAInput                             string
 	DotInput                             string
 	SumInput                             string
 	Alpha, Beta, Threshold, Lower, Upper uint32
@@ -20,7 +21,7 @@ type Options struct {
 }
 
 func DefaultOptions() Options {
-	return Options{Alpha: math.Float32bits(1.5), Beta: math.Float32bits(-0.5), Lower: math.Float32bits(-1), Upper: math.Float32bits(1), Pattern: "alternating", Seed: 42, SumInput: "balanced", DotInput: "balanced"}
+	return Options{Alpha: math.Float32bits(1.5), Beta: math.Float32bits(-0.5), Lower: math.Float32bits(-1), Upper: math.Float32bits(1), Pattern: "alternating", Seed: 42, SumInput: "balanced", DotInput: "balanced", FMAInput: "balanced"}
 }
 
 func (o Options) Bits(name string) uint32 {
@@ -54,6 +55,11 @@ func IsPredicate(op catalog.Operation) bool {
 }
 
 func (o Options) Validate() error {
+	switch o.FMAFixture() {
+	case "balanced", "rounding", "mixed-magnitude":
+	default:
+		return fmt.Errorf("unknown fma-input %q (choose balanced, rounding, or mixed-magnitude)", o.FMAInput)
+	}
 	switch o.DotFixture() {
 	case "balanced", "cancellation", "mixed-magnitude":
 	default:
@@ -124,6 +130,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.AffineFMA {
+		return "generated-affine-fma-float32-v1/" + o.FMAFixture()
+	}
 	if op.ID == catalog.Dot {
 		return "generated-dot-float32-v1/" + o.DotFixture()
 	}
@@ -143,6 +152,18 @@ func (o Options) Generator(op catalog.Operation) string {
 }
 
 func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
+	if op.ID == catalog.AffineFMA {
+		switch o.FMAFixture() {
+		case "rounding":
+			v := [8]float32{1 - 0x1p-23, 1 + 0x1p-23, 1, -1, math.SmallestNonzeroFloat32, math.MaxFloat32, math.Float32frombits(0x80000000), 1 - 0x1p-23}
+			return v[i%8], 0
+		case "mixed-magnitude":
+			v := [8]float32{1e-20, 1, 1e20, -1e20, -1, 3, -3, 1e-20}
+			return v[i%8], 0
+		default:
+			return float32(i%33-16) / 4, 0
+		}
+	}
 	if op.ID == catalog.Dot {
 		switch o.DotFixture() {
 		case "cancellation":
@@ -253,4 +274,11 @@ func (o Options) DotFixture() string {
 		return "balanced"
 	}
 	return o.DotInput
+}
+
+func (o Options) FMAFixture() string {
+	if o.FMAInput == "" {
+		return "balanced"
+	}
+	return o.FMAInput
 }

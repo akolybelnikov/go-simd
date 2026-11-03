@@ -13,6 +13,7 @@ import (
 	"github.com/akolybelnikov/go-simd/internal/benchutil"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
+	"github.com/akolybelnikov/go-simd/internal/fmacap"
 	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/result"
 )
@@ -165,6 +166,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			}
 			key.Case.Reduction = fold
 		}
+		if c.Operation.ID == catalog.AffineFMA {
+			var vector simd.Float32s
+			identity, err := result.NewFMAIdentity(c.Implementation.Descriptor.ID, fmacap.Path(), vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.FMA = identity
+		}
 		for repetition := 1; repetition <= plan.Config.Count; repetition++ {
 			sample, err := backend.Measure(prepared, plan.Config.Benchtime)
 			if err != nil {
@@ -190,6 +199,10 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			if c.Operation.ScalarResult() {
 				bits := math.Float32bits(scalar)
 				run.Observations[len(run.Observations)-1].ScalarResultBits = &bits
+			}
+			if c.Operation.ID == catalog.AffineFMA {
+				bits := math.Float32bits(out[len(out)-1])
+				run.Observations[len(run.Observations)-1].ArrayResultLastBits = &bits
 			}
 		}
 	}

@@ -44,6 +44,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.Parameterized() {
 		run.Metadata += "parameters: " + plan.Input.Identity(op) + "\nfixture: " + plan.Input.Generator(op) + "\n"
 	}
+	if op.ID == catalog.AffineFMA {
+		run.Metadata += "FMA32 SIMD path: " + machine.FMA32Path + "\nnumerics: " + op.NumericalPolicy + "\n"
+	}
 	if op.ScalarResult() {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nnumerics: " + op.NumericalPolicy + fmt.Sprintf("\nlogical traffic: %d*n + 4 bytes/call\n", 4*len(op.Inputs))
 	}

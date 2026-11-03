@@ -22,6 +22,9 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 	fmt.Fprintln(&out, "Implemented laboratory catalogue (no benchmarks run)")
 	fmt.Fprintf(&out, "go: %s\nplatform: %s/%s\nSIMD bits: %d\nSIMD float32 lanes: %d\nemulated: %t\nGOMAXPROCS: %d\n",
 		machine.GoVersion, machine.OS, machine.Arch, machine.Bits, machine.Lanes, machine.Emulated, machine.Procs)
+	if machine.FMA32Path != "" {
+		fmt.Fprintf(&out, "FMA32 SIMD path: %s\n", machine.FMA32Path)
+	}
 	if group == "all" {
 		fmt.Fprintln(&out)
 		table := tabwriter.NewWriter(&out, 0, 0, 2, ' ', 0)
@@ -58,7 +61,14 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 			for _, p := range op.Parameters {
 				fmt.Fprintf(&out, "  %s: %g (float32 bits 0x%08x)\n", p.Name, options.Float(p.Name), options.Bits(p.Name))
 			}
-			fmt.Fprintf(&out, "fixture: %s\nsetup: scalar parameters prepared; SIMD broadcasts once per kernel call\n", options.Generator(op))
+			if op.ID == catalog.AffineFMA {
+				fmt.Fprintf(&out, "fixture: %s\nsetup: native vector path broadcasts once per call; software path uses scalar parameters\n", options.Generator(op))
+			} else {
+				fmt.Fprintf(&out, "fixture: %s\nsetup: scalar parameters prepared; SIMD broadcasts once per kernel call\n", options.Generator(op))
+			}
+		}
+		if op.NumericalPolicy != "" && !op.ScalarResult() {
+			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
 		bytes, err := op.LogicalBytes(1)
 		if err != nil {
@@ -73,6 +83,18 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 				mode = "portable hardware"
 				if machine.Emulated {
 					mode = "portable emulation"
+				}
+			}
+			if op.ID == catalog.AffineFMA {
+				mode = "software FMA32"
+				if variant.UsesSIMD {
+					switch machine.FMA32Path {
+					case "vector-fma32/v1":
+						mode = "verified vector FMA32"
+					case "software-fma32/v1":
+					default:
+						mode = "unknown FMA32 path"
+					}
 				}
 			}
 			fmt.Fprintf(table, "%s\t%s\t%s\t%s\n", variant.Label, variant.ID, mode, variant.Workers)

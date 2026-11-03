@@ -10,8 +10,12 @@ import (
 const PatternHarnessID = "standalone-patterns/v1"
 const ReductionHarnessID = "standalone-reduction/v1"
 const DotHarnessID = "standalone-dot/v1"
+const FMAHarnessID = "standalone-affine-fma/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ID == catalog.AffineFMA {
+		return FMAHarnessID
+	}
 	if op.ID == catalog.Dot {
 		return DotHarnessID
 	}

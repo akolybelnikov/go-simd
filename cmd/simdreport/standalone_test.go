@@ -77,6 +77,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone scalar result or fold identity lost")
 				}
 			}
+			if group == "affinefma" {
+				if observation.ArrayResultLastBits == nil || observation.Key.Case.FMA.VectorPathID != capture.Machine.FMA32Path || observation.Key.Case.FMA.NativeLanes.Value != capture.Machine.Lanes {
+					t.Fatal("standalone FMA context/result lost")
+				}
+			}
 		}
 		if _, err := os.Stat(strings.TrimSuffix(paths[0], ".measurements.json") + ".md"); err != nil {
 			t.Fatal(err)
