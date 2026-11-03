@@ -174,6 +174,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			}
 			key.Case.FMA = identity
 		}
+		if c.Operation.ID == catalog.DotFMA {
+			var vector simd.Float32s
+			identity, err := result.NewDotFMAIdentity(c.Implementation.Descriptor.ID, fmacap.Path(), vector.Len(), c.Elements)
+			if err != nil {
+				return run, err
+			}
+			key.Case.FMA = identity
+		}
 		for repetition := 1; repetition <= plan.Config.Count; repetition++ {
 			sample, err := backend.Measure(prepared, plan.Config.Benchtime)
 			if err != nil {

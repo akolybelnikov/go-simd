@@ -5,6 +5,45 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 4 — Fused dot with specified folds — 2026-11-03
+
+- Added dotfma / dot-fma-f32 / BenchmarkDotFMA with Scalar and explicitly
+  unrolled SIMDStriped/2/4 strategies. Catalogue: eleven operations/thirty
+  implementations. Existing sum, unfused dot and affine bodies/IDs stay intact.
+- Fuse each binary32 multiply-accumulate using the corrected software reference
+  or gated native MulAdd. Specify round-robin full-vector assignment,
+  left-to-right ordinary rounded merges, low-to-high lane fold and software FMA
+  tails. This does not round the complete mathematical dot only once.
+- Preserve each striped order in software/emulated execution. Retain per-case
+  reference, software-striped, vector-full, vector/software-tail or tail-only
+  paths separately from the process gate, width, fold order and accumulator count.
+- Use checked scalar bindings and dedicated compiled/native dot-FMA harnesses.
+  Keep length validation, dispatch, updates, extraction/folds and tails timed;
+  retain uint32 scalar result bits once afterward. No output slice; logical
+  work is 8*n+4 bytes. Errors preserve earlier successful measurements.
+- Add strict child fma-vector/fma-path/result-bits/simd-lanes validation;
+  dot-specific path codes 0..4 do not change affine's 0/1 contract. Reject
+  inconsistent size/gate/path facts and incompatible comparison contexts.
+- Extend shared -dot-input with fusion-sensitive for dot and dotfma, retaining
+  the three original recipes. The new fused generator has its own identity;
+  both groups fingerprint identical x/y fixture values independently.
+- Verify independent exact-rational per-update rounding and specified folds,
+  finite forward bounds, random bit patterns, NaNs/infinities, signed underflow,
+  overflow cancellation, nil/empty/mismatched inputs, overlap, input preservation,
+  current zero allocations, unroll boundaries and wider software scratch.
+- Check all four fixtures/strategies through compiled/native backends at
+  tail-only, full-vector and hybrid sizes, with exact counts and identity parity;
+  include failure retention and all-group/no-Go standalone tests.
+- Pass full tests/vet, experiment-independent model packages, forced-software
+  numerical/backend checks, Go/installed/Make commands and retained hardware/
+  software captures. Extend Windows/Linux CI with fused-dot native smoke checks
+  and Linux forced-emulation backend parity.
+- Add examples/dotfma, detailed feature/evidence records and progressive Wiki
+  chapter 18; align README, catalogue, shared flag values and capability ledger.
+  Preserve the credited SIMD reading and prior checkpoint history.
+- Stop after fused dot. Three-array MulAdd, other pattern families and M4 remain
+  separate pending checkpoints.
+
 ### F004 slice 3 — Correctly rounded fused affine — 2026-11-03
 
 - Added affinefma / affine-fma-f32 / BenchmarkAffineFMA with software Scalar

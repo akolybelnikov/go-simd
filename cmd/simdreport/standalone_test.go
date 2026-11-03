@@ -71,7 +71,7 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 			if observation.Iterations != 2 || observation.DurationNS == nil {
 				t.Fatal("fixed iteration evidence lost")
 			}
-			if group == "sum" || group == "dot" {
+			if group == "sum" || group == "dot" || group == "dotfma" {
 				fold := observation.Key.Case.Reduction
 				if observation.ScalarResultBits == nil || fold.OrderID == "" || !fold.NativeLanes.Known || fold.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone scalar result or fold identity lost")
@@ -80,6 +80,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 			if group == "affinefma" {
 				if observation.ArrayResultLastBits == nil || observation.Key.Case.FMA.VectorPathID != capture.Machine.FMA32Path || observation.Key.Case.FMA.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone FMA context/result lost")
+				}
+			}
+			if group == "dotfma" {
+				if observation.Key.Case.FMA.VectorPathID != capture.Machine.FMA32Path || observation.Key.Case.FMA.NativeLanes.Value != capture.Machine.Lanes {
+					t.Fatal("standalone fused-dot context lost")
 				}
 			}
 		}

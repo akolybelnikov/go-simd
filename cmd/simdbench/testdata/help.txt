@@ -12,7 +12,7 @@ Options:
   -computation
     	alias for -group computation
   -dot-input string
-    	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
+    	dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive (default "balanced")
   -fma-input string
     	fused affine fixture: balanced, rounding, mixed-magnitude (default "balanced")
   -function string

@@ -17,6 +17,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if operation.Descriptor.ID == catalog.DotFMA {
+		benchmarkDotFMA(b, operation)
+		return
+	}
 	if operation.Descriptor.ScalarResult() {
 		benchmarkReduction(b, operation)
 		return

@@ -10,7 +10,7 @@ import (
 func TestDotFixturesAndRelevantIdentity(t *testing.T) {
 	op, _ := catalog.ByGroup("dot")
 	seen := map[string]bool{}
-	for _, fixture := range []string{"balanced", "cancellation", "mixed-magnitude", ""} {
+	for _, fixture := range []string{"balanced", "cancellation", "mixed-magnitude", "fusion-sensitive", ""} {
 		for _, n := range []int{0, 1, 64, 1025} {
 			o := DefaultOptions()
 			o.DotInput = fixture

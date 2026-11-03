@@ -61,9 +61,9 @@ func (o Options) Validate() error {
 		return fmt.Errorf("unknown fma-input %q (choose balanced, rounding, or mixed-magnitude)", o.FMAInput)
 	}
 	switch o.DotFixture() {
-	case "balanced", "cancellation", "mixed-magnitude":
+	case "balanced", "cancellation", "mixed-magnitude", "fusion-sensitive":
 	default:
-		return fmt.Errorf("unknown dot-input %q (choose balanced, cancellation, or mixed-magnitude)", o.DotInput)
+		return fmt.Errorf("unknown dot-input %q (choose balanced, cancellation, mixed-magnitude, or fusion-sensitive)", o.DotInput)
 	}
 	switch o.SumFixture() {
 	case "balanced", "cancellation", "mixed-magnitude":
@@ -136,6 +136,9 @@ func (o Options) Generator(op catalog.Operation) string {
 	if op.ID == catalog.Dot {
 		return "generated-dot-float32-v1/" + o.DotFixture()
 	}
+	if op.ID == catalog.DotFMA {
+		return "generated-dot-fma-float32-v1/" + o.DotFixture()
+	}
 	if op.ID == catalog.Sum {
 		return "generated-sum-float32-v1/" + o.SumFixture()
 	}
@@ -164,8 +167,16 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 			return float32(i%33-16) / 4, 0
 		}
 	}
-	if op.ID == catalog.Dot {
+	if op.ID == catalog.Dot || op.ID == catalog.DotFMA {
 		switch o.DotFixture() {
+		case "fusion-sensitive":
+			switch i % 64 {
+			case 0:
+				return -1, 1
+			case 32:
+				return 1 + 0x1p-23, 1 - 0x1p-23
+			}
+			return 0, 0
 		case "cancellation":
 			switch i % 64 {
 			case 0:

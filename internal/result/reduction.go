@@ -21,7 +21,7 @@ func ReductionFold(operation, strategy string, lanes int) (FoldIdentity, error) 
 	if operation == catalog.Sum {
 		return SumFold(strategy, lanes)
 	}
-	if operation != catalog.Dot {
+	if operation != catalog.Dot && operation != catalog.DotFMA {
 		return FoldIdentity{}, fmt.Errorf("unregistered reduction %q", operation)
 	}
 	fold, err := SumFold(strategy, lanes)
@@ -36,6 +36,17 @@ func ReductionFold(operation, strategy string, lanes int) (FoldIdentity, error) 
 			fold.OrderID = fmt.Sprintf("striped-%d-accumulators-unfused-dot-f32/v1", fold.VectorAccumulators)
 		}
 		fold.TailID = "scalar-products-after-lanes/v1"
+	}
+	if operation == catalog.DotFMA {
+		if strategy == catalog.Scalar {
+			fold.OrderID = "left-to-right-fma-dot-f32/v1"
+		} else {
+			fold.OrderID = "striped-lane-fma-dot-f32/v1"
+			if fold.VectorAccumulators > 1 {
+				fold.OrderID = fmt.Sprintf("striped-%d-accumulators-fma-dot-f32/v1", fold.VectorAccumulators)
+			}
+			fold.TailID = "fma-products-after-lanes/v1"
+		}
 	}
 	return fold, nil
 }

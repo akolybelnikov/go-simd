@@ -196,6 +196,9 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 		bySize[c.Elements][c.StrategyID] = s
 	}
 	table := Comparison{Title: title, BaselinePolicy: "legacy-serial-scalar/v1"}
+	if summaries[0].Key.Case.OperationID == catalog.DotFMA {
+		table.BaselinePolicy = "specified-fused-float32-dot-folds/v1"
+	}
 	if summaries[0].Key.Case.OperationID == catalog.AffineFMA {
 		table.BaselinePolicy = "fused-software-reference/v1"
 	}

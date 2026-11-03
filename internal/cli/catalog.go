@@ -85,6 +85,19 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 					mode = "portable emulation"
 				}
 			}
+			if op.ID == catalog.DotFMA {
+				mode = "software FMA32"
+				if variant.UsesSIMD {
+					switch machine.FMA32Path {
+					case "vector-fma32/v1":
+						mode = "vector FMA32 / software tail"
+					case "software-fma32/v1":
+						mode = "software striped FMA32"
+					default:
+						mode = "unknown FMA32 gate"
+					}
+				}
+			}
 			if op.ID == catalog.AffineFMA {
 				mode = "software FMA32"
 				if variant.UsesSIMD {

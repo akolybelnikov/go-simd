@@ -1,5 +1,34 @@
 # Ordered float32 reductions
 
+## Fused dot product
+
+DotFMAScalar and DotFMASIMD/2/4 return `(float32,error)` with one correctly rounded
+binary32 FMA per update. Scalar proceeds left to right. SIMD assigns full vectors
+round-robin to 1/2/4 accumulators, merges lane-wise left to right, folds lanes low
+to high from +0, then performs software FMA tail updates. Merge/fold additions
+round separately; this is not a single-round whole-dot operation.
+
+The startup gate chooses native FMA or software stripes preserving the same
+order. Case.FMA records the actual reference/striped/vector/hybrid/tail FMA path;
+Case.Reduction records width, count and fold, and ScalarResultBits retains the
+result once after timing. Validation, cached dispatch, updates, merging, extraction
+and tails are timed under standalone-dot-fma/v1 or legacy-report-dot-fma/v1.
+Current widths allocate zero per call. Logical work is `8*n+4` bytes.
+
+Unequal lengths return +0,ErrLengthMismatch before reading inputs. Equal empty
+inputs return +0,nil; inputs stay unchanged and read-only overlap is allowed.
+Exceptional values and signed zero follow each order; NaN payloads are unspecified.
+The shared -dot-input adds fusion-sensitive alongside the original three recipes.
+
+```powershell
+go run ./examples/dotfma
+go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 3 -benchtime 100ms -format md
+```
+
+See the [contract](../../docs/features/F004-fused-dot.md) and
+[worked guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
+Three-array MulAdd remains pending.
+
 ## Two/four accumulator strategies
 
 SumSIMD2/4 and DotSIMD2/4 assign full vectors round-robin to 2/4 independent
@@ -33,11 +62,11 @@ go run ./examples/dot
 go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot$/^n=64$' -count 3 -benchtime 100ms -format md
 ```
 
-`-dot-input` selects balanced, cancellation or mixed-magnitude fixtures, with
+`-dot-input` selects balanced, cancellation, mixed-magnitude or fusion-sensitive fixtures, with
 both input arrays fingerprinted and no output array. Logical work is `8*n+4`.
 Typed checked callbacks propagate errors and retain result bits once after
 timing under distinct dot harnesses. Scalar is a timing baseline; order changes
-can alter rounding and exceptional values. Fused dot remains future work; multiple
+can alter rounding and exceptional values. Fused dot is a separate group above; multiple
 accumulators are available above. See the [dot contract](../../docs/features/F004-dot.md) and
 [Wiki exercise](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
 

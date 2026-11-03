@@ -20,7 +20,7 @@ Options:
   -count int
     	measurement repetitions (default 5)
   -dot-input string
-    	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
+    	dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive (default "balanced")
   -fma-input string
     	fused affine fixture: balanced, rounding, mixed-magnitude (default "balanced")
   -format string
