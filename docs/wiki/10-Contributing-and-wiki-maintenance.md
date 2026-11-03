@@ -82,6 +82,13 @@ order, actual process width, accumulator count and tail policy. Check independen
 rounded-order oracles, cancellation in both directions, exceptional values and
 native/compiled evidence parity. Never treat scalar as an exact real-number oracle.
 
+Dot extends this with checked `func()(float32,error)` bindings and separate dot
+harnesses. Retain timed length validation and explicit unfused product rounding;
+propagate failures without appending failed values or discarding earlier samples.
+Fingerprint both inputs and account for `8*n+4` bytes. Test product/fold oracles,
+nonfusion cases in vector and tail paths, mismatched lengths, read-only overlaps
+and compiled/native parity for all admitted fixtures. Preserve sum's identities.
+
 ## Local validation commands
 
 ```powershell

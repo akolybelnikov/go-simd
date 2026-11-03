@@ -1,9 +1,10 @@
 # 04 — Operation and kernel guide
 
-The lab contains eight operations and eighteen implementations on `float32`
-slices: seven element-wise operations and one reduction. Array kernels have
+The lab contains nine operations and twenty implementations on `float32`
+slices: seven element-wise operations and two reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
-output slice. Sum accepts one input and returns one float32.
+output slice. Sum accepts one input and returns one float32; dot accepts two
+inputs and returns a float32 plus a length-validation error.
 
 ## Complete kernel reference
 
@@ -22,6 +23,8 @@ output slice. Sum accepts one input and returns one float32.
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
 | `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |
 | `internal/reduction` | `SumSIMD(x []float32) float32` | SIMDStriped | One vector accumulator, low-to-high lane fold, scalar tail |
+| `internal/reduction` | `DotScalar(x,y []float32) (float32,error)` | Scalar | Rounded products, left-to-right float32 accumulation |
+| `internal/reduction` | `DotSIMD(x,y []float32) (float32,error)` | SIMDStriped | Unfused vector products, one accumulator, lane fold/tail |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -134,6 +137,12 @@ orders can return different values, including different exceptional classes.
 See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 for examples, input recipes, result retention and `4*n+4` logical byte accounting.
 
+Dot rounds products before addition, propagates ErrLengthMismatch before reading
+unequal-length inputs, and allocates no output slice. Empty equal inputs return
++0,nil; read-only input overlaps are allowed. See
+[dot and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
+for its complete numerical/error contract and `8*n+4` accounting.
+
 The structured result model separates display names from identity:
 
 | Display group / label | Internal identifier |
@@ -145,6 +154,7 @@ The structured result model separates display names from identity:
 | SIMDTail | Strategy `simd-scalar-tail` |
 | SIMDParallel | Strategy `simd-parallel-scalar-tail` |
 | sum | Operation `sum-f32` |
+| dot | Operation `dot-f32` |
 | SIMDStriped | Strategy `simd-striped` |
 
 These identifiers are internal model fields, not new command flags. Select
@@ -156,7 +166,7 @@ Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
 ten configured bindings add broadcast/predicates, and two scalar-returning
-bindings add sum.
+bindings add sum, and two checked scalar-returning bindings add dot.
 
 ## Pattern gaps and reading credit
 

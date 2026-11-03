@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all eight groups and many sizes up to 16,777,216 elements. That
+The default covers all nine groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -115,6 +115,12 @@ with different worker configurations also fail. Keep those experiments in
 separate tables instead of merging names and losing identity.
 
 ## Report a useful issue
+
+For dot, `-dot-input` accepts balanced, cancellation or mixed-magnitude. The
+module-local kernels return ErrLengthMismatch before reading unequal-length
+inputs. Multiplication rounds before addition; differing scalar/SIMD results
+can follow the declared folds. Preserve both input identities, result bits and
+width; see [dot's worked guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
 
 For sum, `-sum-input` accepts only balanced, cancellation and mixed-magnitude.
 Other values fail before measuring. Differing scalar/SIMD results can be expected

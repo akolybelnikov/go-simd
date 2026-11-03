@@ -109,6 +109,12 @@ directly without an output slice or error sentinel. Run `go run ./examples/sum`
 and follow [its fold and rounding contract](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
 Additional reductions and output types need their own explicit contracts.
 
+Dot now adds `reduction.DotScalar(x,y)` and `reduction.DotSIMD(x,y)`, returning
+`(float32,error)`. Handle `reduction.ErrLengthMismatch` for unequal lengths;
+no output array is used. Input aliases/overlaps are read-only and supported.
+Run `go run ./examples/dot` and follow
+[dot and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
+
 The functions accept caller-supplied `[]float32` inside the module, so you can
 write a local program that prepares different values and checks results. The
 report CLI itself still uses generated fixtures; it has no CSV/JSON input-file

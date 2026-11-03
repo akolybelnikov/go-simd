@@ -1,9 +1,10 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** F004 broadcast/predicate and sum checkpoints implemented, reviewed 2026-11-03.
-The lab has eight operations/eighteen implementations. The
+**Status:** F004 broadcast/predicate, sum and dot checkpoints implemented, reviewed 2026-11-03.
+The lab has nine operations/twenty implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 separate delivered patterns from the remaining proposals below.
 
 ## Reading credit
@@ -24,7 +25,7 @@ The small numerical sketches below are our own planning examples.
 | Comparisons and mask logic | Threshold/selection/rangefilter implemented | Distribution/seed controls and range-mask And; exported masks deferred |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | No clamp kernel | Compare branches, selection, and min/max only under matching numerical rules |
-| Streaming accumulation | Sum with one vector accumulator and a final scalar fold implemented | Dot product and multiple independent accumulators next |
+| Streaming accumulation | Sum and unfused dot with one vector accumulator/final scalar fold implemented | Multiple independent accumulators remain planned |
 | Explicit FMA | No fused mode; existing expression/affine are unfused | A separately gated multiply-add contract |
 | Permutes, horizontal folds, extraction | Sum includes portable store/fold cost; no isolated lane-rearrangement study | An explicitly scoped architecture-specific experiment |
 | Conversion, bit representation, saturation | No kernels for these families | A later bounded numeric/representation experiment |
@@ -65,7 +66,7 @@ we do not infer that a particular fix is present merely from a newer version lab
 ## Original planning examples
 
 These mathematical sketches informed the plan; broadcast/predicates and sum
-now have runnable examples linked above. Reordering and dot remain proposals:
+now have runnable examples linked above, including dot. Reordering remains proposed:
 
 - **Broadcast affine:** for `x=[-2,0,3,6]`, scalar `alpha=2`, `beta=1`, the result
   of `alpha*x+beta` is `[-3,1,7,13]`. Scalar parameters differ from reading two
@@ -74,8 +75,9 @@ now have runnable examples linked above. Reordering and dot remain proposals:
   is `[false,false,true,true]`. Keep-or-zero yields `[0,0,3,6]`. Choosing `x` when
   true and `y=[-4,2,5,7]` otherwise yields `[-4,2,3,6]`.
 - **Reduction:** sum returns one scalar through its own typed path. Its specified
-  scalar/vector orders can round differently. Dot and additional accumulator
-  strategies still need their own correctness/error rules.
+  scalar/vector orders can round differently. Unfused dot also returns a length
+  error and rounds each product before accumulation. Additional accumulator
+  strategies need their own correctness/error rules.
 - **Reordering:** reversing lanes in each block is different from reversing an
   entire slice. State block size and partial-block behavior in case identity.
 
@@ -97,11 +99,13 @@ element rather than assuming addition's tail treatment works for every pattern.
 2. First slice complete: scale/affine, threshold/selection and range mask
    composition, with scalar controls and none/mixed/all-true arrangements.
 3. Sum checkpoint complete: specified folds, typed scalar results, fixture and
-   width identity, retained result bits. Dot and multiple accumulators follow;
-   gate fused variants on a valid FMA reference, independently of fold order.
+   width identity, retained result bits. Unfused dot checkpoint is also complete:
+   checked scalar callbacks, separate product rounding and both-input identity.
+   Multiple accumulators follow; gate fused variants on a valid FMA reference.
 4. Add movement, conversion, or a gated `archsimd` experiment when it answers a
    documented learning question; grow numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. Broadcast/masking/selection and sum are implemented.
-Permutation, dot, explicit FMA and output-mask representations remain deferred.
+Unfused dot is implemented. Permutation, multiple accumulators, explicit FMA and
+output-mask representations remain deferred.

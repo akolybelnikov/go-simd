@@ -1,5 +1,25 @@
 # F004 smoke evidence
 
+## Unfused dot checkpoint — 2026-11-03
+
+`dot-cancellation.measurements.json` was generated on Windows/amd64, Go 1.27.3,
+GOEXPERIMENT=simd, GOMAXPROCS 16, 256-bit vectors / 8 float32 lanes in hardware
+mode. Source base was signed commit 6c1e94b plus uncommitted dot changes.
+The capture's absent embedded VCS facts remain explicitly unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group dot -dot-input cancellation -bench='^BenchmarkDot$/^n=64$' -count=2 -benchtime=3x -format=md -output=artifacts/dot-checkpoint
+```
+
+Four observations retain exactly three iterations each, the dot harness,
+both-input fingerprints, unfused fold identity and result bits. Scalar returns
++0 (bits 0); SIMDStriped returns 1 (bits 1065353216) for this width/fixture/size.
+Logical work is 516 bytes per call. Original numerical data, run IDs and UTC
+timestamps are retained; only filename, LF endings and trailing whitespace differ.
+This is a plumbing observation without performance or accuracy ranking.
+See the [dot contract](../F004-dot.md) for numerical acceptance and boundaries.
+
 ## Ordered sum checkpoint — 2026-11-03
 
 `sum-cancellation.measurements.json` was generated on Windows/amd64, Go 1.27.3,
