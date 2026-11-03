@@ -44,7 +44,7 @@ func TestReductionExecuteRetainsActualResultsAndFold(t *testing.T) {
 		t.Fatal(err)
 	}
 	run, err := Execute(plan, result.Run{ID: "sum", Environment: result.Environment{ID: "env"}, BackendID: BackendID, HarnessID: ReductionHarnessID}, Testing{})
-	if err != nil || len(run.Observations) != 4 {
+	if err != nil || len(run.Observations) != 8 {
 		t.Fatalf("%+v %v", run, err)
 	}
 	for _, o := range run.Observations {
@@ -52,7 +52,7 @@ func TestReductionExecuteRetainsActualResultsAndFold(t *testing.T) {
 			t.Fatalf("reduction identity lost: %+v", o)
 		}
 		want := uint32(0)
-		if o.Label == "SIMDStriped" {
+		if o.Label != "Scalar" {
 			want = math.Float32bits(1)
 		}
 		if *o.ScalarResultBits != want {

@@ -4,7 +4,7 @@ import "testing"
 
 func TestDotScalarOutputContract(t *testing.T) {
 	op, ok := Lookup("dot-f32", "float32")
-	if !ok || op.Group != "dot" || op.BenchmarkName != "BenchmarkDot" || op.NativePath() != "./internal/reduction" || op.ArithmeticID != "float32-dot-unfused-ordered-folds-v1" || !op.ScalarResult() || len(op.Inputs) != 2 || len(op.Parameters) != 0 || len(op.Variants) != 2 {
+	if !ok || op.Group != "dot" || op.BenchmarkName != "BenchmarkDot" || op.NativePath() != "./internal/reduction" || op.ArithmeticID != "float32-dot-unfused-ordered-folds-v1" || !op.ScalarResult() || len(op.Inputs) != 2 || len(op.Parameters) != 0 || len(op.Variants) != 4 {
 		t.Fatalf("dot descriptor drift: %+v", op)
 	}
 	for _, n := range []int{0, 1, 1024} {

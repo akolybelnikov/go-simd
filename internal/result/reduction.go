@@ -32,6 +32,9 @@ func ReductionFold(operation, strategy string, lanes int) (FoldIdentity, error) 
 		fold.OrderID = "left-to-right-unfused-dot-f32/v1"
 	} else {
 		fold.OrderID = "striped-lane-unfused-dot-f32/v1"
+		if fold.VectorAccumulators > 1 {
+			fold.OrderID = fmt.Sprintf("striped-%d-accumulators-unfused-dot-f32/v1", fold.VectorAccumulators)
+		}
 		fold.TailID = "scalar-products-after-lanes/v1"
 	}
 	return fold, nil
@@ -48,6 +51,13 @@ func SumFold(strategy string, lanes int) (FoldIdentity, error) {
 	case catalog.SIMDStriped:
 		fold.OrderID = "striped-lane-fold-f32/v1"
 		fold.VectorAccumulators = 1
+		fold.TailID = "scalar-after-lanes/v1"
+	case catalog.SIMDStriped2, catalog.SIMDStriped4:
+		fold.VectorAccumulators = 2
+		if strategy == catalog.SIMDStriped4 {
+			fold.VectorAccumulators = 4
+		}
+		fold.OrderID = fmt.Sprintf("striped-%d-accumulators-lane-fold-f32/v1", fold.VectorAccumulators)
 		fold.TailID = "scalar-after-lanes/v1"
 	default:
 		return FoldIdentity{}, fmt.Errorf("unregistered sum strategy %q", strategy)

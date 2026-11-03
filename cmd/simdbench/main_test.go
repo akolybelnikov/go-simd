@@ -75,7 +75,7 @@ func TestQuickSumHasTypedScalarDestination(t *testing.T) {
 		}
 		got := v.reduce()
 		want := float32(0)
-		if v.name == "SIMDStriped" {
+		if v.name != "Scalar" {
 			want = 1
 		}
 		if got != want {

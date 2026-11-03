@@ -10,7 +10,7 @@ import (
 
 func TestDotCheckedBindings(t *testing.T) {
 	op, err := Lookup(catalog.Dot, catalog.Float32)
-	if err != nil || len(op.Implementations) != 2 {
+	if err != nil || len(op.Implementations) != 4 {
 		t.Fatal("dot binding inventory", err)
 	}
 	for _, impl := range op.Implementations {
