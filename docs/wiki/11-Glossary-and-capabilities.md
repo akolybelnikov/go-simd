@@ -1,6 +1,6 @@
 # 11 — Glossary and capability ledger
 
-Reviewed against M3 / F004 slice 1 on 2026-10-27. This is a ledger of implemented
+Reviewed against M3 / F004 sum checkpoint on 2026-11-03. This is a ledger of implemented
 capabilities, not a promise to deliver every possible extension.
 
 ## Capability ledger
@@ -17,10 +17,11 @@ capabilities, not a promise to deliver every possible extension.
 | MulAdd/FMA mode | Not implemented; numerical semantics need an explicit contract |
 | Broadcast scale/affine kernels | Implemented, Scalar/SIMDPartial, exact float32 scalar parameters; broadcasts per call |
 | Predicate/mask/selection kernels | Implemented threshold, selection and rangefilter; strict comparisons, bit-preserving selection, Masked/IfElse/And |
-| Sum/dot reductions | Planned composed kernels; scalar-result and numerical-order contracts pending |
+| Float32 sum | Implemented Scalar/SIMDStriped; typed scalar results, specified folds, three fixtures and retained result bits |
+| Dot / multiple vector accumulators | Planned; separate arithmetic and order contracts required |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Seven operations / sixteen implementations; shared descriptors, configured and legacy typed bindings |
+| Shared runtime catalogue | Eight operations / eighteen implementations; array and scalar-result typed bindings |
 | Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -39,7 +40,7 @@ capabilities, not a promise to deliver every possible extension.
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M0-M3 and F004's first broadcast/predicate slice are complete. Reductions, FMA,
+M0-M3 and F004's broadcast/predicate and ordered-sum checkpoints are complete. Dot, FMA,
 clamp, mask export, conversions and new types remain planned.
 Worker isolation, cancellation recovery and advanced manifests remain deferred. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.

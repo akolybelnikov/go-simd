@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 slice 1, reviewed 2026-10-27. Installed binaries run from any directory.
+Baseline: M3 / F004 sum checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,13 +34,14 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all seven groups. Positional arguments are
+group. No explicit selection means all eight groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact seven-row operation table.
+`-list` prints runtime context and a compact eight-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary patterns and 12 for addition, computation and two-array selection.
+Sum uses `4*n+4` bytes per call: one input array and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
 no artifacts. It advertises only implemented kernels, not proposed SDK patterns.
 Runtime emulation context does not guarantee acceleration or a speedup.
@@ -55,7 +56,7 @@ simdreport -list -function compute
 validated by `simdreport` when listing. The listing is human-readable diagnostic
 text, not a versioned machine-data export.
 
-## Pattern options: both commands
+## Fixture and parameter options: both commands
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
@@ -65,6 +66,7 @@ text, not a versioned machine-data export.
 | `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds |
 | `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
+| `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 
 Scalars parse to float32 and are recorded as exact bits. Settings apply only to
 operations declaring them. Predicate fixtures guarantee none/all truth or mixed
@@ -72,6 +74,10 @@ arrangements; shuffled is approximately 50%, with the seed in input identity.
 Impossible true distributions fail before fixtures/artifacts; `-pattern none`
 permits all-false bounds. See [the worked pattern guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 for NaN/Inf/signed-zero, alias and rounding rules.
+
+Sum uses only `-sum-input`; other fixture/parameter settings do not alter its
+input identity. See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+for exact fold orders, cancellation examples and retained scalar-result bits.
 
 ## Quick comparison: simdbench
 
@@ -118,8 +124,10 @@ The outer `go run` process can also print `exit status 1`.
 | `threshold` | `BenchmarkThreshold` | `Scalar`, `SIMDPartial` |
 | `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
+| `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped` |
 
-New native benchmark wrappers share `./internal/patterns`. The developer report
+Broadcast/predicate native wrappers share `./internal/patterns`; sum uses
+`./internal/reduction`. The developer report
 backend restricts it to the requested group's validated cases and records exact
 input/parameter context. Direct native commands use defaults; choose the report
 CLI with `-backend go-test` for recorded custom parameters.
@@ -149,6 +157,7 @@ With `-group all`, match every selected group or the unmatched group will fail w
 
 ```powershell
 simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^(Scalar|SIMDPartial|SIMDTail)$' -count 3 -benchtime 100ms -format md
+simdreport -group sum -sum-input cancellation -bench '^BenchmarkSum$/^n=64$' -count 3 -benchtime 100ms -format md
 ```
 
 For a source run, replace `simdreport` with `go run ./cmd/simdreport` and keep

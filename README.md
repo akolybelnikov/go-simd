@@ -1,8 +1,8 @@
 # go-simd
 
-An experimental Go SIMD laboratory: seven operations and sixteen scalar/SIMD
+An experimental Go SIMD laboratory: eight operations and eighteen scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
-expression, broadcast scale/affine and predicate-based masking/selection. Run a quick
+expression, broadcast scale/affine, predicate-based masking/selection and sum. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
 on hardware, toolchain, size and background load; SIMD can be slower.
 
@@ -80,8 +80,9 @@ and strategy details. Existing aliases remain for addition/computation.
 | threshold | `x > threshold ? x : +0` | Scalar, SIMDPartial |
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
+| sum | One returned float32, specified fold orders | Scalar, SIMDStriped |
 
-Both commands accept these pattern options. Each operation uses only its declared
+Both commands accept these fixture/parameter options. Each operation uses only its declared
 parameters; exact float32 bits and relevant fixture identity survive in evidence.
 
 | Option | Default | Applies to |
@@ -92,6 +93,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-lower`, `-upper` | `-1`, `1` | Exclusive range bounds |
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
+| `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 
 ```powershell
 go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench '^BenchmarkSelection$/^n=1024$' -count 3 -benchtime 100ms -format md
@@ -104,6 +106,17 @@ false, false masking yields +0 and selection preserves chosen operand bits.
 Impossible true distributions fail early; `-pattern none` permits deliberate
 all-false bounds. See [broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 for examples, numerical rules, byte accounting and the remaining F004 backlog.
+
+Sum returns a scalar through a typed reduction path. Scalar folds left to right;
+SIMDStriped accumulates full vectors, folds lanes low to high, then handles the
+scalar tail. Rounding can differ in either direction. Logical bytes are `4*n+4`;
+individual results and fold identities survive in evidence. See the
+[sum and reduction-order guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
+
+```powershell
+go run ./cmd/simdreport -group sum -sum-input cancellation -bench '^BenchmarkSum$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/sum
+```
 
 `simdbench` measures a fixed 1,048,576-element input and prints a quick table.
 It has no report/count/timing flags. `simdreport` adds:
@@ -184,13 +197,15 @@ The [progressive Wiki](https://github.com/akolybelnikov/go-simd/wiki) includes
 kernel examples, recipes, numerical contracts, troubleshooting and credited SIMD
 reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md)
 and [migration record](docs/migration/README.md). F004's
-[first implementation slice](docs/features/F004-broadcast-predicates.md) is complete;
-reductions, FMA, clamp, packed-mask export and new types remain planned.
+[broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
+[ordered sum checkpoint](docs/features/F004-sum.md) are complete;
+dot product, FMA, clamp, packed-mask export and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
 Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
-[patterns](internal/patterns/README.md). They support disjoint output and
+[patterns](internal/patterns/README.md) and [sum](internal/reduction/README.md).
+The array-output kernels support disjoint output and
 exact in-place aliases; partial overlap is unsupported and length errors leave
 output unchanged. These internal packages are not a stable public API.

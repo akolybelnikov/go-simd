@@ -56,8 +56,9 @@ New top-level operations also need a native benchmark wrapper that delegates to
 
 Metadata must remain independent of SIMD and `testing`, so offline import and
 render packages continue to work without the experiment. Parameter descriptions
-and scalar-output shapes are seams only; implementing those kernels requires
-typed preparation, identity, output retention and numerical contracts. M3 adds
+and output shapes describe the contract. Array-parameter and float32 scalar-result
+bindings implement typed preparation, identity and output retention; additional
+shapes require their own numerical contracts. M3 adds
 `internal/engine` for compiled measurements, `internal/platform` for executable
 facts and `internal/cli` for shared flags/help/listing. Keep command and Make
 examples aligned: new shared flags belong in one definition, and every launcher
@@ -75,7 +76,11 @@ Record parameter bits, pattern/seed and actual declared-array fingerprints.
 Shared native packages must restrict a report group to its selected leaf set.
 Test independent numerical oracles, distributions, partial-store canaries,
 backend identity parity and forced portable emulation before marking a pattern
-implemented. The scalar-output/reduction seam is still future work.
+implemented. Sum uses the separate reduction harness and float32-returning
+binding: retain results once after timing, store raw uint32 bits and record fold
+order, actual process width, accumulator count and tail policy. Check independent
+rounded-order oracles, cancellation in both directions, exceptional values and
+native/compiled evidence parity. Never treat scalar as an exact real-number oracle.
 
 ## Local validation commands
 

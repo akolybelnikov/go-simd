@@ -1,9 +1,10 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** first F004 slice implemented, reviewed 2026-10-27.
-The lab has seven operations/sixteen implementations. The
+**Status:** F004 broadcast/predicate and sum checkpoints implemented, reviewed 2026-11-03.
+The lab has eight operations/eighteen implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
-separates the delivered patterns from the remaining proposals below.
+and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+separate delivered patterns from the remaining proposals below.
 
 ## Reading credit
 
@@ -23,8 +24,9 @@ The small numerical sketches below are our own planning examples.
 | Comparisons and mask logic | Threshold/selection/rangefilter implemented | Distribution/seed controls and range-mask And; exported masks deferred |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | No clamp kernel | Compare branches, selection, and min/max only under matching numerical rules |
-| FMA and streaming accumulation | Existing expression uses `Mul`/`Add`, without reduction | A separate multiply-add mode; sum/dot and accumulator strategies |
-| Permutes, horizontal folds, extraction | No lane-rearrangement or scalar-result study | An explicitly scoped architecture-specific experiment or portable composed reduction |
+| Streaming accumulation | Sum with one vector accumulator and a final scalar fold implemented | Dot product and multiple independent accumulators next |
+| Explicit FMA | No fused mode; existing expression/affine are unfused | A separately gated multiply-add contract |
+| Permutes, horizontal folds, extraction | Sum includes portable store/fold cost; no isolated lane-rearrangement study | An explicitly scoped architecture-specific experiment |
 | Conversion, bit representation, saturation | No kernels for these families | A later bounded numeric/representation experiment |
 
 The useful next step is broader *behavioral* coverage, before nominal coverage
@@ -62,7 +64,8 @@ we do not infer that a particular fix is present merely from a newer version lab
 
 ## Original planning examples
 
-These are mathematical result sketches, not currently runnable lab operations:
+These mathematical sketches informed the plan; broadcast/predicates and sum
+now have runnable examples linked above. Reordering and dot remain proposals:
 
 - **Broadcast affine:** for `x=[-2,0,3,6]`, scalar `alpha=2`, `beta=1`, the result
   of `alpha*x+beta` is `[-3,1,7,13]`. Scalar parameters differ from reading two
@@ -70,9 +73,9 @@ These are mathematical result sketches, not currently runnable lab operations:
 - **Predicate and selection:** with threshold `1`, the predicate for that `x`
   is `[false,false,true,true]`. Keep-or-zero yields `[0,0,3,6]`. Choosing `x` when
   true and `y=[-4,2,5,7]` otherwise yields `[-4,2,3,6]`.
-- **Reduction:** a sum or dot product returns one scalar, unlike today's output
-  slices. Vector folds and multiple accumulators change addition order, which
-  can change floating-point rounding. A correctness/error rule is required.
+- **Reduction:** sum returns one scalar through its own typed path. Its specified
+  scalar/vector orders can round differently. Dot and additional accumulator
+  strategies still need their own correctness/error rules.
 - **Reordering:** reversing lanes in each block is different from reversing an
   entire slice. State block size and partial-block behavior in case identity.
 
@@ -89,15 +92,16 @@ element rather than assuming addition's tail treatment works for every pattern.
 
 1. M2 foundation is complete: shared descriptors/bindings for the existing six
    kernels preserve current identities. Scalar parameter descriptions and output
-   shapes support the implemented array-parameter slice; scalar-result retention
-   remains future work.
+   shapes support the array-parameter slice; sum now implements scalar-result
+   preparation and retention.
 2. First slice complete: scale/affine, threshold/selection and range mask
    composition, with scalar controls and none/mixed/all-true arrangements.
-3. Add sum/dot experiments after scalar-output and reduction-order contracts.
-   Gate fused variants on a valid FMA reference, independently of fold order.
+3. Sum checkpoint complete: specified folds, typed scalar results, fixture and
+   width identity, retained result bits. Dot and multiple accumulators follow;
+   gate fused variants on a valid FMA reference, independently of fold order.
 4. Add movement, conversion, or a gated `archsimd` experiment when it answers a
    documented learning question; grow numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
-migration sequence. Broadcast/masking/selection are implemented. Permutation,
-sum/dot, explicit FMA and output-mask representations remain deferred.
+migration sequence. Broadcast/masking/selection and sum are implemented.
+Permutation, dot, explicit FMA and output-mask representations remain deferred.

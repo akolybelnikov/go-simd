@@ -1,0 +1,325 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "sum",
+  "config": {
+    "input": {
+      "SumInput": "cancellation",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkSum$/^n=64$"
+  },
+  "machine": {
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261103-170256-2499385796",
+    "Environment": {
+      "ID": "benchmark-20261103-170256-2499385796/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-reduction/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-03T17:02:56Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-reduction/v1\ngroup: sum\nselection: \"^BenchmarkSum$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-sum-float32-v1/cancellation\nnumerics: Scalar: left-to-right from +0. SIMDStriped: one native-width vector accumulator, low-to-high lane fold from +0, then scalar tail. Each addition rounds to float32; cross-strategy bit equality is not required. Empty input returns +0; NaNs/Inf follow the selected fold.\nlogical traffic: 4*n + 4 bytes/call\n",
+    "Observations": [
+      {
+        "ScalarResultBits": 0,
+        "Key": {
+          "RunID": "benchmark-20261103-170256-2499385796",
+          "EnvironmentID": "benchmark-20261103-170256-2499385796/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-reduction/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Reduction": {
+              "OrderID": "left-to-right-f32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              },
+              "VectorAccumulators": 0,
+              "TailID": "none"
+            },
+            "OperationID": "sum-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-sum-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2600,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum/n=64/Scalar-16"
+      },
+      {
+        "ScalarResultBits": 0,
+        "Key": {
+          "RunID": "benchmark-20261103-170256-2499385796",
+          "EnvironmentID": "benchmark-20261103-170256-2499385796/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-reduction/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Reduction": {
+              "OrderID": "left-to-right-f32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              },
+              "VectorAccumulators": 0,
+              "TailID": "none"
+            },
+            "OperationID": "sum-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-sum-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2600,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum/n=64/Scalar-16"
+      },
+      {
+        "ScalarResultBits": 1065353216,
+        "Key": {
+          "RunID": "benchmark-20261103-170256-2499385796",
+          "EnvironmentID": "benchmark-20261103-170256-2499385796/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-reduction/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Reduction": {
+              "OrderID": "striped-lane-fold-f32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              },
+              "VectorAccumulators": 1,
+              "TailID": "scalar-after-lanes/v1"
+            },
+            "OperationID": "sum-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped",
+            "ArithmeticID": "float32-sum-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 166.66666666666666,
+        "DurationNS": 500,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1560,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum/n=64/SIMDStriped-16"
+      },
+      {
+        "ScalarResultBits": 1065353216,
+        "Key": {
+          "RunID": "benchmark-20261103-170256-2499385796",
+          "EnvironmentID": "benchmark-20261103-170256-2499385796/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-reduction/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Reduction": {
+              "OrderID": "striped-lane-fold-f32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              },
+              "VectorAccumulators": 1,
+              "TailID": "scalar-after-lanes/v1"
+            },
+            "OperationID": "sum-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped",
+            "ArithmeticID": "float32-sum-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 166.66666666666666,
+        "DurationNS": 500,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1560,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum/n=64/SIMDStriped-16"
+      }
+    ]
+  }
+}

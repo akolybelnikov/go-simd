@@ -1,11 +1,11 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **first broadcast/predicate slice implemented**, 2026-10-27.
-Architecture M0-M3 are complete. F004 adds five operations and ten bindings:
-scale, affine, threshold, selection and rangefilter. The catalogue totals seven
-operations/sixteen implementations. See the
-[implementation and acceptance record](F004-broadcast-predicates.md).
-Remaining reduction, FMA, clamp, export, movement and type stages stay planned.
+Status: **broadcast/predicate and ordered-sum checkpoints implemented**, 2026-11-03.
+Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
+rangefilter and sum. The catalogue totals eight operations/eighteen implementations.
+See the [broadcast/predicate record](F004-broadcast-predicates.md) and
+[sum implementation and acceptance record](F004-sum.md).
+Dot, additional accumulators, FMA, clamp, export, movement and types stay planned.
 
 ## Purpose and evidence
 
@@ -35,13 +35,15 @@ vectors/scalar tails, and per-call parallel work. The expression composes
 element-wise `Mul` and `Add`; it is neither a reduction nor an FMA benchmark.
 Loads, stores, and tails are exercised inside those kernels, not isolated as
 primitive latency experiments. Scalar parameter bits and predicate fixture
-distributions are now recorded. Accumulators, reductions, predicate export,
-clamp, FMA and permutations remain absent.
+distributions are recorded. Sum now adds a genuine scalar-return path and one
+vector accumulator with a specified lane/scalar-tail fold. Dot, multiple vector
+accumulators, predicate export, clamp, FMA and permutations remain absent.
 
 ## Pattern gap ledger
 
 Scale/affine/threshold/selection/range IDs are registered as documented in the
-implementation record; other candidate IDs below remain proposals. M2/M3 IDs
+implementation record; sum-f32 is registered in the sum checkpoint. Other
+candidate IDs below remain proposals. M2/M3 IDs
 and existing kernel timing paths are preserved.
 
 | Pattern | Present in the lab | Verified API / boundary | Proposed useful experiment |
@@ -53,10 +55,10 @@ and existing kernel timing paths are preserved.
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
 | Explicit multiply-add | No; ordinary `Mul`/`Add` composition exists | Portable `MulAdd(y,z)`; semantics need a reference gate | `muladd-f32`, with separately identified fused/unfused modes |
-| Streaming accumulation / reduction | No | No portable `Sum` or horizontal-pair method in the inspected inventory | `sum-f32`, using a declared fold; portable vector-store/final scalar fold is a possible composition |
+| Streaming accumulation / reduction | Implemented: sum-f32, Scalar/SIMDStriped | No portable `Sum` or horizontal-pair method; composed full-vector accumulation and store/fold | Exact fold/width/result identity; three input recipes |
 | Dot product / accumulator count | No | Composed multiply/accumulate/fold, with FMA conditional on its semantics gate | `dot-f32`; compare one versus multiple independent accumulators as separate strategies |
 | Permutation / shuffle | No | `archsimd.Float32x8.Permute`; absent on portable `Float32s` here | Explicitly gated fixed-block lane reorder; not silently a whole-slice reverse |
-| Horizontal fold / lane extraction | No | `Float32x4.ConcatAddPairs` and `GetElem`; `Float32x8.GetLo/GetHi` in amd64 `archsimd` | Separate register-fold study and end-to-end reduction, including extraction cost |
+| Horizontal fold / lane extraction | Portable sum includes store/final scalar fold; isolated study absent | `Float32x4.ConcatAddPairs` and `GetElem`; `Float32x8.GetLo/GetHi` in amd64 `archsimd` | Separately gated register-fold study |
 | Numeric conversion / reinterpretation | No | Portable `ConvertToInt32`, `ToBits`, integer `BitsToFloat32` | Numeric conversion versus exact bit round-trip as different operations |
 | Saturation / integer logic / shifts | No | Type-dependent integer API; not available uniformly | A bounded clipping/overflow or bit-manipulation experiment when justified |
 
@@ -76,9 +78,10 @@ matching both output and conversion boundaries.
 2. **First pattern slice (complete):** float32 broadcast scale/affine plus predicate-driven
    threshold/selection and range-mask composition. These exercise scalar parameters and masks while retaining
    an array output. Keep explicit `Mul`/`Add` separate from a gated FMA variant.
-3. **Accumulation slice:** sum, then dot product and accumulator-count experiments,
-   once scalar-output preparation/retention, fold semantics, and accounting are
-   supported. Dot/FMA is not a prerequisite for a non-FMA dot experiment.
+3. **Accumulation slice:** sum checkpoint complete with typed scalar outputs,
+   specified folds, exact result-bit retention and `4*n+4` accounting. Stop before
+   dot product and accumulator-count experiments; each needs its own contract.
+   FMA is not a prerequisite for a non-FMA dot experiment.
 4. **Movement/representation slice:** a useful copy/reorder, predicate-export, or
    conversion experiment. Fixed-width permutes/horizontal primitives remain a
    separate `archsimd` extension with build/runtime requirements.
@@ -180,7 +183,7 @@ These are candidate *logical* byte counts for float32 kernels, not DRAM counters
 | Float32 dot product | `8*n + 4` |
 
 Record constant setup, scratch traffic, mask packing, output kind and byte units
-explicitly. Current descriptors derive `8*n` or `12*n`; future output shapes
+explicitly. Current descriptors derive `8*n`, `12*n` or sum's `4*n+4`; future output shapes
 must retain their own logical traffic model.
 Exclude zero-work sizes from throughput claims; retain them in correctness tests.
 Do not pool contexts with different parameters, mask representation, fusion,

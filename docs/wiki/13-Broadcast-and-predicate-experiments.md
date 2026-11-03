@@ -1,7 +1,9 @@
 # 13 — Broadcast and predicate experiments
 
 F004's first slice adds five operations with matching Scalar/SIMDPartial controls.
-The lab now has seven operations and sixteen implementations. Inspect the short
+That slice brought the lab to seven operations and sixteen implementations.
+The [sum checkpoint](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+now raises the total to eight/eighteen. Inspect the short
 catalogue with either CLI's `-list`; add `-group` for details and current values.
 
 ## Choose an experiment
