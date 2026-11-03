@@ -80,7 +80,7 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 	}
 	match, _ := compileSelection(c.Bench)
 	plan := Plan{Config: c, Input: options}
-	for _, n := range benchutil.BenchmarkSizes(width) {
+	for _, n := range benchutil.OperationSizes(op, width) {
 		bytes, err := op.LogicalBytes(n)
 		if err != nil {
 			return Plan{}, err
@@ -131,7 +131,11 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			fingerprint = input.FingerprintFloat32(a, b)
 			previous = c.Elements
 			if c.Operation.ByteResult() {
-				byteOut = make([]uint8, c.Elements)
+				length, err := c.Operation.OutputElements(c.Elements)
+				if err != nil {
+					return run, err
+				}
+				byteOut = make([]uint8, length)
 			}
 		}
 		// Native developer benchmarks retain the same callback -> typed function
@@ -178,6 +182,9 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 		if c.Operation.ByteResult() {
 			var vector simd.Float32s
 			identity, err := result.NewPredicateIdentity(vector.Len())
+			if c.Operation.ID == catalog.PredicateGTPacked {
+				identity, err = result.NewPackedPredicateIdentity(vector.Len())
+			}
 			if err != nil {
 				return run, err
 			}

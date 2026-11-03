@@ -22,6 +22,7 @@ const LegacyDotHarnessID = "legacy-report-dot/v1"
 const LegacyFMAHarnessID = "legacy-report-affine-fma/v1"
 const LegacyDotFMAHarnessID = "legacy-report-dot-fma/v1"
 const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
+const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -165,6 +166,10 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				return Run{}, fmt.Errorf("predicate requires an integer simd-lanes metric")
 			}
 			identity, err := NewPredicateIdentity(int(lanes.Value))
+			if op.ID == catalog.PredicateGTPacked {
+				harness = LegacyPackedPredicateHarnessID
+				identity, err = NewPackedPredicateIdentity(int(lanes.Value))
+			}
 			if err != nil {
 				return Run{}, err
 			}

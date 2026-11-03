@@ -75,7 +75,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 			return err
 		}
 		fmt.Fprintf(&out, "logical traffic at n=1: %d bytes/call (effective, not DRAM)\n", bytes)
-		if op.ByteResult() {
+		if op.ID == catalog.PredicateGTPacked {
+			fmt.Fprintln(&out, "logical traffic model: 4*n+ceil(n/8) bytes/call; packed LSB-first output")
+			fmt.Fprintln(&out, "SIMD boundary: partial load, compare, select 0/1, convert/extract, pack valid bits, byte writes; all timed")
+		} else if op.ByteResult() {
 			fmt.Fprintln(&out, "logical traffic model: 5*n bytes/call; uint8 0/1 output")
 			fmt.Fprintln(&out, "SIMD boundary: partial load, compare, select 0/1, convert/extract, valid byte writes; all timed")
 		}
@@ -133,6 +136,9 @@ func writeCatalog(w io.Writer, value string) error {
 }
 
 func describeValue(value catalog.Value) string {
+	if value.Shape == catalog.PackedBits {
+		return value.Name + ":" + value.TypeID + "[ceil(n/8)]"
+	}
 	if value.Shape == catalog.Array {
 		return value.Name + ":" + value.TypeID + "[]"
 	}

@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 		benchmarkDotFMA(b, operation)
 		return
 	}
+	if operation.Descriptor.ID == catalog.PredicateGTPacked {
+		benchmarkPackedPredicate(b, operation)
+		return
+	}
 	if operation.Descriptor.ByteResult() {
 		benchmarkPredicate(b, operation)
 		return

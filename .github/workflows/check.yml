@@ -31,6 +31,7 @@ jobs:
           go test ./cmd/simdreport -run='^TestFMAResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestDotFMAResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestPredicateResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestPackedPredicateResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -44,3 +45,5 @@ jobs:
         run: go test ./internal/reduction -run='^$' -bench='^BenchmarkDotFMA$/^n=(1|8|16)$' -benchtime=1x
       - name: Check predicate export
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicate$/^n=(1|8|16)$' -benchtime=1x
+      - name: Check packed predicate export
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicatePacked$/^n=(7|8|9|63|64|65)$' -benchtime=1x

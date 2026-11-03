@@ -5,6 +5,41 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 6 — Packed predicate masks — 2026-11-03
+
+- Added predicatepack / predicate-gt-packed-f32 / BenchmarkPredicatePacked
+  with Scalar/SIMDPartial: thirteen operations/thirty-four implementations.
+  Input i maps to bit i%8 in byte i/8, least-significant bit first.
+- Require exactly ceil(n/8) output bytes; clear unused high bits and overwrite
+  all bytes on every call. Ordered equality/NaNs produce false. Invalid length
+  fails before writes, empty/nil succeeds and input storage remains disjoint.
+- Scalar builds each byte; SIMD normalizes vector comparisons to explicit 0/1,
+  converts/extracts and packs valid lanes, carrying partial bytes across vector
+  boundaries. Validation, conversion, packing and stores are timed.
+- Add PackedBits/OutputElements to distinguish logical input size from physical
+  output storage with overflow-safe rounding. Logical work is 4*n+ceil(n/8).
+  Preserve original array/scalar traffic and byte-mask kernel/callback bodies.
+- Reuse typed byte output and strict complete output-digest retention, with
+  uint8-packed-lsb0/v1 and dedicated native/compiled harnesses. Keep packed and
+  byte-mask arithmetic/output identities and timing series distinct.
+- Reuse threshold/pattern/seed recipes and exact input identity. Add sorted,
+  deduplicated sizes 7,9,63,65 around packing boundaries to both backends;
+  existing operations keep their prior sweeps.
+- Test independent bitwise truth, exact LSB bytes, unused padding, stale-output
+  overwrite, negative-threshold tails, NaNs/zeros/subnormals/infinities, random
+  float32 bits, canaries, input preservation, errors and current zero allocations.
+  Verify physical extents/work overflow, typed bindings and unchanged inputs.
+- Verify all five distributions through compiled/native backends at byte/vector
+  boundaries, exact counts and complete output hashes, including forced emulation.
+  Pass partial-retention, all-group/no-Go standalone, pure-package, full tests/vet
+  and checked Go/installed/Make examples.
+- Extend Windows/Linux CI with packed-boundary native smoke checks and Linux
+  emulated backend parity. Add examples/predicatepack, feature/evidence records,
+  Wiki chapter 20 and consistent readable command/operation/capability guides.
+  Make examples use n=64; direct anchored selectors cover exact n=65.
+- Stop after packed export. Clamp, copy/reorder, three-array MulAdd, standalone
+  conversions, other input types and architecture M4 remain separate work.
+
 ### F004 slice 5 — Canonical uint8 predicate export — 2026-11-03
 
 - Added predicate / predicate-gt-f32 / BenchmarkPredicate with Scalar and

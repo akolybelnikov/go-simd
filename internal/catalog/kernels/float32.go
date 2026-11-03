@@ -72,6 +72,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.PredicateGTPacked {
+			bind, ok := packedPredicateBindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing packed predicate binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUint8: bind})
+			continue
+		}
 		if descriptor.ID == catalog.PredicateGT {
 			bind, ok := predicateBindings[variant.ID]
 			if !ok {
