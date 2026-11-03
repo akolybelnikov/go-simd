@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** F004 broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export and packed-predicate checkpoints implemented, reviewed 2026-11-03.
-The lab has thirteen operations/thirty-four implementations. The
+**Status:** F004 broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export, packed-predicate and copy checkpoints implemented, reviewed 2026-11-04.
+The lab has fourteen operations/thirty-eight implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -23,7 +23,7 @@ The small numerical sketches below are our own planning examples.
 
 | Pattern | Current lab coverage | Useful proposed experiment |
 | --- | --- | --- |
-| Contiguous loads/stores and partial/scalar tails | Exercised in existing addition/expression kernels | Keep as controls; isolate movement only for a concrete question |
+| Contiguous loads/stores and partial/scalar tails | Implemented exact copy with source loop, Go built-in and partial/tail SIMD controls | Compare explicit movement with compiler/runtime copy across working sets; 8*n logical bytes |
 | Broadcast constants | Scale/affine implemented | Compare per-call broadcasts and matched scalar controls |
 | Comparisons and mask logic | Threshold/selection/rangefilter plus canonical byte and packed predicate export implemented | Distribution/seed controls, range-mask And and timed normalization/extraction/packing/stores |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
@@ -111,10 +111,12 @@ element rather than assuming addition's tail treatment works for every pattern.
 4. Predicate export is complete: typed uint8 0/1, timed conversion/extraction,
    valid tail writes and full output evidence. See [the byte-mask guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
    [Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) are also complete with explicit bit order,
-   padding and packing costs. Further movement, conversion or gated `archsimd` experiments need a documented
+   padding and packing costs. [Copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) is complete with Go's built-in
+   control, exact-bit evidence and disjoint-buffer timings. Reordering, conversion
+   or gated `archsimd` experiments need a documented
    learning question; grow input numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. Broadcast/masking/selection and sum are implemented.
 Unfused dot and 2/4 accumulators are implemented. Fused affine and fused dot are implemented; permutation, three-array MulAdd and
-copy/reorder and standalone conversions remain deferred; byte and packed masks are implemented.
+reordering and standalone conversions remain deferred; byte/packed masks and copy are implemented.

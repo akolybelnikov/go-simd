@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: thirteen operations and thirty-four scalar/SIMD
+An experimental Go SIMD laboratory: fourteen operations and thirty-eight scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -83,6 +83,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
 | predicate | `x > threshold ? uint8(1) : uint8(0)` | Scalar, SIMDPartial; conversion and byte stores included |
 | predicatepack | Same predicate packed LSB first, eight bits per byte | Scalar, SIMDPartial; conversion, packing and stores included |
+| copy | Exact float32 bit copy | Scalar source loop, GoCopy built-in control, SIMDPartial, SIMDTail |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dotfma | FMA updates with specified merge/fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4; actual path recorded |
@@ -132,6 +133,16 @@ share input recipes but retain distinct output identities. Run
 
 ```powershell
 go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 3 -benchtime 100ms -format md
+```
+
+Copy compares a source loop, Go's built-in copy, partial vectors and full vectors
+with a scalar tail. All preserve exact float32 bits, including NaN payloads and
+signed zero. Measured buffers are disjoint; logical work is `8*n`. Percentages
+use Scalar; inspect GoCopy as another optimized control. See [copy and movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
+
+```powershell
+go run ./cmd/simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/copy
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
@@ -269,14 +280,15 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), are complete. Three-array MulAdd, clamp, movement
+and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), plus [copy](docs/features/F004-copy.md), are complete. Three-array MulAdd, clamp, reordering
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
 Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
-[patterns](internal/patterns/README.md) and [reductions](internal/reduction/README.md).
+[patterns](internal/patterns/README.md), [reductions](internal/reduction/README.md)
+and [movement](internal/movement/README.md).
 Float32 array-output kernels support disjoint output and exact in-place aliases;
 partial overlap is unsupported. Predicate export requires disjoint float32 input
 and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.

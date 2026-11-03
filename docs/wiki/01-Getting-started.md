@@ -81,7 +81,7 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Thirteen operations/thirty-four implementations
+or any group in the compact catalogue. Fourteen operations/thirty-eight implementations
 are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
@@ -90,7 +90,9 @@ that can occur before the project's tests execute; see troubleshooting.
 
 ## 5. Run the small code example
 
-The current catalogue contains thirteen operations and thirty-four implementations.
+The current catalogue contains fourteen operations and thirty-eight implementations.
+Run `go run ./examples/copy` for exact-bit copies and the Go built-in control;
+see [copy and movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
 Run `go run ./examples/predicatepack` to compare byte masks with packed bits;
 see [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
 Run `go run ./examples/predicate` for canonical byte masks, including a short

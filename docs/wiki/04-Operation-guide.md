@@ -1,7 +1,7 @@
 # 04 — Operation and kernel guide
 
-The lab contains thirteen operations and thirty-four implementations on `float32`
-inputs: eight float32 element-wise outputs, two uint8 predicate representations and three reductions. Array kernels have
+The lab contains fourteen operations and thirty-eight implementations on `float32`
+inputs: eight arithmetic/selection float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
 Sum accepts one input and returns one float32; dot/dotfma accept two
@@ -34,6 +34,10 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/reduction` | `DotFMAScalar(x,y []float32) (float32,error)` | Scalar | Corrected binary32 FMA updates left to right |
 | `internal/reduction` | `DotFMASIMD(x,y []float32) (float32,error)` | SIMDStriped | One accumulator; FMA updates, rounded lane fold, software FMA tail |
 | `internal/reduction` | `DotFMASIMD2(x,y)` / `DotFMASIMD4(x,y)` returning (float32,error) | SIMDStriped2 / SIMDStriped4 | 2/4 accumulators; actual vector/software stripes, rounded merge/fold, software FMA tail |
+| `internal/movement` | `CopyScalar(x,out []float32) error` | Scalar | Source-loop exact bit copy |
+| `internal/movement` | `CopyBuiltin(x,out []float32) error` | GoCopy | Strict-length wrapper around Go copy; compiler/runtime-selected execution |
+| `internal/movement` | `CopySIMD(x,out []float32) error` | SIMDPartial | Partial-vector loads/stores, preserving every bit |
+| `internal/movement` | `CopySIMDVectorTail(x,out []float32) error` | SIMDTail | Full vectors followed by scalar assignments |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -150,6 +154,12 @@ before writes. Input i maps to bit i%8 of byte i/8, with unused high bits zero.
 All output bytes are overwritten. Logical work is `4*n+ceil(n/8)`.
 See [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for decoding, boundaries and evidence.
 
+Copy takes one input/output float32 array with equal lengths; mismatches return
+movement.ErrLengthMismatch before writes. Empty succeeds. Disjoint output and
+exact alias are supported; partial overlap is outside the shared contract.
+Benchmarks use disjoint buffers, logical work `8*n`, and full output-bit digests
+after timing. See [copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) for compiler/runtime controls.
+
 ## Internal machine identifiers
 
 Sum has no output slice or length-error sentinel. It leaves input unchanged,
@@ -185,6 +195,7 @@ The structured result model separates display names from identity:
 | dotfma | Operation `dot-fma-f32` |
 | predicate | Operation `predicate-gt-f32`; output encoding `uint8-zero-one/v1` |
 | predicatepack | Operation `predicate-gt-packed-f32`; output encoding `uint8-packed-lsb0/v1` |
+| copy / GoCopy | Operation `copy-f32`; strategy `go-copy` |
 | SIMDStriped | Strategy `simd-striped` |
 | SIMDStriped2 | Strategy `simd-striped-2` |
 | SIMDStriped4 | Strategy `simd-striped-4` |
@@ -198,7 +209,8 @@ Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
 Twelve float32-output configured bindings cover broadcasts, predicates and fused affine;
-four additional BindUint8 bindings export byte and packed predicates. Sum, dot and dotfma each have four scalar-returning
+four additional BindUint8 bindings export byte and packed predicates, and four
+BindUnary bindings implement exact copying. Sum, dot and dotfma each have four scalar-returning
 bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 specifies the 1/2/4-vector strategies and their numerical differences.
 
@@ -208,4 +220,4 @@ specifies the 1/2/4-vector strategies and their numerical differences.
 is credited as the reading prompt for our
 [SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
 That review distinguishes implemented broadcasts, predicates and accumulation
-from planned movement and three-array FMA experiments and checks the portable/`archsimd` boundary.
+from implemented copy and planned reordering/three-array FMA experiments and checks the portable/`archsimd` boundary.

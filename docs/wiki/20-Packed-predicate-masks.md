@@ -1,8 +1,8 @@
 # 20 — Export predicates as packed bits
 
 The predicatepack group stores eight truth values per byte. It offers Scalar
-and SIMDPartial, bringing the catalogue to thirteen operations/thirty-four
-implementations. This extends the [canonical byte-mask experiment](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
+and SIMDPartial, bringing that checkpoint to thirteen operations/thirty-four
+implementations. [Copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) now brings it to fourteen/thirty-eight. This extends the [canonical byte-mask experiment](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
 with a compact representation and measured packing cost.
 
 ## Run a bounded experiment
@@ -135,8 +135,9 @@ one true input; unused bits zero: 00000001
 
 Read the [kernels](https://github.com/akolybelnikov/go-simd/blob/main/internal/patterns/predicate_packed.go)
 and [contract/evidence record](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-packed-predicate.md).
-This checkpoint stops after packed export. Clamp, movement/reordering, three-array
-MulAdd, standalone conversion studies, other input types and M4 remain pending.
+Packed export is complete. [Exact copying](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) is now available as a
+separate movement experiment. Clamp, reordering, three-array MulAdd, standalone
+conversion studies, other input types and M4 remain pending.
 
 The implementation record links the signed code and retained hardware/emulated
 captures with exact commands and source provenance. Tiny fixed-iteration captures

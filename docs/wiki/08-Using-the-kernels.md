@@ -1,5 +1,13 @@
 # 08 — Using the kernels in Go
 
+Exact copying adds movement.CopyScalar, CopyBuiltin, CopySIMD and
+CopySIMDVectorTail, each accepting `(x,out []float32) error`. Lengths must agree;
+mismatch returns movement.ErrLengthMismatch before writes. Empty/nil succeeds.
+Disjoint output or exact in-place alias is supported; partial overlap is outside
+the common contract. All float32 bits, including NaN payloads, are preserved.
+Run `go run ./examples/copy`; see [the copy guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) for controls, timing,
+unary preparation, `8*n` work and complete output digests.
+
 Packed predicates add patterns.PredicateGTPackedScalar and PredicateGTPackedSIMD:
 `(x []float32,out []uint8,threshold float32) error`. Allocate exactly ceil(n/8)
 output bytes. Input i maps to bit i%8 of byte i/8, least-significant bit first.
