@@ -89,6 +89,12 @@ Fingerprint both inputs and account for `8*n+4` bytes. Test product/fold oracles
 nonfusion cases in vector and tail paths, mismatched lengths, read-only overlaps
 and compiled/native parity for all admitted fixtures. Preserve sum's identities.
 
+Accumulator strategies must declare full-vector assignment, remaining-vector
+handling, lane-wise merge and final fold/tail. Preserve old IDs, bind the actual
+2/4 algorithms to matching labels and record VectorAccumulators as algorithmic
+count. Test unroll boundaries and count-sensitive cancellation independently;
+never infer physical register counts or guaranteed speedups from this metadata.
+
 ## Local validation commands
 
 ```powershell

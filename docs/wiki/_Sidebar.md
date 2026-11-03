@@ -16,5 +16,6 @@
 - [13 · Broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 - [14 · Sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 - [15 · Dot product and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
+- [16 · Accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

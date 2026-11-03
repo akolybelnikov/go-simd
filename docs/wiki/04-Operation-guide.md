@@ -1,6 +1,6 @@
 # 04 — Operation and kernel guide
 
-The lab contains nine operations and twenty implementations on `float32`
+The lab contains nine operations and twenty-four implementations on `float32`
 slices: seven element-wise operations and two reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
 output slice. Sum accepts one input and returns one float32; dot accepts two
@@ -25,6 +25,8 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/reduction` | `SumSIMD(x []float32) float32` | SIMDStriped | One vector accumulator, low-to-high lane fold, scalar tail |
 | `internal/reduction` | `DotScalar(x,y []float32) (float32,error)` | Scalar | Rounded products, left-to-right float32 accumulation |
 | `internal/reduction` | `DotSIMD(x,y []float32) (float32,error)` | SIMDStriped | Unfused vector products, one accumulator, lane fold/tail |
+| `internal/reduction` | `SumSIMD2(x)` / `SumSIMD4(x)` returning float32 | SIMDStriped2 / SIMDStriped4 | Round-robin vector accumulation, left-to-right lane-wise merge/fold/tail |
+| `internal/reduction` | `DotSIMD2(x,y)` / `DotSIMD4(x,y)` returning (float32,error) | SIMDStriped2 / SIMDStriped4 | Unfused products with 2/4 independent accumulators, merge/fold/tail |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -156,6 +158,8 @@ The structured result model separates display names from identity:
 | sum | Operation `sum-f32` |
 | dot | Operation `dot-f32` |
 | SIMDStriped | Strategy `simd-striped` |
+| SIMDStriped2 | Strategy `simd-striped-2` |
+| SIMDStriped4 | Strategy `simd-striped-4` |
 
 These identifiers are internal model fields, not new command flags. Select
 current CLI cases with group names and benchmark labels from the registry.
@@ -165,13 +169,14 @@ M2 defines these identities once in
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
-ten configured bindings add broadcast/predicates, and two scalar-returning
-bindings add sum, and two checked scalar-returning bindings add dot.
+ten configured bindings add broadcast/predicates. Sum and dot each have four scalar-returning
+bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
+specifies the 1/2/4-vector strategies and their numerical differences.
 
 ## Pattern gaps and reading credit
 
 [SIMD and Go, by Jesús Espino](https://internals-for-interns.com/posts/go-simd/)
 is credited as the reading prompt for our
 [SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
-That review distinguishes implemented broadcast/masking/selection from planned
-accumulation/movement experiments and checks the portable/`archsimd` boundary.
+That review distinguishes implemented broadcasts, predicates and accumulation
+from planned movement/FMA experiments and checks the portable/`archsimd` boundary.

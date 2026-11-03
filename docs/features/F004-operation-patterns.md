@@ -1,11 +1,12 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum and unfused-dot checkpoints implemented**, 2026-11-03.
+Status: **broadcast/predicate, sum, dot and accumulator checkpoints implemented**, 2026-11-03.
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum and dot. The catalogue totals nine operations/twenty implementations.
+rangefilter, sum and dot. The catalogue totals nine operations/twenty-four implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
-Additional accumulators, FMA, clamp, export, movement and types stay planned.
+[Accumulator comparison record](F004-accumulators.md) adds two/four-vector
+strategies. FMA, clamp, export, movement and types stay planned.
 
 ## Purpose and evidence
 
@@ -37,8 +38,9 @@ Loads, stores, and tails are exercised inside those kernels, not isolated as
 primitive latency experiments. Scalar parameter bits and predicate fixture
 distributions are recorded. Sum now adds a genuine scalar-return path and one
 vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
-checked scalar returns and rounded products over two input arrays. Multiple vector
-accumulators, predicate export, clamp, FMA and permutations remain absent.
+checked scalar returns and rounded products over two input arrays. Both reductions
+now compare 1/2/4 independent vector accumulators with declared merge orders.
+Predicate export, clamp, FMA and permutations remain absent.
 
 ## Pattern gap ledger
 
@@ -56,8 +58,8 @@ and existing kernel timing paths are preserved.
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
 | Explicit multiply-add | No; ordinary `Mul`/`Add` composition exists | Portable `MulAdd(y,z)`; semantics need a reference gate | `muladd-f32`, with separately identified fused/unfused modes |
-| Streaming accumulation / reduction | Implemented: sum-f32, Scalar/SIMDStriped | No portable `Sum` or horizontal-pair method; composed full-vector accumulation and store/fold | Exact fold/width/result identity; three input recipes |
-| Dot product / accumulator count | Implemented: dot-f32, Scalar/SIMDStriped with one vector accumulator | Separate rounded Mul/Add, specified fold; FMA gated separately | Multiple independent accumulators remain separate strategies to implement |
+| Streaming accumulation / reduction | Implemented: sum-f32 with Scalar and 1/2/4-vector strategies | No portable `Sum` or horizontal-pair method; composed full-vector accumulation, merge and store/fold | Exact count/fold/width/result identity; three input recipes |
+| Dot product / accumulator count | Implemented: dot-f32 with Scalar and 1/2/4-vector strategies, also available for sum | Separate rounded Mul/Add, round-robin vector assignment, left-to-right merge/fold; FMA gated separately | Fused arithmetic remains a separate numerical experiment |
 | Permutation / shuffle | No | `archsimd.Float32x8.Permute`; absent on portable `Float32s` here | Explicitly gated fixed-block lane reorder; not silently a whole-slice reverse |
 | Horizontal fold / lane extraction | Portable sum includes store/final scalar fold; isolated study absent | `Float32x4.ConcatAddPairs` and `GetElem`; `Float32x8.GetLo/GetHi` in amd64 `archsimd` | Separately gated register-fold study |
 | Numeric conversion / reinterpretation | No | Portable `ConvertToInt32`, `ToBits`, integer `BitsToFloat32` | Numeric conversion versus exact bit round-trip as different operations |
@@ -82,7 +84,8 @@ matching both output and conversion boundaries.
 3. **Accumulation slice:** sum and unfused-dot checkpoints complete with typed
    scalar outputs, specified folds, exact result bits and `4*n+4` / `8*n+4`
    accounting. Dot propagates length errors and rounds products before addition.
-   Stop before multiple accumulators or FMA; each needs its own contract.
+   Two/four-accumulator strategies are complete with declared assignment and merge
+   orders. Stop before FMA; it requires a separate valid fused reference.
 4. **Movement/representation slice:** a useful copy/reorder, predicate-export, or
    conversion experiment. Fixed-width permutes/horizontal primitives remain a
    separate `archsimd` extension with build/runtime requirements.

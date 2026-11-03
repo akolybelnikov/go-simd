@@ -87,6 +87,13 @@ same optional bit/fold fields with distinct arithmetic/order identities. Errors
 propagate, keeping prior observations without appending a failed value. See
 [the dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
 
+Sum/dot also have SIMDStriped2/4. Their distinct OrderIDs and VectorAccumulators
+2/4 use the same v1 fields and existing harnesses. Count describes algorithmic
+accumulators, not observed physical registers; actual NativeLanes is separate.
+Count/order distinguish strategies, so tables can compare 1/2/4 in that order
+after scalar while continuing to reject mixed widths. Input/byte accounting and
+old fold identities stay unchanged. See [accumulator experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
+
 CPU model detection is explicitly `unknown`. Missing embedded VCS information
 also stays `unknown`; `go run` and copied builds can lack it. Build settings come
 from the executable, without runtime `go env`. This is a minimal versioned

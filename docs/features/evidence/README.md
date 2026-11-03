@@ -1,5 +1,28 @@
 # F004 smoke evidence
 
+## Accumulator checkpoint — 2026-11-03
+
+`accumulators-sum.measurements.json` and `accumulators-dot.measurements.json`
+were generated on Windows/amd64, Go 1.27.3, GOEXPERIMENT=simd, GOMAXPROCS 16,
+256-bit vectors / 8 float32 lanes in hardware mode. Source base was signed
+ad5c928 plus uncommitted accumulator changes. Missing embedded VCS facts remain
+explicitly unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group sum -sum-input cancellation -bench='^BenchmarkSum$/^n=64$' -count=2 -benchtime=3x -format=md -output=artifacts/accumulator-checkpoint
+go run ./cmd/simdreport -group dot -dot-input cancellation -bench='^BenchmarkDot$/^n=64$' -count=2 -benchtime=3x -format=md -output=artifacts/accumulator-checkpoint
+```
+
+Each capture retains eight observations: Scalar and SIMDStriped/2/4, two
+repetitions, exactly three reported iterations. VectorAccumulators is 0/1/2/4
+with distinct OrderIDs and unchanged harness/input/byte identities. For this
+fixture/width/size scalar returns +0; all SIMD variants return 1. The runnable
+example separately exposes count-sensitive numerical differences. Original
+numerical data, timestamps and run IDs are preserved; only filename, LF endings
+and trailing whitespace differ. These are plumbing observations without timing
+or accuracy rankings. See the [accumulator contract](../F004-accumulators.md).
+
 ## Unfused dot checkpoint — 2026-11-03
 
 `dot-cancellation.measurements.json` was generated on Windows/amd64, Go 1.27.3,
