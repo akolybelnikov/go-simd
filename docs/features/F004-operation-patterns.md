@@ -1,15 +1,16 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum, dot, accumulator, fused-affine and fused-dot checkpoints implemented**, 2026-11-03.
+Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot and predicate-export checkpoints implemented**, 2026-11-03.
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum, dot, fused affine and fused dot. The catalogue totals eleven operations/thirty implementations.
+rangefilter, sum, dot, fused affine, fused dot and predicate export. The catalogue totals twelve operations/thirty-two implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
 [Accumulator comparison record](F004-accumulators.md) adds two/four-vector
 strategies. The [fused-affine record](F004-fma.md) adds one-rounding binary32
 arithmetic with corrected software and gated vector paths. The [fused-dot record](F004-fused-dot.md)
 adds FMA updates with ordinary merge/fold additions and actual per-case paths.
-Three-array MulAdd, clamp, export, movement and types stay planned.
+[Predicate export](F004-predicate-export.md) adds canonical uint8 output with conversion/storage timed.
+Three-array MulAdd, clamp, packed export, movement and other input types stay planned.
 
 ## Purpose and evidence
 
@@ -44,7 +45,8 @@ vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
 checked scalar returns and rounded products over two input arrays. Both reductions
 now compare 1/2/4 independent vector accumulators with declared merge orders.
 Fused affine now adds a separately identified one-rounding contract. Predicate
-export, clamp, three-array MulAdd and permutations remain absent. Fused dot now
+packed export, clamp, three-array MulAdd and permutations remain absent. Canonical
+byte predicate export now includes conversion/extraction and a typed uint8 output. Fused dot now
 uses Scalar and 1/2/4 accumulators with separate fused arithmetic/fold/path identity.
 
 ## Pattern gap ledger
@@ -58,7 +60,7 @@ and existing kernel timing paths are preserved.
 | --- | --- | --- | --- |
 | Contiguous load/operate/store | Yes, both operations | Portable full/partial loads and stores | Retain current arithmetic controls; add copy only to answer a movement question |
 | Broadcast scalar parameters | Implemented: scale/affine | `simd.BroadcastFloat32s` | Scalar/SIMD controls; no prepared-vector variant |
-| Comparisons / predicate output | Comparisons implemented; exported masks pending | `Float32s.Greater`, related comparisons; `Mask32s` | `predicate-gt-f32`: export a defined logical mask, with conversion cost declared |
+| Comparisons / predicate output | Implemented comparisons and predicate-gt-f32 uint8 export | Greater/IfElse selects exact 0/1; ConvertToInt32/Store and valid byte writes | Canonical bytes implemented with timed conversion/storage; packed bits remain separate |
 | Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
@@ -93,11 +95,12 @@ matching both output and conversion boundaries.
    orders. Fused affine is also complete with an independent rational oracle,
    corrected binary32 reference and recorded vector/software gate. Fused dot is
    complete with four specified folds, software stripes preserving order and
-   per-case vector/software/tail identity. Stop after this fused-dot checkpoint;
-   three-array MulAdd and M4 remain separate work.
-4. **Movement/representation slice:** a useful copy/reorder, predicate-export, or
-   conversion experiment. Fixed-width permutes/horizontal primitives remain a
-   separate `archsimd` extension with build/runtime requirements.
+   per-case vector/software/tail identity. Three-array MulAdd remains separate work.
+4. **Representation slice (predicate export complete):** canonical uint8 0/1,
+   typed byte output, valid tails, conversion/extraction/storage timed and full
+   output digest after timing. Stop after this byte-export checkpoint. Packed
+   masks, copy/reorder, standalone conversions and M4 remain separate work.
+   Fixed-width permutes/horizontal primitives need explicit `archsimd` gates.
 5. **Purposeful numeric breadth:** add float64 or a narrow integer family for a
    documented question about rounding, saturation, conversion, or bit operations.
    Carryless multiplication and broad ISA coverage remain demand-driven.
@@ -197,7 +200,7 @@ These are candidate *logical* byte counts for float32 kernels, not DRAM counters
 
 Record constant setup, scratch traffic, mask packing, output kind and byte units
 explicitly. Current descriptors derive `8*n`, `12*n`, sum's `4*n+4` or dot's
-`8*n+4`; future output shapes
+`8*n+4`, plus predicate export's `5*n`; future output shapes
 must retain their own logical traffic model.
 Exclude zero-work sizes from throughput claims; retain them in correctness tests.
 Do not pool contexts with different parameters, mask representation, fusion,

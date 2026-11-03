@@ -111,6 +111,16 @@ dot-specific five-path encoding against width, size and process gate; affine's
 existing 0/1 metrics remain unchanged. A passing process gate does not establish
 vector FMA work for a case shorter than one vector.
 
+Byte predicate export adds a typed BindUint8/Prepared.ByteOutput path and
+separate harnesses. Preserve canonical uint8 0/1 independently of SDK mask
+encoding. Include comparison, normalization, conversion, extraction and byte
+writes in timing; preparation and complete output hashing stay outside.
+Test exact bytes, NaN/equality/signed-zero rules, input preservation, output
+canaries and negative-threshold tails where padded zero lanes compare true.
+Keep relevant parameter/input identity and actual child width/encoding/digest
+facts. Match all fixture distributions through compiled/native and emulated
+paths. Do not generalize the old float32 in-place alias policy across types.
+
 ## Local validation commands
 
 ```powershell

@@ -1,5 +1,34 @@
 # F004 smoke evidence
 
+## Predicate byte-export checkpoint — 2026-11-03
+
+`predicate-vector.measurements.json` and `predicate-software.measurements.json`
+were generated on Windows/amd64, Go 1.27.3, GOEXPERIMENT=simd, GOMAXPROCS 16.
+Hardware execution used 256-bit / 8-lane SIMD; forced emulation used 128-bit /
+4-lane SIMD. Source base was signed b8ecb2e plus uncommitted predicate changes;
+missing embedded VCS facts remain explicitly unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/predicate-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/predicate-emulated-checkpoint
+Remove-Item Env:GODEBUG
+```
+
+Restore any prior GODEBUG value. Quote the full negative decimal argument in
+PowerShell. Each capture retains four observations: two strategies/repetitions,
+exactly three iterations and 320 logical bytes per call. Case.Predicate retains
+canonical uint8-zero-one/v1 and actual lanes; input identity retains threshold
+bits, shuffled seed and x's hash. Every ByteResultSHA256 is
+`0140afddd8f37a2228872352701425d6ade797d97a44915645852e053cd07b9e`,
+SHA-256 of the complete 64 canonical bytes, computed after timing. The SIMD
+measurement includes normalization, conversion/extraction and byte stores.
+Different hardware/emulated contexts remain separate. Original numeric values,
+run IDs and UTC timestamps are retained; only filenames, LF endings and trailing
+whitespace differ. These tiny captures verify plumbing without performance
+claims. See [the contract](../F004-predicate-export.md).
+
 ## Fused-dot checkpoint — 2026-11-03
 
 `dotfma-vector.measurements.json` and `dotfma-software.measurements.json` were

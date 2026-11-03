@@ -1,6 +1,6 @@
 # 11 — Glossary and capability ledger
 
-Reviewed against M3 / F004 fused-dot checkpoint on 2026-11-03. This is a ledger of implemented
+Reviewed against M3 / F004 predicate-export checkpoint on 2026-11-03. This is a ledger of implemented
 capabilities, not a promise to deliver every possible extension.
 
 ## Capability ledger
@@ -19,12 +19,14 @@ capabilities, not a promise to deliver every possible extension.
 | Three-array MulAdd | Pending separate operand/traffic contract |
 | Broadcast scale/affine kernels | Implemented, Scalar/SIMDPartial, exact float32 scalar parameters; broadcasts per call |
 | Predicate/mask/selection kernels | Implemented threshold, selection and rangefilter; strict comparisons, bit-preserving selection, Masked/IfElse/And |
+| Predicate byte export | Implemented predicate Scalar/SIMDPartial; canonical uint8 0/1, conversion/extraction/stores timed, output digest retained |
+| Packed predicate bits | Pending separate representation/packing contract |
 | Float32 sum | Implemented Scalar and SIMDStriped/2/4; typed scalar results, specified folds, three fixtures and retained result bits |
 | Unfused float32 dot | Implemented Scalar and SIMDStriped/2/4; rounded products, checked scalar returns, four fixtures shared with dotfma, bit/fold evidence |
 | Multiple vector accumulators | Implemented SIMDStriped2/4 for sum, unfused dot and fused dot; explicit round-robin assignment and left-to-right merge |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Eleven operations / thirty implementations; array and unchecked/checked scalar-result bindings |
+| Shared runtime catalogue | Twelve operations / thirty-two implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
 | Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -43,8 +45,8 @@ capabilities, not a promise to deliver every possible extension.
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M0-M3 and F004's broadcast/predicate, sum, unfused-dot, accumulator, fused-affine and fused-dot checkpoints are complete. Three-array MulAdd,
-clamp, mask export, conversions and new types remain planned.
+M0-M3 and F004's broadcast/predicate, sum, unfused-dot, accumulator, fused-affine, fused-dot and predicate-export checkpoints are complete. Three-array MulAdd,
+clamp, packed-mask export, standalone conversions and other input types remain planned.
 Worker isolation, cancellation recovery and advanced manifests remain deferred. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.
 

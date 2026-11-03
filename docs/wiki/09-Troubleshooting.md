@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all eleven groups and many sizes up to 16,777,216 elements. That
+The default covers all twelve groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -127,6 +127,19 @@ cases shorter than one vector use software tails, and nonmultiples mix vector
 updates with a software tail. These are recorded per case. A fused update does
 not imply a single correctly rounded whole-dot result or bitwise agreement
 between accumulator counts; see [the worked examples](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
+
+## Exported masks and tail bytes
+
+Predicate output is exactly uint8 0/1, with strict ordered x > threshold.
+Equality and NaNs produce zero. SIMD includes conversion/extraction/stores;
+a SIMD label does not guarantee a speedup. Padded zero lanes can compare true
+at negative thresholds, but only valid byte positions are written. Invalid
+lengths leave output unchanged. Inspect Case.Predicate and ByteResultSHA256,
+and preserve input/parameter identity when reporting differences.
+
+In PowerShell, quote a complete negative decimal flag, such as
+`'-threshold=-1.5'`, to prevent the shell splitting the argument. The
+[predicate guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) includes checked launcher examples.
 
 ## Report a useful issue
 

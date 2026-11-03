@@ -2,7 +2,8 @@
 
 The dotfma group applies one float32 rounding to each x*y+accumulator update.
 It offers Scalar and SIMDStriped/2/4, with explicit assignment/merge orders.
-The catalogue now has eleven operations and thirty implementations. The original
+That checkpoint brought the catalogue to eleven operations and thirty implementations.
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings it to twelve/thirty-two. The original
 dot group remains unfused; this is not a single exact dot rounded at the end.
 
 ## Run a bounded experiment
