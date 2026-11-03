@@ -1,8 +1,9 @@
 # 04 — Operation and kernel guide
 
-The lab contains seven element-wise operations and sixteen implementations on
-`float32` slices. Kernels have one or two declared array inputs, scalar parameters
-where needed, and one caller-provided output slice.
+The lab contains eight operations and eighteen implementations on `float32`
+slices: seven element-wise operations and one reduction. Array kernels have
+one or two declared inputs, scalar parameters where needed and a caller-provided
+output slice. Sum accepts one input and returns one float32.
 
 ## Complete kernel reference
 
@@ -19,6 +20,8 @@ where needed, and one caller-provided output slice.
 | `internal/patterns` | `ThresholdZeroScalar` / `ThresholdZeroSIMD(x,out []float32,t float32) error` | Scalar / SIMDPartial | Strict predicate, false to +0 |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
+| `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |
+| `internal/reduction` | `SumSIMD(x []float32) float32` | SIMDStriped | One vector accumulator, low-to-high lane fold, scalar tail |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -125,6 +128,12 @@ accounts for `12*n`. Numerical, alias and fixture rules are in
 
 ## Internal machine identifiers
 
+Sum has no output slice or length-error sentinel. It leaves input unchanged,
+returns +0 for empty input and rounds every addition to float32. Its specified
+orders can return different values, including different exceptional classes.
+See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+for examples, input recipes, result retention and `4*n+4` logical byte accounting.
+
 The structured result model separates display names from identity:
 
 | Display group / label | Internal identifier |
@@ -135,6 +144,8 @@ The structured result model separates display names from identity:
 | SIMDPartial / computation SIMD | Strategy `simd-partial` |
 | SIMDTail | Strategy `simd-scalar-tail` |
 | SIMDParallel | Strategy `simd-parallel-scalar-tail` |
+| sum | Operation `sum-f32` |
+| SIMDStriped | Strategy `simd-striped` |
 
 These identifiers are internal model fields, not new command flags. Select
 current CLI cases with group names and benchmark labels from the registry.
@@ -144,7 +155,8 @@ M2 defines these identities once in
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
-ten new configured bindings add the broadcast/predicate slice.
+ten configured bindings add broadcast/predicates, and two scalar-returning
+bindings add sum.
 
 ## Pattern gaps and reading credit
 

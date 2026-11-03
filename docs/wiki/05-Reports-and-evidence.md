@@ -50,6 +50,7 @@ commas, quotes and embedded newlines. Absent scalar is not a measured zero.
 | `status`, `error` | `complete` or `failed`; reason on failure |
 | `group` | Measured group |
 | `config` | Normalized `count`, `benchtime`, `bench`, optional `input` (scalar uint32 bits, pattern and seed) |
+| `config.input.SumInput` | Sum fixture name; balanced, cancellation or mixed-magnitude |
 | `machine` | Measuring process's Go/OS/architecture, vector bits/lanes, emulation, GOMAXPROCS, source revision/modified state and embedded Go build information |
 | `run` | Typed run and individual observations; model fields retain Go names in v1, e.g. `Observations` and `DurationNS` |
 
@@ -67,6 +68,16 @@ duration is not kernel CPU/op for final N. Preparation, fingerprints and binding
 stay outside the callback. Validation, callback/function-pointer dispatch and
 per-call workers remain measured. Typed output is retained once after the
 repeated loop, without a full checksum.
+
+Sum uses `standalone-reduction/v1`, with a genuine float32-returning callback.
+The timer includes vector extraction/final fold/tail; the last returned value
+is retained once after stopping it. Optional `ScalarResultBits` stores uint32
+bits safely even for NaN/Inf. `Key.Case.Reduction` records OrderID, observed
+NativeLanes, VectorAccumulators and TailID. Width belongs to comparison context;
+fold order distinguishes strategies. Values are never averaged in timing tables.
+See [the sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
+for decoding and numerical examples. These additive v1 fields are omitted from
+array observations when absent; historical captures remain readable.
 
 CPU model detection is explicitly `unknown`. Missing embedded VCS information
 also stays `unknown`; `go run` and copied builds can lack it. Build settings come
@@ -89,6 +100,10 @@ backend `go-test-text/v1`, harness `legacy-report/v1` for original cases or `leg
 for parameterized cases. New raw headers record input configuration; absent
 historical parameter/fixture context remains unknown.
 
+Sum uses `legacy-report-reduction/v1`. Its native `result-bits` and `simd-lanes`
+metrics retain exact scalar bits and the child process's width outside timing;
+missing, fractional or out-of-range metrics are rejected.
+
 Legacy text retains tool/environment output, repetitions, iterations, displayed
 timing, allocations and throughput. It cannot recover exact duration from rounded
 ns/op and lacks complete build/emulation identity. Parent metadata does not
@@ -96,7 +111,7 @@ establish child capabilities. Historical fingerprints stay unknown; old evidence
 is never silently converted. Both backends feed the same summary renderers, but
 their results must remain separate series because harness/precision differ.
 Throughput is descriptor-specific logical work: `8*n` for unary patterns and
-`12*n` for the binary operations, not measured DRAM traffic.
+`12*n` for the binary operations and `4*n+4` for sum, not measured DRAM traffic.
 
 ## Failure and sharing
 

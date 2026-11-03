@@ -81,7 +81,7 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Seven operations/sixteen implementations
+or any group in the compact catalogue. Eight operations/eighteen implementations
 are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
@@ -89,6 +89,9 @@ CI runs this check. A local `runtime/cgo` build failure is a toolchain problem
 that can occur before the project's tests execute; see troubleshooting.
 
 ## 5. Run the small code example
+
+For the scalar-result reduction and two rounding-loss examples, run
+`go run ./examples/sum`; see [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
 
 ```powershell
 go run ./examples/basic
