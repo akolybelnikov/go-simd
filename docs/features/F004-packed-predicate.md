@@ -1,5 +1,9 @@
 # F004, slice 6 — Packed predicate export
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-11-03 after canonical byte masks. Group predicatepack adds Scalar
 and SIMDPartial: thirteen operations/thirty-four implementations. This checkpoint
 answers how much conversion and packing cost when output occupies one bit per

@@ -1,5 +1,30 @@
 # F004 smoke evidence
 
+## Final clamp checkpoint — 2026-11-04
+
+Normal-SDK clamp-vector.measurements.json and SDK-emulated
+clamp-sdk-emulated.measurements.json each retain six observations: three controls,
+two repetitions, exactly three iterations, n=64, shuffled seed 123, bounds -1.5/2.5.
+Both output digests agree across controls and execution modes. Captured on
+Windows/amd64, Go 1.27.3-X:simd, GOMAXPROCS 16; normal SDK has 256 bits/8 lanes,
+emulated has 128 bits/4 lanes. Base was signed commit 72bb7ff plus uncommitted
+clamp changes. Embedded source revision/modified facts remain explicitly unknown.
+Files retain original data/run IDs/timestamps; only LF/trailing whitespace is normalized.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/clamp-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/clamp-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+These tiny fixed-iteration captures verify evidence plumbing, not performance.
+See the [clamp contract](../F004-clamp.md) and [F004 closure](../F004-completion.md).
+The [SDK declaration snapshot](f004-sdk-inventory.json) records the independent
+API coverage ledger; it is inventory metadata, not benchmark results.
+
+
 ## Copy checkpoint — 2026-11-04
 
 `copy-vector.measurements.json` and `copy-sdk-emulated.measurements.json` were

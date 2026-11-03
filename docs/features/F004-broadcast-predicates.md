@@ -1,5 +1,9 @@
 # F004, slice 1 — Broadcasts, predicates and mask composition
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-10-27 after architecture M0-M3. This slice adds five operations,
 each with scalar and partial-vector implementations. The catalogue now contains
 seven operations and sixteen implementations. Existing addition/computation

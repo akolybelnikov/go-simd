@@ -1,4 +1,4 @@
-Experimental Go SIMD laboratory · Guide baseline: M3 / F004 copy checkpoint · Reviewed
+Experimental Go SIMD laboratory · Guide baseline: M3 / F004 complete for current scope · Reviewed
 2026-11-04 · [Editable guide sources](https://github.com/akolybelnikov/go-simd/tree/main/docs/wiki)
 · [Changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md)
 

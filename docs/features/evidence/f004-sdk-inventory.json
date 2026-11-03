@@ -1,0 +1,3005 @@
+{
+  "Version": "go1.27.3-X:simd",
+  "GOOS": "windows",
+  "GOARCH": "amd64",
+  "Experiment": "simd",
+  "SourceSHA256": {
+    "doc.go": "b577e72ac5e623d98ac313aab5a31867fd9286471af20040ab62422e045d86e9",
+    "midway_amd64.go": "a187562095fad6d2f885ec7b22db2101c4a0d61586897f6e6b4aa6b44a4da9f2",
+    "midway_common.go": "d573ef7e915cf5153f4442a801bab1fb58a4144ea48e08d2e158ed4612f559bc",
+    "simd_stubs.go": "c003d32bdcbf168f70dc34e193b333562b0c227b50539af1ceede6c5d1eb12be",
+    "simd_types.go": "f8ff9a05803cdc01a60c1d4f5f9fd4005744455dba1a1c45856f3ed8cd602181",
+    "tofrom_amd64.go": "62c56237338ab6258fdc92172d8eef3c3c7288a139a9536abe0674876474a874"
+  },
+  "Entries": [
+    {
+      "name": "BroadcastFloat32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Loads or per-call broadcasts inside admitted float32 kernels."
+    },
+    {
+      "name": "BroadcastFloat64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastInt16s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastInt32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastInt64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastInt8s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastUint16s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastUint32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastUint64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BroadcastUint8s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Emulated",
+      "kind": "function",
+      "source": "midway_common.go",
+      "status": "Infrastructure used",
+      "reason": "Runtime metadata in internal/platform; no throughput comparison."
+    },
+    {
+      "name": "Float32s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Exercised type",
+      "reason": "Primary generated input/output and arithmetic vector."
+    },
+    {
+      "name": "Float32sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Float64s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Float64sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "HasHardwareCarrylessMultiply",
+      "kind": "function",
+      "source": "midway_common.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Int16s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Int16sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Int32s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Exercised type",
+      "reason": "Intermediate canonical predicate conversion/extraction only; no integer input experiment."
+    },
+    {
+      "name": "Int32sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Int64s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Int64sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Int8s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Int8sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "LoadFloat32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Loads or per-call broadcasts inside admitted float32 kernels."
+    },
+    {
+      "name": "LoadFloat32sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Loads or per-call broadcasts inside admitted float32 kernels."
+    },
+    {
+      "name": "LoadFloat64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadFloat64sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt16s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt16sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt32sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt64sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt8s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadInt8sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint16s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint16sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint32s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint32sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint64s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint64sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint8s",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LoadUint8sPart",
+      "kind": "function",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mask16s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Mask16sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Mask32s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Exercised type",
+      "reason": "Internal comparison/composition/selection only; no raw mask representation exported."
+    },
+    {
+      "name": "Mask32sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Mask64s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Mask64sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Mask8s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Mask8sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Uint16s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Uint16sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Uint32s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Uint32sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Uint64s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Uint64sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Uint8s",
+      "kind": "type",
+      "source": "simd_types.go",
+      "status": "Deferred type",
+      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+    },
+    {
+      "name": "Uint8sFromArch",
+      "kind": "function",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "VectorBitSize",
+      "kind": "function",
+      "source": "midway_common.go",
+      "status": "Infrastructure used",
+      "reason": "Runtime metadata in internal/platform; no throughput comparison."
+    },
+    {
+      "name": "Abs",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "ConvertToInt32",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "Div",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "Len",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Infrastructure used",
+      "reason": "Actual lanes for kernel loops and evidence; setup cost follows each kernel contract."
+    },
+    {
+      "name": "Less",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "Max",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Clamp SIMDMinMax, with all bit-preserving repairs included in timing."
+    },
+    {
+      "name": "Min",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Clamp SIMDMinMax, with all bit-preserving repairs included in timing."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "MulAdd",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Gated native FMA paths only; software fallback and actual path retained."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "Sqrt",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Used inside admitted float32 kernels; composed semantics, not isolated instruction latency."
+    },
+    {
+      "name": "String",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Float32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Abs",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Div",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "MulAdd",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Sqrt",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Float64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Abs",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AddSaturated",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToUint16",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllRight",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "SubSaturated",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToMask",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Int16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Abs",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToFloat32",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToUint32",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllRight",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Timed predicate conversion/extraction scratch store only."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToMask",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Int32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToUint64",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToMask",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Int64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Abs",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AddSaturated",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToUint8",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Neg",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "SubSaturated",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToBits",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToMask",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Int8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Mask16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Mask16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Mask16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Mask16s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToInt16s",
+      "receiver": "Mask16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Mask32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Timed strict-range And or clamp tie/NaN Or composition."
+    },
+    {
+      "name": "Or",
+      "receiver": "Mask32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Exercised member",
+      "reason": "Timed strict-range And or clamp tie/NaN Or composition."
+    },
+    {
+      "name": "String",
+      "receiver": "Mask32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Mask32s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToInt32s",
+      "receiver": "Mask32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Mask64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Mask64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Mask64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Mask64s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToInt64s",
+      "receiver": "Mask64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Mask8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Mask8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Mask8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Mask8s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "ToInt8s",
+      "receiver": "Mask8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AddSaturated",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Average",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToInt16",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToInt16",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint32s",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint64s",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint8s",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllRight",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "SubSaturated",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Uint16s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToFloat32",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToInt32",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToInt32",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint16s",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint64s",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint8s",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllRight",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Uint32s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToFloat64",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToInt64",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "CarrylessMultiplyEven",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "CarrylessMultiplyOdd",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToInt64",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Greater",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "GreaterEqual",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Less",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "LessEqual",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint16s",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint32s",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint8s",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllLeft",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "RotateAllRight",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllLeft",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ShiftAllRight",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Uint64s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Add",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AddSaturated",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "And",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "AndNot",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Average",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "BitsToInt8",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ConvertToInt8",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Equal",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "IfElse",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Len",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Masked",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Max",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Min",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Mul",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Not",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "NotEqual",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Or",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint16s",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint32s",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ReshapeToUint64s",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "Store",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "StorePart",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "String",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Utility outside scope",
+      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+    },
+    {
+      "name": "Sub",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "SubSaturated",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    },
+    {
+      "name": "ToArch",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "tofrom_amd64.go",
+      "status": "Deferred bridge",
+      "reason": "Architecture bridge; a separately gated fixed-width experiment is outside current scope."
+    },
+    {
+      "name": "Xor",
+      "receiver": "Uint8s",
+      "kind": "method",
+      "source": "simd_stubs.go",
+      "status": "Deferred member",
+      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+    }
+  ],
+  "Reviewed": "2026-11-04",
+  "Scope": "Selected simd package, GOEXPERIMENT=simd, windows/amd64; archsimd itself excluded."
+}

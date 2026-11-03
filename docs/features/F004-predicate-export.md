@@ -1,5 +1,9 @@
 # F004, slice 5 — Canonical predicate export
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-11-03 after fused dot. The predicate group adds Scalar and
 SIMDPartial: twelve operations/thirty-two implementations. Architecture M0–M3
 remains complete; this is a bounded representation checkpoint. Packed masks,

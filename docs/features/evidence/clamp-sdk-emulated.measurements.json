@@ -1,0 +1,430 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "clamp",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3217031168,
+      "Upper": 1075838976,
+      "Pattern": "shuffled",
+      "Seed": 123
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkClamp$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "software-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 128,
+    "float32_lanes": 4,
+    "gomaxprocs": 16,
+    "emulated": true,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261103-223857-3301208878",
+    "Environment": {
+      "ID": "benchmark-20261103-223857-3301208878/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-clamp/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-03T22:38:57Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 128\nSIMD float32 lanes: 4\nemulated: true\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-clamp/v1\ngroup: clamp\nselection: \"^BenchmarkClamp$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nparameters: lower=float32:0xbfc00000;upper=float32:0x40200000\nfixture: clamp-float32-v1/shuffled/seed=123\noutput: ordered clamp preserves input ties/NaN bits and exact clipping-bound bits; full ArrayResultSHA256 retained after timing\nlogical traffic: 8*n bytes/call\nnumerics: Ordered clipping to exact lower/upper bits. Equality, signed-zero ties and input NaN payloads preserve original bits. Bounds must be non-NaN with lower\u003c=upper; infinities and equal bounds accepted. Length errors take precedence; all failures precede writes, including empty invalid bounds. Disjoint/exact alias; partial overlap unsupported. SIMDMinMax includes explicit outside/tie/NaN repairs; no raw Min/Max equivalence assumed. Validation, broadcasts, selection/repairs and stores timed. Logical bytes 8*n.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 366.6666666666667,
+        "DurationNS": 1100,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1396.3636363636363,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 300,
+        "DurationNS": 900,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1706.6666666666667,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 700,
+        "DurationNS": 2100,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 731.4285714285714,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 633.3333333333334,
+        "DurationNS": 1900,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 808.421052631579,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-minmax",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDMinMax",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 1300,
+        "DurationNS": 3900,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 393.84615384615387,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/SIMDMinMax-16"
+      },
+      {
+        "ArrayResultSHA256": "149437fa1d7a09bc7be428b5271400b997e7be779bc787b7c1aaf5504db4b866",
+        "Key": {
+          "RunID": "benchmark-20261103-223857-3301208878",
+          "EnvironmentID": "benchmark-20261103-223857-3301208878/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clamp/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Clamp": {
+              "PolicyID": "ordered-clamp-preserve-bits/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "OperationID": "clamp-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-minmax",
+            "ArithmeticID": "float32-clamp-ordered-bits-v1",
+            "Parameters": "lower=float32:0xbfc00000;upper=float32:0x40200000",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "clamp-float32-v1/shuffled/seed=123",
+              "SHA256": "b3ed548e68d94f562b3aef80e643d90a20c3bcfe9bb4485a3b44ffac5cf5a450"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDMinMax",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 1533.3333333333333,
+        "DurationNS": 4600,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 333.9130434782609,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClamp/n=64/SIMDMinMax-16"
+      }
+    ]
+  }
+}

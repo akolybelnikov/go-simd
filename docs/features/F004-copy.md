@@ -1,5 +1,9 @@
 # F004, slice 7 — Exact float32 copy and data-movement baseline
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-11-04 after packed predicates. The copy group adds Scalar,
 GoCopy, SIMDPartial and SIMDTail: fourteen operations/thirty-eight implementations.
 The question is when explicit SIMD helps copying and how it compares with Go's

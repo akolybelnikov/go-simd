@@ -1,5 +1,9 @@
 # F004, slice 3 — Fused binary32 affine
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-11-03 after accumulator comparisons. Group affinefma adds
 Scalar and SIMDPartial for one-rounding alpha*x+beta. The catalogue now has ten
 operations and twenty-six implementations. Existing affine and dot remain

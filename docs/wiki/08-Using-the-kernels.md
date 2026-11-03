@@ -176,3 +176,8 @@ Compare rounding, NaNs, infinities, signed zero, and arithmetic semantics
 deliberately; equality on a few simple integers is not a full floating-point
 contract. Keep data preparation and complete-output validation outside the
 timed inner loop when your objective is kernel-only timing.
+
+
+## Ordered clamp
+
+`patterns.ClampScalar`, `ClampSIMD` and `ClampSIMDMinMax` accept `(x,out []float32,lower,upper float32) error`. Handle `patterns.ErrLengthMismatch` first and `patterns.ErrInvalidBounds` for reversed/NaN bounds, including empty slices. Failures precede writes; disjoint/exact aliases are supported. Run `go run ./examples/clamp` and follow [its exact bit contract](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).

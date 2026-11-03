@@ -1,5 +1,9 @@
 # F004, slice 2c — Multiple reduction accumulators
 
+Historical checkpoint record. The final [F004 acceptance record](F004-completion.md)
+now closes the agreed scope after clamp; counts and stop decisions below describe
+this earlier slice.
+
 Implemented 2026-11-03 after unfused dot. Sum and dot each add SIMDStriped2 and
 SIMDStriped4 alongside Scalar and the unchanged one-accumulator SIMDStriped.
 The catalogue contains nine operations and twenty-four implementations.

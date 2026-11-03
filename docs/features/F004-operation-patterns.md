@@ -1,8 +1,10 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export, packed-predicate and copy checkpoints implemented**, 2026-11-04.
+Status: **Complete for the agreed current scope**, 2026-11-04.
+See the [acceptance/closure record](F004-completion.md), [clamp contract](F004-clamp.md) and
+[complete baseline API coverage ledger](F004-api-coverage.md).
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum, dot, fused affine, fused dot, byte/packed predicate export and copy. The catalogue totals fourteen operations/thirty-eight implementations.
+rangefilter, sum, dot, fused affine, fused dot, byte/packed predicate export and copy, then ordered clamp. The catalogue totals fifteen operations/forty-one implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
 [Accumulator comparison record](F004-accumulators.md) adds two/four-vector
@@ -12,8 +14,9 @@ adds FMA updates with ordinary merge/fold additions and actual per-case paths.
 [Predicate export](F004-predicate-export.md) adds canonical uint8 output with conversion/storage timed.
 [Packed export](F004-packed-predicate.md) adds LSB-first bits, normalized padding,
 physical output extents and timed packing. [Copy](F004-copy.md) adds an exact-bit
-movement baseline with Go's built-in control. Three-array MulAdd, clamp,
-reordering and other input types stay planned.
+movement baseline with Go's built-in control. [Clamp](F004-clamp.md) completes the current
+scope with branch, selection and repaired Min/Max strategies. Three-array MulAdd,
+reordering, conversions and other input types are optional follow-on work.
 
 ## Purpose and evidence
 
@@ -49,7 +52,8 @@ vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
 checked scalar returns and rounded products over two input arrays. Both reductions
 now compare 1/2/4 independent vector accumulators with declared merge orders.
 Fused affine now adds a separately identified one-rounding contract.
-Clamp, three-array MulAdd and permutations remain absent. Packed export now
+Clamp now compares ordered clipping with exact bit policies. Three-array MulAdd
+and permutations remain optional extensions. Packed export now
 specifies LSB-first bits, zero padding and actual physical output sizes. Canonical
 byte predicate export now includes conversion/extraction and a typed uint8 output. Fused dot now
 uses Scalar and 1/2/4 accumulators with separate fused arithmetic/fold/path identity.
@@ -66,9 +70,9 @@ and existing kernel timing paths are preserved.
 | Contiguous load/operate/store | Implemented copy-f32 plus existing arithmetic | Partial/full portable loads/stores and Go copy control; exact bits, disjoint measured arrays | Determine when explicit SIMD copying helps versus compiler/runtime copy across working sets |
 | Broadcast scalar parameters | Implemented: scale/affine | `simd.BroadcastFloat32s` | Scalar/SIMD controls; no prepared-vector variant |
 | Comparisons / predicate output | Implemented comparisons and predicate-gt-f32 uint8 export | Greater/IfElse selects exact 0/1; ConvertToInt32/Store and valid byte writes | Canonical byte and packed LSB-first output implemented with timed conversion/packing/storage |
-| Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
+| Mask composition | Implemented: rangefilter And and clamp Or | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict range controls and bit-preserving clamp repairs |
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
-| Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
+| Min/max and clamp | Implemented clamp-f32, three strategies | Portable Min/Max, comparisons, Mask32s.Or and IfElse | Ordered clipping; explicit outside/tie/NaN repairs included in Min/Max timings |
 | Explicit multiply-add | Implemented affine-fma-f32 and dot-fma-f32 beside unchanged unfused affine/dot | Binary32 reference, gated native MulAdd and actual software/vector/tail paths; ordinary dot merges/folds | Three-array muladd-f32 remains a distinct future contract |
 | Streaming accumulation / reduction | Implemented: sum-f32 with Scalar and 1/2/4-vector strategies | No portable `Sum` or horizontal-pair method; composed full-vector accumulation, merge and store/fold | Exact count/fold/width/result identity; three input recipes |
 | Dot product / accumulator count | Implemented dot-f32 and dot-fma-f32 with Scalar and 1/2/4-vector strategies, also available for sum | Separate unfused/fused update semantics; round-robin assignment and left-to-right merge/fold | Three-array FMA and register-only primitive studies remain separate experiments |
@@ -106,7 +110,8 @@ matching both output and conversion boundaries.
 4. **Representation/movement slice (byte/packed predicates and copy complete):**
    canonical masks, typed physical output extents and complete post-timing output
    digests. Exact copying adds Go's built-in control, partial/tail SIMD strategies
-   and disjoint-buffer timings with 8*n work. Stop after copy. Reordering,
+   and disjoint-buffer timings with 8*n work. Final slice 8 adds ordered clamp with
+   three matched numerical controls and closes the agreed F004 scope. Reordering,
    standalone conversions and M4 remain separate work.
    Fixed-width permutes/horizontal primitives need explicit `archsimd` gates.
 5. **Purposeful numeric breadth:** add float64 or a narrow integer family for a
@@ -215,7 +220,11 @@ Exclude zero-work sizes from throughput claims; retain them in correctness tests
 Do not pool contexts with different parameters, mask representation, fusion,
 fold order, width, worker policy, or backend/harness boundaries.
 
-## Acceptance checklist for each admitted pattern
+## Reusable acceptance checklist for future admitted patterns
+
+The delivered scope has been audited in [F004 completion](F004-completion.md).
+The unchecked template below applies to a future extension; it is not a list of
+unimplemented requirements for this closed checkpoint.
 
 - [ ] A documented experiment/learning question and selected initial types.
 - [ ] Verified portable versus architecture-specific API/capability status.
