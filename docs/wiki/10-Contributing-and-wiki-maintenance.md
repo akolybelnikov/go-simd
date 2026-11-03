@@ -129,6 +129,14 @@ Include packing cost in timing. Test byte/vector boundaries, stale true bits,
 negative-threshold padded lanes, child encoding/digest identity and selector
 parity. The packed callback is separate from the original byte callback.
 
+Copy adds a typed BindUnary seam, a fixed single-input raw-bit fixture and
+post-timing whole-array retention under dedicated harnesses. Preserve exact
+signed-zero/NaN payload bits; test offset slices, disjoint/exact aliases, output
+canaries and length failures before writes. Include GoCopy in selected control
+lists and export coverage. Retain full little-endian output-bit digests and
+actual child SDK width. Keep source-loop/built-in labels distinct from proof of
+instruction selection, and SDK emulation distinct from runtime-copy optimization.
+
 ## Local validation commands
 
 ```powershell

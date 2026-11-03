@@ -22,5 +22,6 @@
 - [18 · Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders)
 - [19 · Predicate export and byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
 - [20 · Packed predicate masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks)
+- [21 · Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement)
 
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

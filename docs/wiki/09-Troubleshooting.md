@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all thirteen groups and many sizes up to 16,777,216 elements. That
+The default covers all fourteen groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -151,6 +151,18 @@ the same on emulation and different widths. See [the examples](https://github.co
 An unanchored report selector n=65 also selects n=65536. Use the direct quoted
 `'^BenchmarkPredicatePacked$/^n=65$'` selector for that exact boundary case;
 simple Make examples use n=64 to avoid dollar-expansion complexity.
+
+## GoCopy is fast, or copy strategies produce NaNs
+
+GoCopy uses the selected Go compiler/runtime copy. Scalar describes a source
+loop; neither label proves a particular instruction sequence. SDK emulation
+controls portable SIMD, not independent Go-copy optimization. Percentages remain
+relative to Scalar, so inspect GoCopy ns/op as the additional control.
+
+The fixed copy fixture deliberately contains non-finite values and NaN payloads.
+This operation preserves bits. Compare ArrayResultSHA256 with the input hash,
+rather than using NaN numeric equality or rounded printing. The [copy guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement)
+explains exact lengths, aliases, disjoint measured buffers and working sets.
 
 ## Report a useful issue
 

@@ -1,0 +1,540 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "copy",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkCopy$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261103-220415-4096345447",
+    "Environment": {
+      "ID": "benchmark-20261103-220415-4096345447/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-copy/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-03T22:04:15Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-copy/v1\ngroup: copy\nselection: \"^BenchmarkCopy$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-copy-float32-bits-v1\ncopy buffers: disjoint; exact in-place API supported; partial overlap unsupported\noutput: exact float32 bits; full ArrayResultSHA256 retained after timing\nlogical traffic: 8*n bytes/call\nnumerics: Exact input bits, including signed zero, subnormals, infinities and NaN payloads. Equal lengths required; mismatch leaves output unchanged. Empty succeeds. Disjoint storage or exact alias; partial overlap unsupported by the shared contract. Benchmarks use disjoint arrays and include validation, copying and tails. Scalar is a source-loop label; GoCopy uses compiler/runtime-selected Go copy. Logical bytes 8*n, not measured DRAM traffic.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 166.66666666666666,
+        "DurationNS": 500,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3072,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "go-copy",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "GoCopy",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/GoCopy-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "go-copy",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "GoCopy",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 66.66666666666667,
+        "DurationNS": 200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 7680,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/GoCopy-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 600,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2560,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-scalar-tail",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDTail",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/SIMDTail-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261103-220415-4096345447",
+          "EnvironmentID": "benchmark-20261103-220415-4096345447/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-copy/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Copy": {
+              "BitPolicyID": "float32-exact-bits/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "copy-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-scalar-tail",
+            "ArithmeticID": "float32-copy-bits-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-copy-float32-bits-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDTail",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkCopy/n=64/SIMDTail-16"
+      }
+    ]
+  }
+}

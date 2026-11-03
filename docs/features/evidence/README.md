@@ -1,5 +1,34 @@
 # F004 smoke evidence
 
+## Copy checkpoint — 2026-11-04
+
+`copy-vector.measurements.json` and `copy-sdk-emulated.measurements.json` were
+captured at 2026-11-03 22:04 UTC (2026-11-04 in Europe/Athens) on Windows/amd64,
+Go 1.27.3, GOEXPERIMENT=simd and GOMAXPROCS 16. Normal SDK execution used 256-bit /
+8-lane vectors; SDK emulation used 128-bit / 4 lanes. Source base was signed
+5bdef6d plus uncommitted copy changes; missing embedded VCS facts remain unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/copy-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/copy-emulated-checkpoint
+Remove-Item Env:GODEBUG
+```
+
+Restore any prior GODEBUG value. SDK emulation does not disable independent
+compiler/runtime Go-copy optimization. Each capture retains eight observations:
+four controls, two repetitions and exactly three iterations. Disjoint arrays
+contain 64 elements; logical work is 512 bytes per call. ArrayResultSHA256 is
+`ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273`
+for every output and equals the complete input hash. Exact-bit policy, actual
+SDK lanes, the fixed raw-bit generator and dedicated harness are retained.
+Hashing is outside timing; validation/copying/tails are inside. Different SDK
+contexts remain separate. Original numeric data, run IDs and UTC timestamps are
+preserved; only filenames, LF endings and trailing whitespace differ. These
+tiny captures verify plumbing without performance claims.
+See [the copy contract](../F004-copy.md).
+
 ## Packed-predicate checkpoint — 2026-11-03
 
 `packed-predicate-vector.measurements.json` and

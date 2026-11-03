@@ -3,7 +3,7 @@
 The predicate group creates a usable uint8 array: one byte per input element,
 exactly 1 when x > threshold and 0 otherwise. It adds Scalar and SIMDPartial,
 bringing that checkpoint to twelve operations/thirty-two implementations.
-[Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) now brings it to thirteen/thirty-four.
+[Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) brought it to thirteen/thirty-four; [copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) now brings it to fourteen/thirty-eight.
 
 This answers: how much does comparison plus producing a usable mask cost?
 The existing threshold group keeps numerical values or writes float32 zero;

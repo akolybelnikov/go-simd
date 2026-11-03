@@ -5,7 +5,7 @@ Existing affine still rounds its product before addition; dot remains unfused.
 That checkpoint brought the catalogue to ten operations and twenty-six implementations.
 [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) brought it to eleven/thirty with separate update/fold semantics.
 
-[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) brought the catalogue to twelve/thirty-two; [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) now brings it to thirteen/thirty-four.
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) brought the catalogue to twelve/thirty-two; [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) brought it to thirteen/thirty-four; [copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) now brings it to fourteen/thirty-eight.
 
 ## Run a fused experiment
 

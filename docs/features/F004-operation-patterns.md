@@ -1,8 +1,8 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export and packed-predicate checkpoints implemented**, 2026-11-03.
+Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export, packed-predicate and copy checkpoints implemented**, 2026-11-04.
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum, dot, fused affine, fused dot, byte and packed predicate export. The catalogue totals thirteen operations/thirty-four implementations.
+rangefilter, sum, dot, fused affine, fused dot, byte/packed predicate export and copy. The catalogue totals fourteen operations/thirty-eight implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
 [Accumulator comparison record](F004-accumulators.md) adds two/four-vector
@@ -11,8 +11,9 @@ arithmetic with corrected software and gated vector paths. The [fused-dot record
 adds FMA updates with ordinary merge/fold additions and actual per-case paths.
 [Predicate export](F004-predicate-export.md) adds canonical uint8 output with conversion/storage timed.
 [Packed export](F004-packed-predicate.md) adds LSB-first bits, normalized padding,
-physical output extents and timed packing. Three-array MulAdd, clamp, movement
-and other input types stay planned.
+physical output extents and timed packing. [Copy](F004-copy.md) adds an exact-bit
+movement baseline with Go's built-in control. Three-array MulAdd, clamp,
+reordering and other input types stay planned.
 
 ## Purpose and evidence
 
@@ -40,8 +41,9 @@ Ten new scalar/SIMD kernels add per-call broadcast constants, strict comparisons
 masking, IfElse selection and range-mask And composition. Existing addition variants compare partial vectors, full
 vectors/scalar tails, and per-call parallel work. The expression composes
 element-wise `Mul` and `Add`; it is neither a reduction nor an FMA benchmark.
-Loads, stores, and tails are exercised inside those kernels, not isolated as
-primitive latency experiments. Scalar parameter bits and predicate fixture
+Loads, stores and tails are also compared in a complete exact-copy experiment,
+with Scalar source-loop, GoCopy built-in, SIMDPartial and SIMDTail controls.
+It measures whole kernels, not isolated instruction latency. Scalar parameter bits and predicate fixture
 distributions are recorded. Sum now adds a genuine scalar-return path and one
 vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
 checked scalar returns and rounded products over two input arrays. Both reductions
@@ -61,7 +63,7 @@ and existing kernel timing paths are preserved.
 
 | Pattern | Present in the lab | Verified API / boundary | Proposed useful experiment |
 | --- | --- | --- | --- |
-| Contiguous load/operate/store | Yes, both operations | Portable full/partial loads and stores | Retain current arithmetic controls; add copy only to answer a movement question |
+| Contiguous load/operate/store | Implemented copy-f32 plus existing arithmetic | Partial/full portable loads/stores and Go copy control; exact bits, disjoint measured arrays | Determine when explicit SIMD copying helps versus compiler/runtime copy across working sets |
 | Broadcast scalar parameters | Implemented: scale/affine | `simd.BroadcastFloat32s` | Scalar/SIMD controls; no prepared-vector variant |
 | Comparisons / predicate output | Implemented comparisons and predicate-gt-f32 uint8 export | Greater/IfElse selects exact 0/1; ConvertToInt32/Store and valid byte writes | Canonical byte and packed LSB-first output implemented with timed conversion/packing/storage |
 | Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
@@ -101,11 +103,11 @@ matching both output and conversion boundaries.
    corrected binary32 reference and recorded vector/software gate. Fused dot is
    complete with four specified folds, software stripes preserving order and
    per-case vector/software/tail identity. Three-array MulAdd remains separate work.
-4. **Representation slice (byte and packed predicates complete):** canonical uint8
-   0/1 or LSB-first packed bits, typed physical output extent, valid tails,
-   conversion/extraction/packing/storage timed and full output digest after timing.
-   Stop after packed export. Copy/reorder, standalone conversions and M4 remain
-   separate work.
+4. **Representation/movement slice (byte/packed predicates and copy complete):**
+   canonical masks, typed physical output extents and complete post-timing output
+   digests. Exact copying adds Go's built-in control, partial/tail SIMD strategies
+   and disjoint-buffer timings with 8*n work. Stop after copy. Reordering,
+   standalone conversions and M4 remain separate work.
    Fixed-width permutes/horizontal primitives need explicit `archsimd` gates.
 5. **Purposeful numeric breadth:** add float64 or a narrow integer family for a
    documented question about rounding, saturation, conversion, or bit operations.

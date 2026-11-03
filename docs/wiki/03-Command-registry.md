@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 packed-predicate checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 copy checkpoint, reviewed 2026-11-04. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all thirteen groups. Positional arguments are
+group. No explicit selection means all fourteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact thirteen-row operation table.
+`-list` prints runtime context and a compact fourteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+Copy uses `8*n`: one float32 read and one float32 write with disjoint measured buffers.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
 Dot and dotfma use `8*n+4`: two input arrays and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
@@ -137,6 +138,28 @@ Use direct quoted selectors for exact byte-boundary sweeps. An unanchored
 Native BenchmarkPredicatePacked is in ./internal/patterns; -backend go-test
 records custom settings and exact child width/output facts.
 
+Copy has no operation-specific flags. Its fixed raw-bit fixture includes signed
+zero, non-finite values and NaN payloads. Scalar is a source loop, GoCopy uses
+compiler/runtime Go copy, and explicit SIMD has partial/tail strategies.
+Timings include validation and movement; full output hashing follows timing.
+See [the copy guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) for alias rules, controls and working sets.
+
+```powershell
+simdreport -list -group copy
+simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/copy
+```
+
+```bash
+make list ARGS="-group copy"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group copy -bench BenchmarkCopy/n=64 -format md"
+make run ARGS="-group copy"
+```
+
+Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
+variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
+selection includes all four controls. Percentages stay relative to Scalar.
+
 ## Quick comparison: simdbench
 
 Each strategy uses **1,048,576 generated float32 elements**. Go calibrates one
@@ -185,6 +208,7 @@ The outer `go run` process can also print `exit status 1`.
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
 | `predicate` | `BenchmarkPredicate` | `Scalar`, `SIMDPartial`; compare/select/convert/extract/byte stores included |
 | `predicatepack` | `BenchmarkPredicatePacked` | `Scalar`, `SIMDPartial`; valid-bit packing, normalization and stores included |
+| `copy` | `BenchmarkCopy` | `Scalar`, `GoCopy`, `SIMDPartial`, `SIMDTail`; exact bit movement |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dotfma` | `BenchmarkDotFMA` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4`; actual vector/software/tail path retained |

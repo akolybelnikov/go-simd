@@ -137,6 +137,13 @@ packed sequence including zeroed final padding. Physical output length is
 timed, hashing afterward. Byte-mask and packed series retain distinct output,
 operation, arithmetic and harness identities. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
 
+Copy uses `standalone-copy/v1`, with Case.Copy retaining exact-bit policy and
+actual process SDK lanes. ArrayResultSHA256 hashes every output float32's bits
+in little-endian order after timing; it equals x's input hash for correct copy.
+It is distinct from byte-mask output and last-element fused-affine evidence.
+Mixed bit policies/SDK widths cannot pool. Source labels do not prove physical
+instruction width; see [the copy guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
+
 ## Explicit developer backend
 
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
@@ -189,6 +196,13 @@ Packed predicates use `legacy-report-packed-predicate/v1` with the same strict
 child width/digest-word requirements, retaining the packed encoding. Compiled
 and native selectors share additional byte boundaries 7,9,63,65. Expected
 output or parent capabilities never substitute for child facts.
+
+Copy uses `legacy-report-copy/v1`. Strict child SDK width and eight exact output
+digest words retain full copied-bit evidence. Fresh fixed-input imports establish
+the copy generator/hash; historical unknown input stays unknown. Expected output
+does not replace a child digest. Percentages use the Scalar source-loop baseline;
+GoCopy remains an additional control. SDK emulation does not disable independent
+compiler/runtime copy optimization.
 
 ## Failure and sharing
 
