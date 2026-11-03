@@ -81,6 +81,16 @@ func (o Options) ValidateFor(op catalog.Operation) error {
 	if err := o.Validate(); err != nil {
 		return err
 	}
+	if op.ID == catalog.Clamp {
+		lo, hi := o.Float("lower"), o.Float("upper")
+		if !(lo <= hi) {
+			return fmt.Errorf("clamp bounds must be ordered and non-NaN")
+		}
+		_, below, above := o.clampValues()
+		if o.Pattern != "none" && !(below < lo) && !(above > hi) {
+			return fmt.Errorf("clamp cannot generate clipped values with these bounds; use -pattern none")
+		}
+	}
 	if IsPredicate(op) && o.Pattern != "none" {
 		_, value := o.predicateValues(op)
 		if !o.matches(op, value) {
@@ -130,6 +140,12 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.Clamp {
+		if o.Pattern == "shuffled" {
+			return fmt.Sprintf("clamp-float32-v1/shuffled/seed=%d", o.Seed)
+		}
+		return "clamp-float32-v1/" + o.Pattern
+	}
 	if op.ID == catalog.Copy {
 		return CopyGeneratorID
 	}
@@ -158,6 +174,9 @@ func (o Options) Generator(op catalog.Operation) string {
 }
 
 func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
+	if op.ID == catalog.Clamp {
+		return o.clampValue(i, n), 0
+	}
 	if op.ID == catalog.Copy {
 		return copyValue(i), 0
 	}

@@ -45,7 +45,7 @@ func TestExactLegacyKernelBindings(t *testing.T) {
 	if registered != len(want) || len(bindings) != len(want) {
 		t.Fatal("missing or orphaned executable bindings")
 	}
-	for _, pair := range [][2]string{{catalog.Add, "float64"}, {"clamp-f32", catalog.Float32}} {
+	for _, pair := range [][2]string{{catalog.Add, "float64"}, {"sqrt-f32", catalog.Float32}} {
 		if _, err := Lookup(pair[0], pair[1]); err == nil {
 			t.Fatalf("unavailable pair accepted: %v", pair)
 		}

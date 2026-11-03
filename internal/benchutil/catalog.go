@@ -25,6 +25,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 		benchmarkCopy(b, operation)
 		return
 	}
+	if operation.Descriptor.ID == catalog.Clamp {
+		benchmarkClamp(b, operation)
+		return
+	}
 	if operation.Descriptor.ID == catalog.PredicateGTPacked {
 		benchmarkPackedPredicate(b, operation)
 		return

@@ -145,6 +145,9 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 		if c.Operation.ID == catalog.Copy {
 			prepared.Run = c.Implementation.BindUnary(a, out)
 			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ID == catalog.Clamp {
+			prepared.Run = c.Implementation.BindConfigured(a, b, out, plan.Input)
+			prepared.RetainOutputAfterTiming = true
 		} else if c.Operation.ByteResult() {
 			prepared.Run = c.Implementation.BindUint8(a, byteOut, plan.Input)
 			prepared.ByteOutput = byteOut
@@ -202,6 +205,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			}
 			key.Case.Copy = identity
 		}
+		if c.Operation.ID == catalog.Clamp {
+			var vector simd.Float32s
+			identity, err := result.NewClampIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Clamp = identity
+		}
 		if c.Operation.ID == catalog.AffineFMA {
 			var vector simd.Float32s
 			identity, err := result.NewFMAIdentity(c.Implementation.Descriptor.ID, fmacap.Path(), vector.Len())
@@ -248,7 +259,7 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				digest := sha256.Sum256(byteOut)
 				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
 			}
-			if c.Operation.ID == catalog.Copy {
+			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat32(out, nil)
 			}
 			if c.Operation.ID == catalog.AffineFMA {

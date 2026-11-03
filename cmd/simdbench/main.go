@@ -220,6 +220,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.copyOutput = true
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; disjoint buffers; GoCopy uses Go compiler/runtime copy"
 		}
+		if descriptor.ID == catalog.Clamp {
+			item.copyOutput = true
+		}
 		if descriptor.ByteResult() {
 			length, err := descriptor.OutputElements(size)
 			if err != nil {

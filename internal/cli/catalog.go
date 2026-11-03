@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.Clamp {
+			fmt.Fprintln(&out, "clamp pattern: ordered clipped positions; remaining values include endpoints, zeros and unchanged NaN payloads")
+			fmt.Fprintln(&out, "SIMDMinMax includes outside-bound/tie/NaN repairs in timing; logical traffic 8*n bytes/call")
+		}
 		if op.ID == catalog.Copy {
 			fmt.Fprintf(&out, "fixture: %s\nlogical traffic model: 8*n bytes/call; disjoint float32 input/output\n", options.Generator(op))
 			fmt.Fprintln(&out, "controls: Scalar is a source loop; GoCopy uses compiler/runtime Go copy; source labels do not prove machine instruction selection")

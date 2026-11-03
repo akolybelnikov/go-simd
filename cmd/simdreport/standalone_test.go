@@ -82,6 +82,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone FMA context/result lost")
 				}
 			}
+			if group == "clamp" {
+				if len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Clamp.NativeLanes.Value != capture.Machine.Lanes || observation.Key.Case.Clamp.PolicyID != result.ClampPolicyID {
+					t.Fatal("standalone clamp output/identity lost")
+				}
+			}
 			if group == "copy" {
 				if observation.ArrayResultSHA256 != observation.Key.Case.Input.SHA256 || len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Copy.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone copy output/identity lost")

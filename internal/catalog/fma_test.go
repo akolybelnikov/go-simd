@@ -15,7 +15,7 @@ func TestFusedAffineDescriptor(t *testing.T) {
 	for _, entry := range All() {
 		count += len(entry.Variants)
 	}
-	if count != 38 {
+	if count != 41 {
 		t.Fatal("implementation inventory", count)
 	}
 }

@@ -29,6 +29,7 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
+	Clamp                                         ClampIdentity     `json:",omitzero"`
 	Copy                                          CopyIdentity      `json:",omitzero"`
 	Predicate                                     PredicateIdentity `json:",omitzero"`
 	FMA                                           FMAIdentity       `json:",omitzero"`
@@ -148,6 +149,7 @@ type Comparison struct {
 // comparisonContext omits strategy/workers for the legacy serial-scalar policy,
 // and size/fingerprint because the report intentionally sweeps input sizes.
 type comparisonContext struct {
+	Clamp                                      ClampIdentity
 	Copy                                       CopyIdentity
 	Predicate                                  PredicateIdentity
 	FMARounding                                string
@@ -162,7 +164,7 @@ type comparisonContext struct {
 
 func contextFor(k MeasurementKey) comparisonContext {
 	c := k.Case
-	return comparisonContext{c.Copy, c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
+	return comparisonContext{c.Clamp, c.Copy, c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
 		k.GOMAXPROCS, c.OperationID, c.TypeID, c.ArithmeticID,
 		c.Parameters, c.Input.GeneratorID, c.ExecutionMode}
 }

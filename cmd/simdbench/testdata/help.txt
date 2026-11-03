@@ -22,9 +22,9 @@ Options:
   -list
     	list implemented kernels and runtime capabilities without benchmarking
   -lower value
-    	float32 exclusive lower range bound (default -1)
+    	float32 lower bound (rangefilter exclusive; clamp inclusive) (default -1)
   -pattern string
-    	predicate fixture: none, all, alternating, clustered, shuffled (default "alternating")
+    	predicate/clamp fixture: none, all, alternating, clustered, shuffled (default "alternating")
   -seed uint
     	deterministic shuffled predicate seed (default 42)
   -sum-input string
@@ -32,7 +32,7 @@ Options:
   -threshold value
     	float32 threshold for threshold/selection/predicate
   -upper value
-    	float32 exclusive upper range bound (default 1)
+    	float32 upper bound (rangefilter exclusive; clamp inclusive) (default 1)
 
 Examples:
   simdbench -list
