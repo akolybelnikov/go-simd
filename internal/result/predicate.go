@@ -34,11 +34,19 @@ func NewPredicateIdentity(lanes int) (PredicateIdentity, error) {
 // Eight exact uint32 metrics encode the SHA-256 digest in big-endian word order.
 // This pure importer never substitutes expected/parent output for child facts.
 func predicateDigest(metrics map[string]Metric) (string, error) {
+	digest, err := outputDigest(metrics)
+	if err != nil {
+		return "", fmt.Errorf("predicate %w", err)
+	}
+	return digest, nil
+}
+
+func outputDigest(metrics map[string]Metric) (string, error) {
 	var digest [32]byte
 	for i := 0; i < 8; i++ {
 		m := metrics[fmt.Sprintf("output-sha256-%d", i)]
 		if !m.Available || !finite(m.Value) || m.Value < 0 || m.Value > math.MaxUint32 || math.Trunc(m.Value) != m.Value {
-			return "", fmt.Errorf("predicate requires eight exact uint32 output-sha256 metrics")
+			return "", fmt.Errorf("requires eight exact uint32 output-sha256 metrics")
 		}
 		binary.BigEndian.PutUint32(digest[i*4:], uint32(m.Value))
 	}

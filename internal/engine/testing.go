@@ -21,6 +21,9 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 	}
 	scalar := p.Reduce != nil || p.ReduceChecked != nil
 	bytes := p.ByteOutput != nil
+	if p.RetainOutputAfterTiming && (bytes || scalar || p.Scalar != nil) {
+		return Sample{}, fmt.Errorf("invalid retained array benchmark")
+	}
 	if p.Bytes < 0 || (bytes && (scalar || p.Scalar != nil || p.Output != nil || p.Run == nil || len(p.ByteOutput) == 0)) || (!bytes && !scalar && (p.Run == nil || len(p.Output) == 0)) || (scalar && (p.Scalar == nil || p.Run != nil || p.Output != nil)) || (p.Reduce != nil && p.ReduceChecked != nil) {
 		return Sample{}, fmt.Errorf("invalid prepared benchmark")
 	}
@@ -33,6 +36,9 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 		return Sample{}, err
 	}
 	defer timing.Value.Set(previous)
+	if p.RetainOutputAfterTiming {
+		return measureRetainedArray(p)
+	}
 	if bytes {
 		var runErr error
 		stats := testing.Benchmark(func(b *testing.B) {

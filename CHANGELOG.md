@@ -5,6 +5,41 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 7 — Exact copy and movement controls — 2026-11-04
+
+- Added copy / copy-f32 / BenchmarkCopy with Scalar source loop, GoCopy built-in
+  control, SIMDPartial and SIMDTail: fourteen operations/thirty-eight implementations.
+- Preserve all float32 bits, including signed zeros, subnormals, infinities and
+  quiet/signaling NaN payloads. Require equal lengths before writes; empty/nil
+  succeeds. Support disjoint storage/exact alias, with partial overlap outside
+  the shared contract. Benchmarks use disjoint input/output.
+- Include validation, movement, loop control and tails in timing. Retain the
+  complete output after timing under dedicated copy callbacks/harnesses; original
+  numerical/predicate callbacks retain their measurement boundaries.
+- Add typed BindUnary preparation with one real input and output, no fabricated
+  second input or parameters. Fixed generated-copy-float32-bits-v1 fixtures
+  preserve raw special-value bits; other operation options leave them unchanged.
+- Account for 8*n logical bytes; record Case.Copy's exact-bit policy and actual
+  SDK lanes. Retain ArrayResultSHA256 over every little-endian float32 output bit
+  after measurement. Import strict child SDK width and eight digest words; keep
+  historical unknown input unknown and reject incompatible bit policies/widths.
+- Keep Scalar as the source-loop baseline, copy-source-loop/v1, with GoCopy as an
+  additional optimized control. Label compiler/runtime-selected behavior clearly;
+  SDK emulation does not disable Go built-in-copy optimization.
+- Verify random/raw special bits, offset/native/tail/large lengths, exact aliases,
+  input/canary preservation, length errors before writes and zero allocations.
+  Cover unary bindings, streamed fingerprints, irrelevant flags, strict native
+  facts, partial captures and timing restoration.
+- Verify four-label compiled/native identity/output parity at vector boundaries
+  and larger sizes, including SDK emulation. Include GoCopy in all-format exports;
+  keep compact-list validation at one row per registered operation.
+- Pass full tests/vet, pure packages, no-Go/all-group standalone execution and
+  Go/installed/Make examples. Extend Windows/Linux native copy smoke checks and
+  Linux SDK-emulation parity. Add examples/copy, feature/evidence records and
+  Wiki chapter 21 with consistent commands, controls and interpretation.
+- Stop after copy. Clamp, reordering, three-array MulAdd, standalone conversions,
+  other input types and architecture M4 remain separate work.
+
 ### F004 slice 6 — Packed predicate masks — 2026-11-03
 
 - Added predicatepack / predicate-gt-packed-f32 / BenchmarkPredicatePacked

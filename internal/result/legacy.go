@@ -23,6 +23,7 @@ const LegacyFMAHarnessID = "legacy-report-affine-fma/v1"
 const LegacyDotFMAHarnessID = "legacy-report-dot-fma/v1"
 const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
+const LegacyCopyHarnessID = "legacy-report-copy/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -159,6 +160,23 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		}
 		var arrayBits *uint32
 		byteDigest := ""
+		arrayDigest := ""
+		if knownOp && op.ID == catalog.Copy {
+			harness = LegacyCopyHarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("copy requires an integer simd-lanes metric")
+			}
+			identity, err := NewCopyIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Copy = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, fmt.Errorf("copy %w", err)
+			}
+		}
 		if knownOp && op.ByteResult() {
 			harness = LegacyPredicateHarnessID
 			lanes := metrics["simd-lanes"]
@@ -236,14 +254,18 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
 			if !ok {
-				if !op.Parameterized() && !op.ScalarResult() {
+				if op.ID == catalog.Copy {
+					fingerprint = input.FingerprintForOperation(op, size, input.DefaultOptions())
+				} else if !op.Parameterized() && !op.ScalarResult() {
 					fingerprint = input.GeneratedFloat32Fingerprint(size)
 				} else if options.InputOptions != nil {
 					fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
 				}
 				fingerprints[cacheKey] = fingerprint
 			}
-			if !op.Parameterized() && !op.ScalarResult() {
+			if op.ID == catalog.Copy {
+				c.Input = InputIdentity{input.CopyGeneratorID, fingerprint}
+			} else if !op.Parameterized() && !op.ScalarResult() {
 				c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}
 			} else if options.InputOptions != nil {
 				c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
@@ -264,6 +286,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			ScalarResultBits:    scalarBits,
 			ArrayResultLastBits: arrayBits,
 			ByteResultSHA256:    byteDigest,
+			ArrayResultSHA256:   arrayDigest,
 		})
 	}
 	if err := scanner.Err(); err != nil {

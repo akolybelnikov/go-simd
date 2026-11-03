@@ -82,6 +82,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone FMA context/result lost")
 				}
 			}
+			if group == "copy" {
+				if observation.ArrayResultSHA256 != observation.Key.Case.Input.SHA256 || len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Copy.NativeLanes.Value != capture.Machine.Lanes {
+					t.Fatal("standalone copy output/identity lost")
+				}
+			}
 			if group == "predicate" || group == "predicatepack" {
 				if len(observation.ByteResultSHA256) != 64 || observation.Key.Case.Predicate.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone byte output/width lost")

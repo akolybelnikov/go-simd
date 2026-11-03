@@ -27,11 +27,12 @@ jobs:
         env:
           GODEBUG: simd=0
         run: |
-          go test ./internal/patterns ./internal/reduction ./internal/catalog/kernels ./internal/engine -count=1
+          go test ./internal/patterns ./internal/reduction ./internal/movement ./internal/catalog/kernels ./internal/engine -count=1
           go test ./cmd/simdreport -run='^TestFMAResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestDotFMAResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestPredicateResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestPackedPredicateResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestCopyResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -47,3 +48,5 @@ jobs:
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicate$/^n=(1|8|16)$' -benchtime=1x
       - name: Check packed predicate export
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicatePacked$/^n=(7|8|9|63|64|65)$' -benchtime=1x
+      - name: Check copy controls
+        run: go test ./internal/movement -run='^$' -bench='^BenchmarkCopy$/^n=(1|8|16|65536)$' -benchtime=1x

@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.Copy {
+			fmt.Fprintf(&out, "fixture: %s\nlogical traffic model: 8*n bytes/call; disjoint float32 input/output\n", options.Generator(op))
+			fmt.Fprintln(&out, "controls: Scalar is a source loop; GoCopy uses compiler/runtime Go copy; source labels do not prove machine instruction selection")
+		}
 		bytes, err := op.LogicalBytes(1)
 		if err != nil {
 			return err
@@ -103,6 +107,12 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 					default:
 						mode = "unknown FMA32 gate"
 					}
+				}
+			}
+			if op.ID == catalog.Copy && !variant.UsesSIMD {
+				mode = "source loop (compiler-selected)"
+				if variant.ID == catalog.GoCopy {
+					mode = "Go builtin (compiler/runtime)"
 				}
 			}
 			if op.ID == catalog.AffineFMA {
