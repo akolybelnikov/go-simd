@@ -51,6 +51,9 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 			inputs = append(inputs, describeValue(value))
 		}
 		fmt.Fprintf(&out, "inputs: %s\noutput: %s\nscalar parameters: %d\n", strings.Join(inputs, ", "), describeValue(op.Output), len(op.Parameters))
+		if op.ScalarResult() {
+			fmt.Fprintf(&out, "fixture: %s\nlogical traffic model: 4*n + 4 bytes/call\nnumerics: %s\n", options.Generator(op), op.NumericalPolicy)
+		}
 		if op.Parameterized() {
 			for _, p := range op.Parameters {
 				fmt.Fprintf(&out, "  %s: %g (float32 bits 0x%08x)\n", p.Name, options.Float(p.Name), options.Bits(p.Name))

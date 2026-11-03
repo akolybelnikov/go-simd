@@ -9,12 +9,14 @@ import (
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/computation"
 	"github.com/akolybelnikov/go-simd/internal/input"
+	"github.com/akolybelnikov/go-simd/internal/reduction"
 )
 
 type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
+	BindScalar     func(x []float32) func() float32
 	BindConfigured func(a, b, out []float32, options input.Options) func() error
 	Descriptor     catalog.Variant
 	Run            Float32Kernel
@@ -68,6 +70,19 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.Sum {
+			var bind func([]float32) func() float32
+			switch variant.ID {
+			case catalog.Scalar:
+				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumScalar(x) } }
+			case catalog.SIMDStriped:
+				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumSIMD(x) } }
+			default:
+				return Operation{}, fmt.Errorf("missing sum binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindScalar: bind})
+			continue
+		}
 		if descriptor.Parameterized() {
 			bind, ok := configuredBindings[bindingKey{id, variant.ID}]
 			if !ok {

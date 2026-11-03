@@ -18,7 +18,7 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 	if err := (Config{Count: 1, Benchtime: benchtime}).Validate(); err != nil {
 		return Sample{}, err
 	}
-	if p.Run == nil || len(p.Output) == 0 || p.Bytes < 0 {
+	if p.Bytes < 0 || (p.Reduce == nil && (p.Run == nil || len(p.Output) == 0)) || (p.Reduce != nil && (p.Scalar == nil || p.Run != nil || p.Output != nil)) {
 		return Sample{}, fmt.Errorf("invalid prepared benchmark")
 	}
 	benchmarkMu.Lock()
@@ -30,6 +30,21 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 		return Sample{}, err
 	}
 	defer timing.Value.Set(previous)
+	if p.Reduce != nil {
+		stats := testing.Benchmark(func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(p.Bytes)
+			b.ResetTimer()
+			var value float32
+			for i := 0; i < b.N; i++ {
+				value = p.Reduce()
+			}
+			b.StopTimer()
+			*p.Scalar = value
+			sink = value
+		})
+		return Sample{stats.N, stats.T, stats.MemAllocs, stats.MemBytes}, nil
+	}
 	var runErr error
 	stats := testing.Benchmark(func(b *testing.B) {
 		b.ReportAllocs()

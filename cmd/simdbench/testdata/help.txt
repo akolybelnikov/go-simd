@@ -23,6 +23,8 @@ Options:
     	predicate fixture: none, all, alternating, clustered, shuffled (default "alternating")
   -seed uint
     	deterministic shuffled predicate seed (default 42)
+  -sum-input string
+    	sum fixture: balanced, cancellation, mixed-magnitude (default "balanced")
   -threshold value
     	float32 threshold for threshold/selection
   -upper value

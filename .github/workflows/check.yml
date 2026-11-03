@@ -19,16 +19,16 @@ jobs:
       - name: Check formatting
         shell: bash
         run: |
-          files=$(gofmt -l cmd internal)
+          files=$(gofmt -l cmd internal examples)
           if [ -n "$files" ]; then printf '%s\n' "$files"; exit 1; fi
       - run: go test ./...
       - run: go vet ./...
-      - name: Check portable pattern emulation
+      - name: Check portable kernel emulation
         env:
           GODEBUG: simd=0
-        run: go test ./internal/patterns ./internal/catalog/kernels -count=1
+        run: go test ./internal/patterns ./internal/reduction ./internal/catalog/kernels ./internal/engine -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
       - name: Check filtered benchmark
-        run: go test ./internal/addition ./internal/computation -run='^$' -bench='^Benchmark(Addition|Computation)$/^n=1$/^Scalar$' -benchtime=1x
+        run: go test ./internal/addition ./internal/computation ./internal/reduction -run='^$' -bench='^Benchmark(Addition|Computation|Sum)$/^n=1$/^Scalar$' -benchtime=1x

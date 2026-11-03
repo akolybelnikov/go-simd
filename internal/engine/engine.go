@@ -3,7 +3,9 @@ package engine
 
 import (
 	"fmt"
+	"math"
 	"runtime"
+	"simd"
 	"strconv"
 	"strings"
 	"time"
@@ -92,6 +94,8 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
+	Reduce func() float32
+	Scalar *float32
 	Run    func() error
 	Output []float32
 	Bytes  int64
@@ -113,6 +117,7 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 	}
 	procs := runtime.GOMAXPROCS(0)
 	var a, b, out []float32
+	var scalar float32
 	previous := -1
 	fingerprint := ""
 	for _, c := range plan.Cases {
@@ -126,6 +131,11 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
 		if c.Operation.Parameterized() {
 			prepared.Run = c.Implementation.BindConfigured(a, b, out, plan.Input)
+		}
+		if c.Operation.ScalarResult() {
+			prepared.Run = nil
+			prepared.Reduce = c.Implementation.BindScalar(a)
+			prepared.Scalar = &scalar
 		}
 		workers, known := c.Implementation.Descriptor.WorkerCount(c.Elements, procs)
 		key := result.MeasurementKey{
@@ -141,6 +151,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				Workers:       result.OptionalInt{Value: workers, Known: known},
 				ExecutionMode: c.Operation.ExecutionMode,
 			},
+		}
+		if c.Operation.ScalarResult() {
+			var vector simd.Float32s
+			fold, err := result.SumFold(c.Implementation.Descriptor.ID, vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Reduction = fold
 		}
 		for repetition := 1; repetition <= plan.Config.Count; repetition++ {
 			sample, err := backend.Measure(prepared, plan.Config.Benchtime)
@@ -164,6 +182,10 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				AllocsPerOp:      result.Metric{Value: float64(sample.MemAllocs) / n, Available: true},
 				MegabytesPerSec:  throughput, SourceBenchmark: fmt.Sprintf("%s-%d", c.Name, procs),
 			})
+			if c.Operation.ScalarResult() {
+				bits := math.Float32bits(scalar)
+				run.Observations[len(run.Observations)-1].ScalarResultBits = &bits
+			}
 		}
 	}
 	return run, nil

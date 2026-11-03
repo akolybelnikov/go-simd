@@ -28,8 +28,9 @@ type options struct {
 }
 
 type variant struct {
-	name string
-	run  func() error
+	reduce func() float32
+	name   string
+	run    func() error
 }
 
 type result struct {
@@ -38,6 +39,7 @@ type result struct {
 }
 
 type benchmarkGroup struct {
+	scalar       *float32
 	output       []float32
 	name         string
 	logicalBytes int64
@@ -71,16 +73,32 @@ func run(args []string, stdout, stderr io.Writer) error {
 		results := make([]result, 0, len(group.variants))
 		for _, item := range group.variants {
 			var runErr error
-			stats := testing.Benchmark(func(b *testing.B) {
-				b.ReportAllocs()
-				b.SetBytes(group.logicalBytes)
-				for i := 0; i < b.N; i++ {
-					if runErr = item.run(); runErr != nil {
-						b.Fatal(runErr)
+			var stats testing.BenchmarkResult
+			if item.reduce != nil {
+				stats = testing.Benchmark(func(b *testing.B) {
+					b.ReportAllocs()
+					b.SetBytes(group.logicalBytes)
+					b.ResetTimer()
+					var value float32
+					for i := 0; i < b.N; i++ {
+						value = item.reduce()
 					}
-				}
-				benchmarkSink = group.output[len(group.output)-1]
-			})
+					b.StopTimer()
+					*group.scalar = value
+					benchmarkSink = value
+				})
+			} else {
+				stats = testing.Benchmark(func(b *testing.B) {
+					b.ReportAllocs()
+					b.SetBytes(group.logicalBytes)
+					for i := 0; i < b.N; i++ {
+						if runErr = item.run(); runErr != nil {
+							b.Fatal(runErr)
+						}
+					}
+					benchmarkSink = group.output[len(group.output)-1]
+				})
+			}
 			if runErr != nil {
 				return fmt.Errorf("%s %s benchmark: %w", group.name, item.name, runErr)
 			}
@@ -146,17 +164,25 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			return nil, err
 		}
 		x, y, resultOut := a, b, out
-		if descriptor.Parameterized() {
+		if descriptor.Parameterized() || descriptor.ScalarResult() {
 			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
 		} else if out == nil {
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
 			x, y, resultOut = a, b, out
 		}
 		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
+		if descriptor.ScalarResult() {
+			item.scalar = new(float32)
+			item.name += "\nfixture: " + options.Generator(descriptor)
+		}
 		if descriptor.Parameterized() {
 			item.name += "\n" + cli.InputSummary(options.Identity(descriptor), options.Generator(descriptor))
 		}
 		for _, implementation := range operation.Implementations {
+			if descriptor.ScalarResult() {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, reduce: implementation.BindScalar(x)})
+				continue
+			}
 			var call func() error
 			if descriptor.Parameterized() {
 				call = implementation.BindConfigured(x, y, resultOut, options)
