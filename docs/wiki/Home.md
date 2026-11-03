@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / F004 predicate-export checkpoint, reviewed 2026-11-03.
+**Guide baseline:** architecture M3 / F004 packed-predicate checkpoint, reviewed 2026-11-03.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -31,6 +31,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Compare fused affine and inspect true float32 rounding | [17 — Fused affine and rounding](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding) |
 | Compare fused dot updates, accumulator orders and actual execution paths | [18 — Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) |
 | Export ordered predicates as usable uint8 0/1 masks | [19 — Predicate export and byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) |
+| Compare byte masks with compact packed-bit output | [20 — Packed predicate masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) |
 
 ## What you can do today
 
@@ -50,6 +51,8 @@ explicitly. This guide grows alongside each delivered feature.
   software tails and per-case execution paths.
 - Export a canonical byte mask with scalar/SIMD comparisons, timed conversion
   and stores, and complete output digests outside timing.
+- Pack eight predicates per byte with defined LSB-first order, zero final padding,
+  timed conversion/packing and physical output-size accounting.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
 - Inspect registered operations and live SIMD context with either CLI's `-list`.
 - Run installed commands on a compatible local or remote machine without Go.
@@ -93,6 +96,7 @@ useful repeated measurement.
 | 2026-11-03 | F004 fused affine: one-rounding reference, double-rounding counterexamples and explicit vector/software evidence; ten operations/twenty-six implementations |
 | 2026-11-03 | F004 fused dot: corrected FMA updates, four specified folds, actual vector/software/tail paths and shared fusion-sensitive fixture; eleven operations/thirty implementations |
 | 2026-11-03 | F004 predicate export: typed uint8 output, canonical 0/1, valid tail writes, complete output digests and 5*n accounting; twelve operations/thirty-two implementations |
+| 2026-11-03 | F004 packed predicates: LSB-first bits, zero padding, exact storage extent, timed packing, byte-boundary sweeps and complete output evidence; thirteen operations/thirty-four implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

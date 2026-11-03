@@ -1,5 +1,13 @@
 # 08 — Using the kernels in Go
 
+Packed predicates add patterns.PredicateGTPackedScalar and PredicateGTPackedSIMD:
+`(x []float32,out []uint8,threshold float32) error`. Allocate exactly ceil(n/8)
+output bytes. Input i maps to bit i%8 of byte i/8, least-significant bit first.
+Unused high bits are zero and all bytes are overwritten. Wrong output length
+returns patterns.ErrLengthMismatch before writes; empty/nil succeeds. Input is
+preserved and storage must be disjoint. Run `go run ./examples/predicatepack`;
+see [the packed-mask guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for decoding, timing and evidence.
+
 Byte-mask export uses patterns.PredicateGTScalar and patterns.PredicateGTSIMD:
 `(x []float32,out []uint8,threshold float32) error`. Allocate one output byte
 per input element; true writes 1, equality/NaN writes 0. Length mismatch returns

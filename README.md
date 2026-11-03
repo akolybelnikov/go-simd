@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: twelve operations and thirty-two scalar/SIMD
+An experimental Go SIMD laboratory: thirteen operations and thirty-four scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -82,6 +82,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
 | predicate | `x > threshold ? uint8(1) : uint8(0)` | Scalar, SIMDPartial; conversion and byte stores included |
+| predicatepack | Same predicate packed LSB first, eight bits per byte | Scalar, SIMDPartial; conversion, packing and stores included |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dotfma | FMA updates with specified merge/fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4; actual path recorded |
@@ -93,7 +94,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | --- | --- | --- |
 | `-alpha` | `1.5` | Scale and affine/affinefma multiplier |
 | `-beta` | `-0.5` | Affine/affinefma offset; group defines fusion |
-| `-threshold` | `0` | Threshold, selection and predicate export |
+| `-threshold` | `0` | Threshold, selection and byte/packed predicate export |
 | `-lower`, `-upper` | `-1`, `1` | Exclusive range bounds |
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
@@ -121,6 +122,16 @@ digest after timing. See [predicate export](https://github.com/akolybelnikov/go-
 ```powershell
 go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/predicate
+```
+
+Packed export adds `predicatepack`: input i maps to bit i%8 of byte i/8.
+Output occupies `ceil(n/8)` bytes with zeroed unused high bits. Timings include
+conversion and packing; logical work is `4*n+ceil(n/8)`. Both representations
+share input recipes but retain distinct output identities. Run
+`go run ./examples/predicatepack`; see [packed masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
+
+```powershell
+go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 3 -benchtime 100ms -format md
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
@@ -258,7 +269,7 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md), are complete. Three-array MulAdd, clamp, packed-mask export
+and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), are complete. Three-array MulAdd, clamp, movement
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
