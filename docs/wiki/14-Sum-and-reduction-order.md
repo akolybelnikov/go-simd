@@ -1,8 +1,9 @@
 # 14 — Sum and reduction order
 
-Sum is F004's next bounded checkpoint: one float32 input array, one returned
-float32. The catalogue now has eight operations and eighteen implementations.
-Dot product and multiple-accumulator experiments remain planned.
+Sum's F004 checkpoint added one float32 input array and one returned float32,
+bringing the catalogue to eight operations/eighteen implementations. The later
+[dot checkpoint](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
+raises that to nine/twenty. Multiple-accumulator experiments remain planned.
 
 ## Run sum
 

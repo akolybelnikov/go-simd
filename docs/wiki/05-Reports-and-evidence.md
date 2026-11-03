@@ -51,6 +51,7 @@ commas, quotes and embedded newlines. Absent scalar is not a measured zero.
 | `group` | Measured group |
 | `config` | Normalized `count`, `benchtime`, `bench`, optional `input` (scalar uint32 bits, pattern and seed) |
 | `config.input.SumInput` | Sum fixture name; balanced, cancellation or mixed-magnitude |
+| `config.input.DotInput` | Dot fixture name; balanced, cancellation or mixed-magnitude |
 | `machine` | Measuring process's Go/OS/architecture, vector bits/lanes, emulation, GOMAXPROCS, source revision/modified state and embedded Go build information |
 | `run` | Typed run and individual observations; model fields retain Go names in v1, e.g. `Observations` and `DurationNS` |
 
@@ -79,6 +80,13 @@ See [the sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-red
 for decoding and numerical examples. These additive v1 fields are omitted from
 array observations when absent; historical captures remain readable.
 
+Dot uses `standalone-dot/v1` and checked float32/error callbacks. It rounds
+products before accumulation, includes length validation and final fold in
+timing, and retains the last successful result once after timing. It uses the
+same optional bit/fold fields with distinct arithmetic/order identities. Errors
+propagate, keeping prior observations without appending a failed value. See
+[the dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
+
 CPU model detection is explicitly `unknown`. Missing embedded VCS information
 also stays `unknown`; `go run` and copied builds can lack it. Build settings come
 from the executable, without runtime `go env`. This is a minimal versioned
@@ -104,6 +112,10 @@ Sum uses `legacy-report-reduction/v1`. Its native `result-bits` and `simd-lanes`
 metrics retain exact scalar bits and the child process's width outside timing;
 missing, fractional or out-of-range metrics are rejected.
 
+Dot uses `legacy-report-dot/v1` with the same strict metric requirements. The
+reported width comes from the child process. The report selects only dot's
+validated leaves from its native package, which also contains sum.
+
 Legacy text retains tool/environment output, repetitions, iterations, displayed
 timing, allocations and throughput. It cannot recover exact duration from rounded
 ns/op and lacks complete build/emulation identity. Parent metadata does not
@@ -111,7 +123,8 @@ establish child capabilities. Historical fingerprints stay unknown; old evidence
 is never silently converted. Both backends feed the same summary renderers, but
 their results must remain separate series because harness/precision differ.
 Throughput is descriptor-specific logical work: `8*n` for unary patterns and
-`12*n` for the binary operations and `4*n+4` for sum, not measured DRAM traffic.
+`12*n` for binary array-output operations, `4*n+4` for sum and `8*n+4` for dot,
+not measured DRAM traffic.
 
 ## Failure and sharing
 

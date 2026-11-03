@@ -3,7 +3,8 @@
 F004's first slice adds five operations with matching Scalar/SIMDPartial controls.
 That slice brought the lab to seven operations and sixteen implementations.
 The [sum checkpoint](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
-now raises the total to eight/eighteen. Inspect the short
+raised that to eight/eighteen; [dot](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
+now brings it to nine/twenty. Inspect the short
 catalogue with either CLI's `-list`; add `-group` for details and current values.
 
 ## Choose an experiment

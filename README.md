@@ -1,8 +1,8 @@
 # go-simd
 
-An experimental Go SIMD laboratory: eight operations and eighteen scalar/SIMD
+An experimental Go SIMD laboratory: nine operations and twenty scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
-expression, broadcast scale/affine, predicate-based masking/selection and sum. Run a quick
+expression, broadcast scale/affine, predicate-based masking/selection, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
 on hardware, toolchain, size and background load; SIMD can be slower.
 
@@ -81,6 +81,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped |
+| dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped |
 
 Both commands accept these fixture/parameter options. Each operation uses only its declared
 parameters; exact float32 bits and relevant fixture identity survive in evidence.
@@ -94,6 +95,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
+| `-dot-input` | `balanced` | Dot fixture: balanced, cancellation, mixed-magnitude |
 
 ```powershell
 go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench '^BenchmarkSelection$/^n=1024$' -count 3 -benchtime 100ms -format md
@@ -116,6 +118,17 @@ individual results and fold identities survive in evidence. See the
 ```powershell
 go run ./cmd/simdreport -group sum -sum-input cancellation -bench '^BenchmarkSum$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/sum
+```
+
+Dot multiplies two inputs, rounds each product before addition, and returns
+`(float32,error)`. Scalar/SIMDStriped follow specified folds without FMA; unequal
+lengths return `reduction.ErrLengthMismatch`. Logical work is `8*n+4` bytes.
+The [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
+explains fixtures, unfused rounding and result evidence.
+
+```powershell
+go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/dot
 ```
 
 `simdbench` measures a fixed 1,048,576-element input and prints a quick table.
@@ -198,14 +211,15 @@ kernel examples, recipes, numerical contracts, troubleshooting and credited SIMD
 reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md)
 and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
-[ordered sum checkpoint](docs/features/F004-sum.md) are complete;
-dot product, FMA, clamp, packed-mask export and new types remain planned.
+[ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
+checkpoints are complete. Multiple accumulators, FMA, clamp, packed-mask export
+and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
 Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
-[patterns](internal/patterns/README.md) and [sum](internal/reduction/README.md).
+[patterns](internal/patterns/README.md) and [reductions](internal/reduction/README.md).
 The array-output kernels support disjoint output and
 exact in-place aliases; partial overlap is unsupported and length errors leave
 output unchanged. These internal packages are not a stable public API.
