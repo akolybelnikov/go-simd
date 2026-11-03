@@ -7,6 +7,7 @@ import (
 	"simd"
 
 	"github.com/akolybelnikov/go-simd/internal/evidence"
+	"github.com/akolybelnikov/go-simd/internal/fmacap"
 )
 
 type Info = evidence.Machine
@@ -14,6 +15,7 @@ type Info = evidence.Machine
 func Current() Info {
 	var vector simd.Float32s
 	i := Info{GoVersion: runtime.Version(), OS: runtime.GOOS, Arch: runtime.GOARCH, CPU: "unknown", Bits: simd.VectorBitSize(), Lanes: vector.Len(), Procs: runtime.GOMAXPROCS(0), Emulated: simd.Emulated(), SourceRevision: "unknown", SourceModified: "unknown"}
+	i.FMA32Path = fmacap.Path()
 	if build, ok := debug.ReadBuildInfo(); ok {
 		i.Build = build
 		for _, setting := range build.Settings {

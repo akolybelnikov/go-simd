@@ -5,6 +5,41 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 3 — Correctly rounded fused affine — 2026-11-03
+
+- Added affinefma / affine-fma-f32 / BenchmarkAffineFMA with software Scalar
+  and SIMDPartial under one binary32 round-to-nearest ties-to-even contract.
+  Existing affine, computation, dot and reduction kernels remain unchanged.
+- Added an ordinary-source software FMA32 primitive: exact binary64 product,
+  error-free TwoSum and round-to-odd correction before narrowing. This avoids
+  widened math.FMA double rounding at normal, subnormal and overflow boundaries;
+  tests use an independent rational oracle and explicit special/signed-zero rules.
+- Inspected the SDK's unfused emulated MulAdd. Added an out-of-timing startup
+  gate for native fused rounding; emulation/failed probes use an explicitly
+  recorded corrected software path. Scalar always uses that software reference.
+  Listing and quick/report output expose actual vector/software execution.
+- Added separate FMA harness IDs, machine.fma32_path, Case.FMA path/rounding/
+  process-width facts and optional last-output uint32 bits to v1 evidence. Native
+  metrics establish child facts, reject malformed/conflicting paths and avoid
+  parent capability inference. Mixed vector paths/widths cannot pool.
+- Shared -fma-input balanced/rounding/mixed-magnitude plus existing alpha/beta
+  through installed/Go/Make launchers. One input plus output accounts for 8*n
+  logical bytes; broadcasts are not extra arrays. Catalogue: ten operations,
+  twenty-six implementations. Historical absent FMAInput normalizes to balanced.
+- Preserved original native pattern callbacks by isolating FMA metric reporting.
+  Length checks, dispatch, correction or vector broadcasts/arithmetic/output and
+  original array retention remain timed; gate/preparation/metric encoding do not.
+- Tested 30,000 random triples/sign inversions, special values and midpoint
+  counterexamples; fused/unfused distinctions, vector/tail boundaries, aliases,
+  canaries, length errors and zero per-call allocations. Compiled/native fixture
+  parity, exact path/last-result retention, invalid-option/no-artifact behavior,
+  nonfinite JSON and no-Go/source standalone checks pass.
+- Full tests/vet, pure packages and forced-emulation paths pass; CI checks native
+  FMA smoke and software-path report parity. Added examples, vector/software
+  smoke captures, numerical contract and Wiki chapter with arithmetic references
+  while retaining Jesús Espino's original article credit.
+- Stopped after fused affine. Fused dot, three-array MulAdd and M4 remain pending.
+
 ### F004 slice 2c — Multiple reduction accumulators — 2026-11-03
 
 - Added SIMDStriped2/4 for sum and unfused dot, with explicitly unrolled 2/4-vector

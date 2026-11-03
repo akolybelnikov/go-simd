@@ -8,11 +8,13 @@ Options:
   -alpha value
     	float32 scale/affine multiplier (broadcast per call) (default 1.5)
   -beta value
-    	float32 affine offset (unfused) (default -0.5)
+    	float32 affine offset (group defines fusion) (default -0.5)
   -computation
     	alias for -group computation
   -dot-input string
     	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
+  -fma-input string
+    	fused affine fixture: balanced, rounding, mixed-magnitude (default "balanced")
   -function string
     	deprecated alias: add, compute, or all
   -group string

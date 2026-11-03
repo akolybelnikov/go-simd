@@ -9,6 +9,14 @@ import (
 // Scalar extraction/binding is prepared once, while each kernel's broadcasts
 // and length validation occur per measured call. No vectors cross this seam.
 var configuredBindings = map[bindingKey]func([]float32, []float32, []float32, input.Options) func() error{
+	{catalog.AffineFMA, catalog.Scalar}: func(a, b, out []float32, o input.Options) func() error {
+		alpha, beta := o.Float("alpha"), o.Float("beta")
+		return func() error { return patterns.AffineFMAScalar(a, out, alpha, beta) }
+	},
+	{catalog.AffineFMA, catalog.SIMDPartial}: func(a, b, out []float32, o input.Options) func() error {
+		alpha, beta := o.Float("alpha"), o.Float("beta")
+		return func() error { return patterns.AffineFMASIMD(a, out, alpha, beta) }
+	},
 	{catalog.Scale, catalog.Scalar}: func(a, b, out []float32, o input.Options) func() error {
 		alpha := o.Float("alpha")
 		return func() error { return patterns.ScaleScalar(a, out, alpha) }

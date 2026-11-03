@@ -37,7 +37,7 @@ go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot
 both input arrays fingerprinted and no output array. Logical work is `8*n+4`.
 Typed checked callbacks propagate errors and retain result bits once after
 timing under distinct dot harnesses. Scalar is a timing baseline; order changes
-can alter rounding and exceptional values. FMA remains future work; multiple
+can alter rounding and exceptional values. Fused dot remains future work; multiple
 accumulators are available above. See the [dot contract](../../docs/features/F004-dot.md) and
 [Wiki exercise](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
 

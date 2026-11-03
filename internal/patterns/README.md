@@ -1,4 +1,13 @@
-# Float32 broadcast and predicate patterns
+# Float32 broadcast, predicate and fused-affine patterns
+
+The affinefma group adds AffineFMAScalar/AffineFMASIMD with one binary32
+rounding. Its corrected reference avoids widened-FMA double rounding. A startup
+gate selects verified vector MulAdd or an explicitly recorded software path.
+Old affine/dot remain unfused. Array alias/length rules and 8*n accounting match
+unary affine. Run `go run ./examples/fma`; see the
+[contract](../../docs/features/F004-fma.md) and [Wiki guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
+
+## Original broadcast/predicate slice
 
 Five operations each have Scalar and SIMDPartial implementations:
 

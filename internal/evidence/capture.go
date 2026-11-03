@@ -21,6 +21,7 @@ type Config struct {
 }
 
 type Machine struct {
+	FMA32Path      string           `json:"fma32_path,omitempty"`
 	GoVersion      string           `json:"go_version"`
 	OS             string           `json:"os"`
 	Arch           string           `json:"arch"`

@@ -23,7 +23,7 @@ func TestConfiguredBindingInventory(t *testing.T) {
 			count++
 		}
 	}
-	if count != 10 || len(configuredBindings) != 10 {
+	if count != 12 || len(configuredBindings) != 12 {
 		t.Fatal("missing/orphan configured binding")
 	}
 }

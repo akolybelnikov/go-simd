@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 		benchmarkReduction(b, operation)
 		return
 	}
+	if operation.Descriptor.ID == catalog.AffineFMA {
+		benchmarkFMA(b, operation)
+		return
+	}
 	if operation.Descriptor.Parameterized() {
 		benchmarkPattern(b, operation)
 		return

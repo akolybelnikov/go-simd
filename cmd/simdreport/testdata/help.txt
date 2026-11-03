@@ -14,13 +14,15 @@ Options:
   -benchtime string
     	duration or iteration count per measurement (default "100ms")
   -beta value
-    	float32 affine offset (unfused) (default -0.5)
+    	float32 affine offset (group defines fusion) (default -0.5)
   -computation
     	alias for -group computation
   -count int
     	measurement repetitions (default 5)
   -dot-input string
     	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
+  -fma-input string
+    	fused affine fixture: balanced, rounding, mixed-magnitude (default "balanced")
   -format string
     	saved report format: txt, md, or csv (terminal stays text) (default "txt")
   -function string

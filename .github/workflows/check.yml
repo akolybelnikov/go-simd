@@ -26,7 +26,9 @@ jobs:
       - name: Check portable kernel emulation
         env:
           GODEBUG: simd=0
-        run: go test ./internal/patterns ./internal/reduction ./internal/catalog/kernels ./internal/engine -count=1
+        run: |
+          go test ./internal/patterns ./internal/reduction ./internal/catalog/kernels ./internal/engine -count=1
+          go test ./cmd/simdreport -run='^TestFMAResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -34,3 +36,5 @@ jobs:
         run: go test ./internal/addition ./internal/computation ./internal/reduction -run='^$' -bench='^Benchmark(Addition|Computation|Sum|Dot)$/^n=1$/^Scalar$' -benchtime=1x
       - name: Check accumulator strategies
         run: go test ./internal/reduction -run='^$' -bench='^Benchmark(Sum|Dot)$/^n=64$/^SIMDStriped(2|4)$' -benchtime=1x
+      - name: Check fused affine paths
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkAffineFMA$/^n=(8|16)$' -benchtime=1x

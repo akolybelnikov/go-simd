@@ -11,12 +11,15 @@ import (
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
+	"github.com/akolybelnikov/go-simd/internal/fma32"
 	"github.com/akolybelnikov/go-simd/internal/input"
 	"github.com/akolybelnikov/go-simd/internal/patterns"
 )
 
 func oracle(id string, x, y float32, o input.Options) float32 {
 	switch id {
+	case catalog.AffineFMA:
+		return fma32.FMA(o.Float("alpha"), x, o.Float("beta"))
 	case catalog.Scale:
 		return o.Float("alpha") * x
 	case catalog.Affine:
@@ -99,7 +102,7 @@ func TestPatternKernelsAgainstIndependentOracle(t *testing.T) {
 								t.Fatal(err)
 							}
 							for i, v := range want {
-								if (op.ID == catalog.Scale || op.ID == catalog.Affine) && math.IsNaN(float64(v)) {
+								if (op.ID == catalog.Scale || op.ID == catalog.Affine || op.ID == catalog.AffineFMA) && math.IsNaN(float64(v)) {
 									if !math.IsNaN(float64(out[i])) {
 										t.Fatalf("non-NaN at %d", i)
 									}

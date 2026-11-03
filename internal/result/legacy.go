@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/fma32"
 	"github.com/akolybelnikov/go-simd/internal/input"
 )
 
@@ -18,6 +19,7 @@ const LegacyHarnessID = "legacy-report/v1"
 const LegacyPatternHarnessID = "legacy-report-patterns/v1"
 const LegacyReductionHarnessID = "legacy-report-reduction/v1"
 const LegacyDotHarnessID = "legacy-report-dot/v1"
+const LegacyFMAHarnessID = "legacy-report-affine-fma/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -52,11 +54,13 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			}
 			decoded.SumInput = decoded.SumFixture()
 			decoded.DotInput = decoded.DotFixture()
+			decoded.FMAInput = decoded.FMAFixture()
 			var expected input.Options
 			if options.InputOptions != nil {
 				expected = *options.InputOptions
 				expected.SumInput = expected.SumFixture()
 				expected.DotInput = expected.DotFixture()
+				expected.FMAInput = expected.FMAFixture()
 			}
 			if options.InputOptions != nil && expected != decoded {
 				return Run{}, fmt.Errorf("conflicting input configuration")
@@ -91,7 +95,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		for i := 2; i+1 < len(fields); i += 2 {
 			unit := fields[i+1]
 			switch unit {
-			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits":
+			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits":
 				value, err := strconv.ParseFloat(fields[i], 64)
 				if err != nil || !finite(value) || value < 0 {
 					return Run{}, fmt.Errorf("line %d: invalid %s measurement", lineNumber, unit)
@@ -137,6 +141,35 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				c.Parameters = options.InputOptions.Identity(op)
 			}
 		}
+		var arrayBits *uint32
+		if knownOp && op.ID == catalog.AffineFMA {
+			harness = LegacyFMAHarnessID
+			vector, path, lanes, bits := metrics["fma-vector"], metrics["fma-path"], metrics["simd-lanes"], metrics["last-result-bits"]
+			if !vector.Available || !path.Available || vector.Value != 0 && vector.Value != 1 || path.Value != 0 && path.Value != 1 || !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value || !bits.Available || bits.Value > math.MaxUint32 || math.Trunc(bits.Value) != bits.Value {
+				return Run{}, fmt.Errorf("fused affine requires exact path, width and last-result-bits metrics")
+			}
+			vectorPath := fma32.SoftwarePath
+			if vector.Value == 1 {
+				vectorPath = fma32.VectorPath
+			}
+			identity, err := NewFMAIdentity(c.StrategyID, vectorPath, int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			expectedPath := float64(0)
+			if identity.PathID == fma32.VectorPath {
+				expectedPath = 1
+			}
+			if path.Value != expectedPath {
+				return Run{}, fmt.Errorf("conflicting FMA32 strategy/path metrics")
+			}
+			c.FMA = identity
+			value := uint32(bits.Value)
+			arrayBits = &value
+			if len(run.Observations) == 0 {
+				run.Metadata += "FMA32 child vector path: " + vectorPath + "\n"
+			}
+		}
 		if options.GeneratedInputs && c.TypeID == "float32" {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
@@ -165,8 +198,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			Key: key, Label: label, Repetition: counts[key], Iterations: iterations,
 			NanosecondsPerOp: metrics["ns/op"].Value,
 			BytesPerOp:       metrics["B/op"], AllocsPerOp: metrics["allocs/op"], MegabytesPerSec: metrics["MB/s"],
-			SourceBenchmark:  fields[0],
-			ScalarResultBits: scalarBits,
+			SourceBenchmark:     fields[0],
+			ScalarResultBits:    scalarBits,
+			ArrayResultLastBits: arrayBits,
 		})
 	}
 	if err := scanner.Err(); err != nil {
