@@ -5,6 +5,33 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 8 and closure — Ordered clamp — 2026-11-04
+
+- Added clamp / clamp-f32 / BenchmarkClamp with Scalar branches, SIMDPartial
+  comparisons/selection and SIMDMinMax with timed outside/tie/NaN bit repairs.
+  The shared catalogue now contains fifteen operations / forty-one implementations.
+- Define inclusive ordered bounds, exact clipping-bound bits, original equality/
+  signed-zero/quiet/signaling-NaN payload bits, length-error precedence and
+  invalid-bounds rejection before writes, including empty input. Support disjoint
+  and exact alias; partial overlap is outside the contract.
+- Reuse lower/upper/pattern/seed through both CLIs, installed binaries, Go and Make.
+  Patterns select clipped positions; reject impossible distributions and NaN/
+  reversed bounds before artifacts. Retain exact parameter/generator/input identity.
+- Include validation, broadcasts, selection/MinMax repairs and stores in timing;
+  account for 8*n logical bytes. Reuse complete post-timing output retention and
+  ArrayResultSHA256, with dedicated clamp harnesses and Case.Clamp policy/width.
+  Strict native digest/lanes import and comparison context reject incompatible facts.
+- Test independent bitwise references, random/special values, equal/infinite/zero
+  bounds, tails/canaries/aliases/errors/allocations; compiled/native parity covers
+  every pattern and exact outputs, also in SDK emulation. Extend all-group no-Go
+  standalone verification and Linux/Windows CI emulation/native checks.
+- Add examples/clamp, retained normal/emulated captures, detailed clamp contract,
+  README/registry updates and Wiki chapters 22/23. Audit F004 acceptance and account
+  for all 381 selected Go 1.27.3 SDK declarations with explicit status/reasons and
+  source hashes. Preserve earlier checkpoint history and Jesús Espino article credit.
+- Close F004 for the agreed current scope. Three-array MulAdd, broader input types,
+  reordering/conversion studies, M4 and HTML remain separately scoped future work.
+
 ### F004 slice 7 — Exact copy and movement controls — 2026-11-04
 
 - Added copy / copy-f32 / BenchmarkCopy with Scalar source loop, GoCopy built-in

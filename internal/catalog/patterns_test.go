@@ -3,7 +3,7 @@ package catalog
 import "testing"
 
 func TestPatternDescriptors(t *testing.T) {
-	if len(All()) != 14 || len(Groups()) != 14 {
+	if len(All()) != 15 || len(Groups()) != 15 {
 		t.Fatal("operation inventory drift")
 	}
 	for _, id := range []string{Scale, Affine, ThresholdZero, SelectGT, RangeZero} {

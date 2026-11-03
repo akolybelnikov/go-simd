@@ -85,3 +85,29 @@ use the defaults unless the internal options environment is supplied.
 
 See [the F004 implementation contract](../../docs/features/F004-broadcast-predicates.md)
 for bit-level parameters, fixture distributions, traffic, timing and evidence.
+
+
+## Ordered clamp — final F004 slice
+
+ClampScalar, ClampSIMD and ClampSIMDMinMax accept
+`(x,out []float32,lower,upper float32) error`. Ordered values outside inclusive
+bounds become exact bound bits; input equality, signed-zero ties and quiet/signaling
+NaN payloads retain original bits. Require lower<=upper and non-NaN bounds.
+ErrLengthMismatch takes precedence; ErrInvalidBounds also applies to empty input.
+Failures precede writes. Valid empty/nil succeeds; disjoint/exact aliases are
+supported, partial overlap is outside the contract.
+
+SIMDPartial uses comparisons/IfElse. SIMDMinMax includes explicit outside/tie/NaN
+repairs around Max/Min; all repairs and per-call broadcasts/validation are timed.
+Logical work is 8*n; complete little-endian output-bit SHA-256 follows timing.
+Shared lower/upper/pattern/seed flags generate clipped-position recipes.
+
+```powershell
+go run ./examples/clamp
+go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 3 -benchtime 100ms -format md
+```
+
+See the [contract](../../docs/features/F004-clamp.md) and
+[F004 closure audit](../../docs/features/F004-completion.md). This closes the
+agreed scope at fifteen operations / forty-one implementations; broader families
+are optional follow-on work.

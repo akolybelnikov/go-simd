@@ -67,7 +67,7 @@ func TestPatternKernelsAgainstIndependentOracle(t *testing.T) {
 	nanUpper.Upper = 0x7fc12345
 	options = append(options, nanUpper)
 	for _, op := range catalog.All() {
-		if !op.Parameterized() || op.ByteResult() {
+		if op.ID == catalog.Clamp || !op.Parameterized() || op.ByteResult() {
 			continue
 		}
 		binding, err := kernels.Lookup(op.ID, op.TypeID)

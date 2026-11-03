@@ -33,6 +33,7 @@ jobs:
           go test ./cmd/simdreport -run='^TestPredicateResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestPackedPredicateResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestCopyResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestClampResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -50,3 +51,6 @@ jobs:
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkPredicatePacked$/^n=(7|8|9|63|64|65)$' -benchtime=1x
       - name: Check copy controls
         run: go test ./internal/movement -run='^$' -bench='^BenchmarkCopy$/^n=(1|8|16|65536)$' -benchtime=1x
+
+      - name: Check ordered clamp controls
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkClamp$/^n=(1|8|16)$' -benchtime=1x

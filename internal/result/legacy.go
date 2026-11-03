@@ -24,6 +24,7 @@ const LegacyDotFMAHarnessID = "legacy-report-dot-fma/v1"
 const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
+const LegacyClampHarnessID = "legacy-report-clamp/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -161,6 +162,22 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.Clamp {
+			harness = LegacyClampHarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("clamp requires an integer simd-lanes metric")
+			}
+			identity, err := NewClampIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Clamp = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, fmt.Errorf("clamp %w", err)
+			}
+		}
 		if knownOp && op.ID == catalog.Copy {
 			harness = LegacyCopyHarnessID
 			lanes := metrics["simd-lanes"]
