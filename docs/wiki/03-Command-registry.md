@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 dot checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 accumulator checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -130,8 +130,13 @@ The outer `go run` process can also print `exit status 1`.
 | `threshold` | `BenchmarkThreshold` | `Scalar`, `SIMDPartial` |
 | `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
-| `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped` |
-| `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped` |
+| `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
+| `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
+
+Sum/dot compare one, two and four vector accumulators. Existing -bench variant
+selection chooses among them; no accumulator flag is added. Counts change fold
+order and the timed loop structure. See [accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
+for the left-to-right merge, result identities and numerical examples.
 
 Broadcast/predicate native wrappers share `./internal/patterns`; sum and dot use
 `./internal/reduction`. The developer report

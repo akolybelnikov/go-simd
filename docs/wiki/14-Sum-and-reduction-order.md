@@ -3,7 +3,8 @@
 Sum's F004 checkpoint added one float32 input array and one returned float32,
 bringing the catalogue to eight operations/eighteen implementations. The later
 [dot checkpoint](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
-raises that to nine/twenty. Multiple-accumulator experiments remain planned.
+raised that to nine/twenty; [2/4-accumulator strategies](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
+now bring it to nine/twenty-four. This page specifies the original sum controls.
 
 ## Run sum
 

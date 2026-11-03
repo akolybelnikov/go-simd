@@ -81,7 +81,7 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Nine operations/twenty implementations
+or any group in the compact catalogue. Nine operations/twenty-four implementations
 are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
@@ -89,6 +89,9 @@ CI runs this check. A local `runtime/cgo` build failure is a toolchain problem
 that can occur before the project's tests execute; see troubleshooting.
 
 ## 5. Run the small code example
+
+Run `go run ./examples/accumulators` to compare sum/dot rounding with 1/2/4
+vector accumulators; see [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
 
 Run `go run ./examples/dot` for an unfused dot product, cancellation and length
 validation; see [the dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).

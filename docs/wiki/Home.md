@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / F004 dot checkpoint, reviewed 2026-11-03.
+**Guide baseline:** architecture M3 / F004 accumulator checkpoint, reviewed 2026-11-03.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -27,6 +27,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Try broadcast constants, masks and predicate arrangements | [13 — Broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments) |
 | Sum an array and understand order-sensitive rounding | [14 — Sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order) |
 | Compute a dot product with explicit unfused rounding | [15 — Dot product and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding) |
+| Compare one, two and four independent vector accumulators | [16 — Accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments) |
 
 ## What you can do today
 
@@ -38,6 +39,8 @@ explicitly. This guide grows alongside each delivered feature.
   mixed-magnitude inputs, retaining scalar result bits and fold identity.
 - Compare unfused dot strategies over two generated arrays, with checked scalar
   returns, product/fold semantics and the same three fixture choices.
+- Compare 1/2/4-vector accumulation strategies for sum/dot with explicit merge
+  orders and retained accumulator-count/result identities.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
 - Inspect registered operations and live SIMD context with either CLI's `-list`.
 - Run installed commands on a compatible local or remote machine without Go.
@@ -77,6 +80,7 @@ useful repeated measurement.
 | 2026-10-27 | F004 first slice: five broadcast/predicate operations, scalar bits, seeded arrangements, compact catalogue and worked examples |
 | 2026-11-03 | F004 sum: typed scalar results, specified fold orders, three input recipes, exact result-bit evidence and cancellation examples; eight operations/eighteen implementations |
 | 2026-11-03 | F004 dot: unfused products, checked scalar returns, both-input fingerprints and compiled/native evidence parity; nine operations/twenty implementations |
+| 2026-11-03 | F004 accumulators: sum/dot with 1/2/4 vector accumulators, declared merge orders, count-sensitive examples and result identity; nine operations/twenty-four implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

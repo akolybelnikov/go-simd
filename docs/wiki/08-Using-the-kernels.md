@@ -109,6 +109,11 @@ directly without an output slice or error sentinel. Run `go run ./examples/sum`
 and follow [its fold and rounding contract](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
 Additional reductions and output types need their own explicit contracts.
 
+SumSIMD2/4 and DotSIMD2/4 add two/four-accumulator strategies with the same
+signatures/error contracts as their one-accumulator counterparts. Run
+`go run ./examples/accumulators` and follow
+[the exact assignment/merge order](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
+
 Dot now adds `reduction.DotScalar(x,y)` and `reduction.DotSIMD(x,y)`, returning
 `(float32,error)`. Handle `reduction.ErrLengthMismatch` for unequal lengths;
 no output array is used. Input aliases/overlaps are read-only and supported.

@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: nine operations and twenty scalar/SIMD
+An experimental Go SIMD laboratory: nine operations and twenty-four scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -80,8 +80,8 @@ and strategy details. Existing aliases remain for addition/computation.
 | threshold | `x > threshold ? x : +0` | Scalar, SIMDPartial |
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
-| sum | One returned float32, specified fold orders | Scalar, SIMDStriped |
-| dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped |
+| sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
+| dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 
 Both commands accept these fixture/parameter options. Each operation uses only its declared
 parameters; exact float32 bits and relevant fixture identity survive in evidence.
@@ -130,6 +130,14 @@ explains fixtures, unfused rounding and result evidence.
 go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/dot
 ```
+
+Sum and dot also compare two/four independent vector accumulators. Full vectors
+are assigned round-robin, accumulators merge lane-wise left to right, then lanes
+and scalar tail are folded. This changes rounding as well as loop structure.
+Existing report `-bench` selectors choose the variants; no new flag is needed.
+Run `go run ./examples/accumulators` and see the
+[accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
+for exact order, result evidence and numerical examples.
 
 `simdbench` measures a fixed 1,048,576-element input and prints a quick table.
 It has no report/count/timing flags. `simdreport` adds:
@@ -212,7 +220,8 @@ reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md
 and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
-checkpoints are complete. Multiple accumulators, FMA, clamp, packed-mask export
+checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
+are complete. FMA, clamp, packed-mask export
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
