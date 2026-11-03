@@ -9,8 +9,12 @@ import (
 
 const PatternHarnessID = "standalone-patterns/v1"
 const ReductionHarnessID = "standalone-reduction/v1"
+const DotHarnessID = "standalone-dot/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ID == catalog.Dot {
+		return DotHarnessID
+	}
 	if op.ScalarResult() {
 		return ReductionHarnessID
 	}

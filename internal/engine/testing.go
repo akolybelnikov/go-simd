@@ -18,7 +18,8 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 	if err := (Config{Count: 1, Benchtime: benchtime}).Validate(); err != nil {
 		return Sample{}, err
 	}
-	if p.Bytes < 0 || (p.Reduce == nil && (p.Run == nil || len(p.Output) == 0)) || (p.Reduce != nil && (p.Scalar == nil || p.Run != nil || p.Output != nil)) {
+	scalar := p.Reduce != nil || p.ReduceChecked != nil
+	if p.Bytes < 0 || (!scalar && (p.Run == nil || len(p.Output) == 0)) || (scalar && (p.Scalar == nil || p.Run != nil || p.Output != nil)) || (p.Reduce != nil && p.ReduceChecked != nil) {
 		return Sample{}, fmt.Errorf("invalid prepared benchmark")
 	}
 	benchmarkMu.Lock()
@@ -30,6 +31,33 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 		return Sample{}, err
 	}
 	defer timing.Value.Set(previous)
+	if p.ReduceChecked != nil {
+		var runErr error
+		stats := testing.Benchmark(func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(p.Bytes)
+			b.ResetTimer()
+			if runErr != nil {
+				b.StopTimer()
+				return
+			}
+			var value float32
+			for i := 0; i < b.N; i++ {
+				value, runErr = p.ReduceChecked()
+				if runErr != nil {
+					b.StopTimer()
+					return
+				}
+			}
+			b.StopTimer()
+			*p.Scalar = value
+			sink = value
+		})
+		if runErr != nil {
+			return Sample{}, runErr
+		}
+		return Sample{stats.N, stats.T, stats.MemAllocs, stats.MemBytes}, nil
+	}
 	if p.Reduce != nil {
 		stats := testing.Benchmark(func(b *testing.B) {
 			b.ReportAllocs()

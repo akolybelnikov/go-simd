@@ -71,7 +71,7 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 			if observation.Iterations != 2 || observation.DurationNS == nil {
 				t.Fatal("fixed iteration evidence lost")
 			}
-			if group == "sum" {
+			if group == "sum" || group == "dot" {
 				fold := observation.Key.Case.Reduction
 				if observation.ScalarResultBits == nil || fold.OrderID == "" || !fold.NativeLanes.Known || fold.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone scalar result or fold identity lost")

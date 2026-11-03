@@ -31,4 +31,4 @@ jobs:
         if: runner.os == 'Linux'
         run: go test -race ./...
       - name: Check filtered benchmark
-        run: go test ./internal/addition ./internal/computation ./internal/reduction -run='^$' -bench='^Benchmark(Addition|Computation|Sum)$/^n=1$/^Scalar$' -benchtime=1x
+        run: go test ./internal/addition ./internal/computation ./internal/reduction -run='^$' -bench='^Benchmark(Addition|Computation|Sum|Dot)$/^n=1$/^Scalar$' -benchtime=1x

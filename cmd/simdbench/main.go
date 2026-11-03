@@ -28,9 +28,10 @@ type options struct {
 }
 
 type variant struct {
-	reduce func() float32
-	name   string
-	run    func() error
+	reduceChecked func() (float32, error)
+	reduce        func() float32
+	name          string
+	run           func() error
 }
 
 type result struct {
@@ -74,7 +75,28 @@ func run(args []string, stdout, stderr io.Writer) error {
 		for _, item := range group.variants {
 			var runErr error
 			var stats testing.BenchmarkResult
-			if item.reduce != nil {
+			if item.reduceChecked != nil {
+				stats = testing.Benchmark(func(b *testing.B) {
+					b.ReportAllocs()
+					b.SetBytes(group.logicalBytes)
+					b.ResetTimer()
+					if runErr != nil {
+						b.StopTimer()
+						return
+					}
+					var value float32
+					for i := 0; i < b.N; i++ {
+						value, runErr = item.reduceChecked()
+						if runErr != nil {
+							b.StopTimer()
+							return
+						}
+					}
+					b.StopTimer()
+					*group.scalar = value
+					benchmarkSink = value
+				})
+			} else if item.reduce != nil {
 				stats = testing.Benchmark(func(b *testing.B) {
 					b.ReportAllocs()
 					b.SetBytes(group.logicalBytes)
@@ -179,6 +201,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.name += "\n" + cli.InputSummary(options.Identity(descriptor), options.Generator(descriptor))
 		}
 		for _, implementation := range operation.Implementations {
+			if implementation.BindCheckedScalar != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, reduceChecked: implementation.BindCheckedScalar(x, y)})
+				continue
+			}
 			if descriptor.ScalarResult() {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, reduce: implementation.BindScalar(x)})
 				continue

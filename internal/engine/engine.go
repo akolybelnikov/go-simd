@@ -94,11 +94,12 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
-	Reduce func() float32
-	Scalar *float32
-	Run    func() error
-	Output []float32
-	Bytes  int64
+	ReduceChecked func() (float32, error)
+	Reduce        func() float32
+	Scalar        *float32
+	Run           func() error
+	Output        []float32
+	Bytes         int64
 }
 type Sample struct {
 	Iterations          int
@@ -134,7 +135,11 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 		}
 		if c.Operation.ScalarResult() {
 			prepared.Run = nil
-			prepared.Reduce = c.Implementation.BindScalar(a)
+			if c.Implementation.BindCheckedScalar != nil {
+				prepared.ReduceChecked = c.Implementation.BindCheckedScalar(a, b)
+			} else {
+				prepared.Reduce = c.Implementation.BindScalar(a)
+			}
 			prepared.Scalar = &scalar
 		}
 		workers, known := c.Implementation.Descriptor.WorkerCount(c.Elements, procs)
@@ -154,7 +159,7 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 		}
 		if c.Operation.ScalarResult() {
 			var vector simd.Float32s
-			fold, err := result.SumFold(c.Implementation.Descriptor.ID, vector.Len())
+			fold, err := result.ReductionFold(c.Operation.ID, c.Implementation.Descriptor.ID, vector.Len())
 			if err != nil {
 				return run, err
 			}

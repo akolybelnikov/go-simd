@@ -19,6 +19,8 @@ Options:
     	alias for -group computation
   -count int
     	measurement repetitions (default 5)
+  -dot-input string
+    	dot fixture: balanced, cancellation, mixed-magnitude (default "balanced")
   -format string
     	saved report format: txt, md, or csv (terminal stays text) (default "txt")
   -function string

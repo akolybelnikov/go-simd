@@ -12,6 +12,7 @@ const NativeOptionsEnv = "GO_SIMD_INPUT_OPTIONS"
 
 // Scalars are stored as exact IEEE-754 bits; JSON never contains NaN/Inf numbers.
 type Options struct {
+	DotInput                             string
 	SumInput                             string
 	Alpha, Beta, Threshold, Lower, Upper uint32
 	Pattern                              string
@@ -19,7 +20,7 @@ type Options struct {
 }
 
 func DefaultOptions() Options {
-	return Options{Alpha: math.Float32bits(1.5), Beta: math.Float32bits(-0.5), Lower: math.Float32bits(-1), Upper: math.Float32bits(1), Pattern: "alternating", Seed: 42, SumInput: "balanced"}
+	return Options{Alpha: math.Float32bits(1.5), Beta: math.Float32bits(-0.5), Lower: math.Float32bits(-1), Upper: math.Float32bits(1), Pattern: "alternating", Seed: 42, SumInput: "balanced", DotInput: "balanced"}
 }
 
 func (o Options) Bits(name string) uint32 {
@@ -53,6 +54,11 @@ func IsPredicate(op catalog.Operation) bool {
 }
 
 func (o Options) Validate() error {
+	switch o.DotFixture() {
+	case "balanced", "cancellation", "mixed-magnitude":
+	default:
+		return fmt.Errorf("unknown dot-input %q (choose balanced, cancellation, or mixed-magnitude)", o.DotInput)
+	}
 	switch o.SumFixture() {
 	case "balanced", "cancellation", "mixed-magnitude":
 	default:
@@ -118,6 +124,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.Dot {
+		return "generated-dot-float32-v1/" + o.DotFixture()
+	}
 	if op.ID == catalog.Sum {
 		return "generated-sum-float32-v1/" + o.SumFixture()
 	}
@@ -134,6 +143,26 @@ func (o Options) Generator(op catalog.Operation) string {
 }
 
 func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
+	if op.ID == catalog.Dot {
+		switch o.DotFixture() {
+		case "cancellation":
+			switch i % 64 {
+			case 0:
+				return 16777216, 1
+			case 1:
+				return 1, 1
+			case 32:
+				return -16777216, 1
+			}
+			return 0, 1
+		case "mixed-magnitude":
+			x := [8]float32{1e-20, 1, 1e20, -1e20, -1, 3, -3, 1e-20}
+			y := [8]float32{1e20, 1e-20, 1e-20, 1e-20, 1e20, 1e-20, 1e-20, 1e20}
+			return x[i%8], y[i%8]
+		default:
+			return float32(i%33-16) / 4, float32(i%17-8) / 8
+		}
+	}
 	if op.ID == catalog.Sum {
 		switch o.SumFixture() {
 		case "cancellation":
@@ -171,8 +200,15 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
 	if op.ScalarResult() {
 		a = make([]float32, n)
+		if len(op.Inputs) == 2 {
+			b = make([]float32, n)
+		}
 		for i := range a {
-			a[i], _ = o.pair(op, i, n)
+			x, y := o.pair(op, i, n)
+			a[i] = x
+			if b != nil {
+				b[i] = y
+			}
 		}
 		return
 	}
@@ -195,7 +231,7 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
 	if op.ScalarResult() {
-		return fingerprintGenerated(n, false, func(i int) (float32, float32) { return o.pair(op, i, n) })
+		return fingerprintGenerated(n, len(op.Inputs) == 2, func(i int) (float32, float32) { return o.pair(op, i, n) })
 	}
 	if !op.Parameterized() {
 		return GeneratedFloat32Fingerprint(n)
@@ -209,4 +245,12 @@ func (o Options) SumFixture() string {
 		return "balanced"
 	}
 	return o.SumInput
+}
+
+// DotFixture supplies the default for historical option records.
+func (o Options) DotFixture() string {
+	if o.DotInput == "" {
+		return "balanced"
+	}
+	return o.DotInput
 }
