@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: nine operations and twenty-four scalar/SIMD
+An experimental Go SIMD laboratory: ten operations and twenty-six scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -77,6 +77,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | computation | `a*a+b*b+a*b` | Scalar, SIMD |
 | scale | `alpha*x` | Scalar, SIMDPartial |
 | affine | `float32(alpha*x)+beta`, unfused | Scalar, SIMDPartial |
+| affinefma | One-rounding `alpha*x+beta` | Scalar, SIMDPartial; vector/software path recorded |
 | threshold | `x > threshold ? x : +0` | Scalar, SIMDPartial |
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
@@ -88,21 +89,22 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 
 | Option | Default | Applies to |
 | --- | --- | --- |
-| `-alpha` | `1.5` | Scale and affine multiplier |
-| `-beta` | `-0.5` | Affine offset |
+| `-alpha` | `1.5` | Scale and affine/affinefma multiplier |
+| `-beta` | `-0.5` | Affine/affinefma offset; group defines fusion |
 | `-threshold` | `0` | Threshold and selection |
 | `-lower`, `-upper` | `-1`, `1` | Exclusive range bounds |
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot fixture: balanced, cancellation, mixed-magnitude |
+| `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
 
 ```powershell
 go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench '^BenchmarkSelection$/^n=1024$' -count 3 -benchtime 100ms -format md
 go run ./examples/patterns
 ```
 
-SIMD broadcasts once per measured call. Affine keeps separate float32 multiply
+Original broadcast/predicate SIMD kernels broadcast once per measured call. Affine keeps separate float32 multiply
 and add rounding. Predicates use strict ordered comparisons; equality/NaN is
 false, false masking yields +0 and selection preserves chosen operand bits.
 Impossible true distributions fail early; `-pattern none` permits deliberate
@@ -138,6 +140,17 @@ Existing report `-bench` selectors choose the variants; no new flag is needed.
 Run `go run ./examples/accumulators` and see the
 [accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 for exact order, result evidence and numerical examples.
+
+Fused affine uses a correctly rounded software reference and a gated vector
+MulAdd path, with an explicit software path for emulation or a failed gate.
+Listing, quick output and evidence expose the actual path. The startup probe
+runs outside measurement; existing affine/dot remain unfused. See the
+[FMA guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
+
+```powershell
+go run ./cmd/simdreport -group affinefma -fma-input rounding '-alpha=1.0000001192092896' '-beta=-1' -bench '^BenchmarkAffineFMA$/^n=8$' -count 3 -benchtime 100ms -format md
+go run ./examples/fma
+```
 
 `simdbench` measures a fixed 1,048,576-element input and prints a quick table.
 It has no report/count/timing flags. `simdreport` adds:
@@ -221,7 +234,7 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-are complete. FMA, clamp, packed-mask export
+and [fused affine](docs/features/F004-fma.md) are complete. Fused dot, clamp, packed-mask export
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,

@@ -1,12 +1,14 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum, dot and accumulator checkpoints implemented**, 2026-11-03.
+Status: **broadcast/predicate, sum, dot, accumulator and fused-affine checkpoints implemented**, 2026-11-03.
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum and dot. The catalogue totals nine operations/twenty-four implementations.
+rangefilter, sum, dot and fused affine. The catalogue totals ten operations/twenty-six implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
 [Accumulator comparison record](F004-accumulators.md) adds two/four-vector
-strategies. FMA, clamp, export, movement and types stay planned.
+strategies. The [fused-affine record](F004-fma.md) adds one-rounding binary32
+arithmetic with corrected software and gated vector paths. Fused dot, clamp,
+export, movement and types stay planned.
 
 ## Purpose and evidence
 
@@ -40,7 +42,8 @@ distributions are recorded. Sum now adds a genuine scalar-return path and one
 vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
 checked scalar returns and rounded products over two input arrays. Both reductions
 now compare 1/2/4 independent vector accumulators with declared merge orders.
-Predicate export, clamp, FMA and permutations remain absent.
+Fused affine now adds a separately identified one-rounding contract. Predicate
+export, clamp, fused reductions and permutations remain absent.
 
 ## Pattern gap ledger
 
@@ -57,7 +60,7 @@ and existing kernel timing paths are preserved.
 | Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
-| Explicit multiply-add | No; ordinary `Mul`/`Add` composition exists | Portable `MulAdd(y,z)`; semantics need a reference gate | `muladd-f32`, with separately identified fused/unfused modes |
+| Explicit multiply-add | Implemented affine-fma-f32 beside unchanged unfused affine | Binary32 reference, gated native MulAdd and recorded software path; SDK emulation is not guaranteed fused | Fused dot / three-array muladd-f32 remain distinct future contracts |
 | Streaming accumulation / reduction | Implemented: sum-f32 with Scalar and 1/2/4-vector strategies | No portable `Sum` or horizontal-pair method; composed full-vector accumulation, merge and store/fold | Exact count/fold/width/result identity; three input recipes |
 | Dot product / accumulator count | Implemented: dot-f32 with Scalar and 1/2/4-vector strategies, also available for sum | Separate rounded Mul/Add, round-robin vector assignment, left-to-right merge/fold; FMA gated separately | Fused arithmetic remains a separate numerical experiment |
 | Permutation / shuffle | No | `archsimd.Float32x8.Permute`; absent on portable `Float32s` here | Explicitly gated fixed-block lane reorder; not silently a whole-slice reverse |
@@ -85,7 +88,9 @@ matching both output and conversion boundaries.
    scalar outputs, specified folds, exact result bits and `4*n+4` / `8*n+4`
    accounting. Dot propagates length errors and rounds products before addition.
    Two/four-accumulator strategies are complete with declared assignment and merge
-   orders. Stop before FMA; it requires a separate valid fused reference.
+   orders. Fused affine is also complete with an independent rational oracle,
+   corrected binary32 reference and recorded vector/software gate. Stop after
+   this FMA checkpoint; fused reductions and M4 remain separate work.
 4. **Movement/representation slice:** a useful copy/reorder, predicate-export, or
    conversion experiment. Fixed-width permutes/horizontal primitives remain a
    separate `archsimd` extension with build/runtime requirements.

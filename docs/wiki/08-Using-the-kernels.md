@@ -97,6 +97,13 @@ Import the standard `errors` package. Use
 `computation.ErrLengthMismatch` for computation calls; the two packages have
 distinct sentinels. Zero-length equal slices succeed, including nil slices.
 
+## Fused affine
+
+`patterns.AffineFMAScalar` and `patterns.AffineFMASIMD` round alpha*x+beta once
+to binary32. Signatures and array alias/length rules match existing affine;
+old affine/dot APIs remain unfused. Run `go run ./examples/fma` and inspect its
+actual vector/software path. See [the FMA contract](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
+
 ## Bring your own slices carefully
 
 Use `go run ./cmd/simdbench -list` to see implemented descriptors before choosing

@@ -95,6 +95,12 @@ handling, lane-wise merge and final fold/tail. Preserve old IDs, bind the actual
 count. Test unroll boundaries and count-sensitive cancellation independently;
 never infer physical register counts or guaranteed speedups from this metadata.
 
+Fused affine has separate one-rounding arithmetic/harness IDs and an independent
+rational oracle with normal/subnormal/overflow midpoint counterexamples. Widened/
+narrowed math.FMA is not a universal oracle. Keep FMA-only native metrics out
+of original callbacks; retain actual child path/width and last-output bits.
+Record software execution explicitly. A bounded probe is not exhaustive proof.
+
 ## Local validation commands
 
 ```powershell

@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all nine groups and many sizes up to 16,777,216 elements. That
+The default covers all ten groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -113,6 +113,13 @@ operations, environments, backend/harness identities, or GOMAXPROCS settings.
 Conflicting per-size input fingerprints and duplicate strategy/size entries
 with different worker configurations also fail. Keep those experiments in
 separate tables instead of merging names and losing identity.
+
+## FMA shows software execution
+
+This is expected with GODEBUG=simd=0 or a failed startup vector-rounding gate.
+The selected SDK's emulated MulAdd is not guaranteed fused, so the lab uses a
+corrected binary32 primitive and records that path. Inspect -list -group affinefma
+and Case.FMA; SIMDPartial alone does not prove acceleration. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
 ## Report a useful issue
 

@@ -1,5 +1,32 @@
 # F004 smoke evidence
 
+## Fused-affine checkpoint — 2026-11-03
+
+`fma-vector.measurements.json` and `fma-software.measurements.json` were generated
+on Windows/amd64, Go 1.27.3, GOEXPERIMENT=simd and GOMAXPROCS 16. The first used
+256-bit / 8-lane SIMD and passed the native FMA gate. The second used
+GODEBUG=simd=0: 128-bit / 4-lane emulation, explicitly selecting corrected software.
+Source base was signed 2689f50 plus uncommitted FMA changes; missing embedded
+VCS facts remain unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group affinefma -fma-input rounding '-alpha=1.0000001192092896' '-beta=-1' -bench '^BenchmarkAffineFMA$/^n=8$' -count 2 -benchtime 3x -format md -output artifacts/fma-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group affinefma -fma-input rounding '-alpha=1.0000001192092896' '-beta=-1' -bench '^BenchmarkAffineFMA$/^n=8$' -count 2 -benchtime 3x -format md -output artifacts/fma-emulated-checkpoint
+Remove-Item Env:GODEBUG
+```
+
+Restore a prior GODEBUG value if applicable. Each capture retains four observations,
+two strategies/repetitions, exactly three iterations, exact coefficient/input
+identity, process/strategy FMA paths and actual lanes. The final output bits are
+0xa8800000 (-2^-46) for both strategies in both captures; unfused affine would
+yield +0 in that cell. ArrayResultLastBits is only the final cell, not a checksum.
+Different vector/software process contexts remain separate. Original numeric
+data/run IDs/UTC timestamps are retained; only filenames, LF endings and trailing
+whitespace differ. These tiny runs are plumbing evidence without performance
+claims. See [the FMA contract](../F004-fma.md).
+
 ## Accumulator checkpoint — 2026-11-03
 
 `accumulators-sum.measurements.json` and `accumulators-dot.measurements.json`

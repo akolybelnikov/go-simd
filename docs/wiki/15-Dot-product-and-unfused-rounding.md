@@ -4,7 +4,8 @@ Dot product multiplies matching x/y elements and reduces them to one float32.
 F004's dot checkpoint brought the lab to nine operations/twenty implementations.
 The later [accumulator checkpoint](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 adds SIMDStriped2/4 for a total of twenty-four implementations. This page specifies
-the original Scalar/SIMDStriped controls; FMA remains a future experiment.
+the original Scalar/SIMDStriped controls. [Fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
+is now available separately; dot remains unfused.
 
 ## Run a small dot experiment
 

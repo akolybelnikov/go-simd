@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 accumulator checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 fused-affine checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,10 +34,10 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all nine groups. Positional arguments are
+group. No explicit selection means all ten groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact nine-row operation table.
+`-list` prints runtime context and a compact ten-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary patterns and 12 for addition, computation and two-array selection.
@@ -46,6 +46,9 @@ Dot uses `8*n+4`: two input arrays and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
 no artifacts. It advertises only implemented kernels, not proposed SDK patterns.
 Runtime emulation context does not guarantee acceleration or a speedup.
+FMA performs a bounded startup rounding probe outside benchmark fixtures and
+measurements. Its actual vector/software path is printed; a SIMDPartial label
+alone does not establish acceleration. See [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
 ```powershell
 simdreport -list
@@ -61,14 +64,15 @@ text, not a versioned machine-data export.
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
-| `-alpha` | `1.5` | Scale/affine float32 multiplier |
-| `-beta` | `-0.5` | Affine float32 offset, without FMA |
+| `-alpha` | `1.5` | Scale/affine/affinefma float32 multiplier |
+| `-beta` | `-0.5` | Affine/affinefma float32 offset; group defines fusion |
 | `-threshold` | `0` | Threshold/selection strict comparison |
 | `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds |
 | `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot fixture: balanced, cancellation, mixed-magnitude |
+| `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
 
 Scalars parse to float32 and are recorded as exact bits. Settings apply only to
 operations declaring them. Predicate fixtures guarantee none/all truth or mixed
@@ -127,6 +131,7 @@ The outer `go run` process can also print `exit status 1`.
 | `computation` | `BenchmarkComputation` | `Scalar`, `SIMD` |
 | `scale` | `BenchmarkScale` | `Scalar`, `SIMDPartial` |
 | `affine` | `BenchmarkAffine` | `Scalar`, `SIMDPartial` |
+| `affinefma` | `BenchmarkAffineFMA` | `Scalar`, `SIMDPartial`; actual vector/software path retained |
 | `threshold` | `BenchmarkThreshold` | `Scalar`, `SIMDPartial` |
 | `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
