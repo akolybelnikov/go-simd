@@ -82,7 +82,7 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone FMA context/result lost")
 				}
 			}
-			if group == "predicate" {
+			if group == "predicate" || group == "predicatepack" {
 				if len(observation.ByteResultSHA256) != 64 || observation.Key.Case.Predicate.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone byte output/width lost")
 				}

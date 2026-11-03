@@ -8,6 +8,16 @@ import (
 )
 
 const PredicateEncodingID = "uint8-zero-one/v1"
+const PackedPredicateEncodingID = "uint8-packed-lsb0/v1"
+
+func NewPackedPredicateIdentity(lanes int) (PredicateIdentity, error) {
+	i, err := NewPredicateIdentity(lanes)
+	if err != nil {
+		return PredicateIdentity{}, err
+	}
+	i.EncodingID = PackedPredicateEncodingID
+	return i, nil
+}
 
 type PredicateIdentity struct {
 	EncodingID  string

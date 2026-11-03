@@ -7,6 +7,28 @@ Old affine/dot remain unfused. Array alias/length rules and 8*n accounting match
 unary affine. Run `go run ./examples/fma`; see the
 [contract](../../docs/features/F004-fma.md) and [Wiki guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
+## Packed predicate export
+
+PredicateGTPackedScalar/PredicateGTPackedSIMD take
+`(x []float32,out []uint8,threshold float32) error`, with exactly ceil(n/8)
+output bytes. Input i is bit i%8 of byte i/8, LSB first. Unused high bits are zero
+and every byte is overwritten each call. Wrong output length fails before
+writes; empty succeeds, input is preserved and storage must be disjoint.
+
+SIMD selects explicit 0/1, converts/extracts into scratch and packs only valid
+lanes, carrying a partial output byte across vectors. Normalization, packing
+and stores are timed. Logical work is `4*n+ceil(n/8)`; current widths allocate
+zero per call. Output extent, encoding and byte-boundary selection are explicit;
+complete output digests are computed after timing. Byte-mask kernels stay intact.
+
+```powershell
+go run ./examples/predicatepack
+go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 3 -benchtime 100ms -format md
+```
+
+See the [contract](../../docs/features/F004-packed-predicate.md) and
+[guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for bit decoding, fixtures and comparisons.
+
 ## Predicate byte export
 
 PredicateGTScalar/PredicateGTSIMD accept
@@ -28,7 +50,7 @@ go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -se
 
 Shared threshold/pattern/seed controls work through installed CLI, Go and Make.
 See the [contract](../../docs/features/F004-predicate-export.md) and
-[guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks). Packed bits and other representations remain separate work.
+[guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks). Packed predicates are implemented above; other representations remain separate work.
 
 ## Original broadcast/predicate slice
 

@@ -1,5 +1,7 @@
 package catalog
 
+import "fmt"
+
 const Uint8 = "uint8"
 const PredicateGT = "predicate-gt-f32"
 
@@ -17,4 +19,27 @@ func predicateOperation() Operation {
 	}
 }
 
-func (op Operation) ByteResult() bool { return op.Output.Shape == Array && op.Output.TypeID == Uint8 }
+func (op Operation) ByteResult() bool {
+	return (op.Output.Shape == Array || op.Output.Shape == PackedBits) && op.Output.TypeID == Uint8
+}
+
+// OutputElements gives physical storage, distinct from logical input size.
+// Division before rounding avoids n+7 overflow for packed representations.
+func (op Operation) OutputElements(elements int) (int, error) {
+	if elements < 0 {
+		return 0, fmt.Errorf("elements must be nonnegative")
+	}
+	switch op.Output.Shape {
+	case Array:
+		return elements, nil
+	case ScalarValue:
+		return 1, nil
+	case PackedBits:
+		n := elements / 8
+		if elements%8 != 0 {
+			n++
+		}
+		return n, nil
+	}
+	return 0, fmt.Errorf("unsupported output shape %q", op.Output.Shape)
+}

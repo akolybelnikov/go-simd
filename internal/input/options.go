@@ -51,7 +51,7 @@ func (o Options) Identity(op catalog.Operation) string {
 }
 
 func IsPredicate(op catalog.Operation) bool {
-	return op.ID == catalog.ThresholdZero || op.ID == catalog.SelectGT || op.ID == catalog.RangeZero || op.ID == catalog.PredicateGT
+	return op.ID == catalog.ThresholdZero || op.ID == catalog.SelectGT || op.ID == catalog.RangeZero || op.ID == catalog.PredicateGT || op.ID == catalog.PredicateGTPacked
 }
 
 func (o Options) Validate() error {

@@ -24,6 +24,7 @@ type Shape string
 const (
 	Array       Shape = "array"
 	ScalarValue Shape = "scalar"
+	PackedBits  Shape = "packed-bits" // One uint8 stores eight logical predicate elements.
 )
 
 // Value describes logical input/output traffic, not actual memory transactions.
@@ -104,6 +105,14 @@ func (op Operation) LogicalBytes(elements int) (int64, error) {
 			count = int64(elements)
 		case ScalarValue:
 			count = 1
+		case PackedBits:
+			if value.TypeID != Uint8 || value.ElementBytes != 1 {
+				return 0, fmt.Errorf("packed bits require uint8 storage")
+			}
+			count = int64(elements / 8)
+			if elements%8 != 0 {
+				count++
+			}
 		default:
 			return 0, fmt.Errorf("unsupported shape %q", value.Shape)
 		}
@@ -138,7 +147,7 @@ var operations = append([]Operation{
 		Output:   Value{"out", Float32, Array, 4},
 		Variants: []Variant{{Scalar, "Scalar", 0, false, Serial}, {SIMDPartial, "SIMD", 1, true, Serial}},
 	},
-}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation(), dotFMAOperation(), predicateOperation())...)
+}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation(), dotFMAOperation(), predicateOperation(), packedPredicateOperation())...)
 
 // All returns independent descriptors in the frozen legacy group/variant order.
 func All() []Operation {

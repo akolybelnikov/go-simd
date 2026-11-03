@@ -214,7 +214,11 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		}
 		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
 		if descriptor.ByteResult() {
-			item.byteOutput = make([]uint8, size)
+			length, err := descriptor.OutputElements(size)
+			if err != nil {
+				return nil, err
+			}
+			item.byteOutput = make([]uint8, length)
 		}
 		if descriptor.ScalarResult() {
 			item.scalar = new(float32)
