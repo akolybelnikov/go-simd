@@ -2,7 +2,9 @@
 
 Sum and unfused dot now offer Scalar plus SIMDStriped, SIMDStriped2 and
 SIMDStriped4. The suffix is the number of independent vector accumulators in
-the algorithm. The catalogue has nine operations and twenty-four implementations.
+the algorithm. That checkpoint brought the catalogue to nine operations/twenty-four implementations.
+[Fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
+now raises it to ten/twenty-six; reductions remain unfused.
 
 ## Run the comparison
 
@@ -45,7 +47,7 @@ After all full vectors, merge accumulators **lane-wise, left to right**:
 
 Store the merged vector and fold its lanes low to high from +0, then process
 the remaining scalar tail. Every addition rounds to float32. Dot also rounds
-each product before adding it; FMA remains a separate pending feature.
+each product before adding it; Fused affine is available separately; these dot strategies remain unfused.
 Length validation, loop control, merging, extraction/fold and tail are timed.
 
 Independent chains may change throughput, but so do loop unrolling and Go's
@@ -115,5 +117,5 @@ is included in timing, not counted as measured memory traffic.
 
 Read the [kernels](https://github.com/akolybelnikov/go-simd/blob/main/internal/reduction/multi.go)
 and [detailed contract](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-accumulators.md)
-for exact order, numerical tests and checkpoint boundaries. FMA, additional
-operation families and M4 remain pending.
+for exact order, numerical tests and checkpoint boundaries. Fused affine is available separately. Fused reductions, additional operation
+families and M4 remain pending.

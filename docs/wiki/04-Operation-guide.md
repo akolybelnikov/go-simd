@@ -1,7 +1,7 @@
 # 04 — Operation and kernel guide
 
-The lab contains nine operations and twenty-four implementations on `float32`
-slices: seven element-wise operations and two reductions. Array kernels have
+The lab contains ten operations and twenty-six implementations on `float32`
+slices: eight element-wise operations and two reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
 output slice. Sum accepts one input and returns one float32; dot accepts two
 inputs and returns a float32 plus a length-validation error.
@@ -18,6 +18,7 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/computation` | `ComputeHeavySIMD(a, b, out []float32) error` | `SIMD` | Partial-vector loads, explicit vector `Mul`/`Add`, partial stores |
 | `internal/patterns` | `ScaleScalar` / `ScaleSIMD(x,out []float32,alpha float32) error` | Scalar / SIMDPartial | Broadcast scale |
 | `internal/patterns` | `AffineScalar` / `AffineSIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | Explicit unfused float32 multiply/add |
+| `internal/patterns` | `AffineFMAScalar` / `AffineFMASIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | One-rounding binary32 affine; actual software/vector path retained |
 | `internal/patterns` | `ThresholdZeroScalar` / `ThresholdZeroSIMD(x,out []float32,t float32) error` | Scalar / SIMDPartial | Strict predicate, false to +0 |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
@@ -94,8 +95,10 @@ It has more arithmetic per element than addition while using the same two inputs
 and output shape. "Compute-heavy" is the existing function name, not proof that
 every measured size is compute-bound.
 
-The SIMD source composes `Mul` and `Add`; there is no user-selectable MulAdd/FMA
-kernel or fused/unfused arithmetic mode. Floating-point rounding, overflow,
+The computation group's scalar expression and explicit SIMD Mul/Add source
+are unchanged. A separate
+`affinefma` group now provides one-rounding affine with a corrected software
+reference and gated vector/software paths; see [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding). Floating-point rounding, overflow,
 infinities, NaNs, and toolchain lowering need explicit semantics before expanding
 that coverage. Do not claim bit-for-bit fused/unfused equivalence from ordinary
 integer-valued test examples.
@@ -169,7 +172,7 @@ M2 defines these identities once in
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
-ten configured bindings add broadcast/predicates. Sum and dot each have four scalar-returning
+Twelve configured bindings cover broadcasts, predicates and fused affine. Sum and dot each have four scalar-returning
 bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 specifies the 1/2/4-vector strategies and their numerical differences.
 

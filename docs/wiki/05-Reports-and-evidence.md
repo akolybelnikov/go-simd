@@ -52,6 +52,7 @@ commas, quotes and embedded newlines. Absent scalar is not a measured zero.
 | `config` | Normalized `count`, `benchtime`, `bench`, optional `input` (scalar uint32 bits, pattern and seed) |
 | `config.input.SumInput` | Sum fixture name; balanced, cancellation or mixed-magnitude |
 | `config.input.DotInput` | Dot fixture name; balanced, cancellation or mixed-magnitude |
+| `config.input.FMAInput` | Fused affine fixture: balanced, rounding or mixed-magnitude |
 | `machine` | Measuring process's Go/OS/architecture, vector bits/lanes, emulation, GOMAXPROCS, source revision/modified state and embedded Go build information |
 | `run` | Typed run and individual observations; model fields retain Go names in v1, e.g. `Observations` and `DurationNS` |
 
@@ -106,6 +107,14 @@ $capture.machine
 $capture.run.Observations | Select-Object Label, Repetition, Iterations, DurationNS, NanosecondsPerOp
 ```
 
+Fused affine uses `standalone-affine-fma/v1`, with a software fused reference.
+`machine.fma32_path` retains the process gate; `Key.Case.FMA` retains RoundingID,
+actual strategy PathID, process VectorPathID and NativeLanes. Mixed process
+paths/widths cannot pool. Optional `ArrayResultLastBits` is only the last output
+element's uint32 bits, including NaN/Inf safely; it is not an array checksum or
+a timing average. Startup probing is outside timing; software correction or
+vector broadcasts/arithmetic are inside. See [the FMA guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
+
 ## Explicit developer backend
 
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
@@ -132,6 +141,12 @@ their results must remain separate series because harness/precision differ.
 Throughput is descriptor-specific logical work: `8*n` for unary patterns and
 `12*n` for binary array-output operations, `4*n+4` for sum and `8*n+4` for dot,
 not measured DRAM traffic.
+
+Fused affine uses `legacy-report-affine-fma/v1`. Strict child `fma-vector`,
+`fma-path`, `simd-lanes` and `last-result-bits` metrics establish the actual path,
+width and retained output cell; parent capabilities cannot establish them.
+Fused/unfused arithmetic stays separate. Additive v1 FMA fields are omitted
+from older unrelated cases.
 
 ## Failure and sharing
 

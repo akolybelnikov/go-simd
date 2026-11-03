@@ -5,7 +5,8 @@ That slice brought the lab to seven operations and sixteen implementations.
 The [sum checkpoint](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 raised that to eight/eighteen; [dot](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 brought it to nine/twenty. [Accumulator strategies](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
-now bring it to nine/twenty-four. Inspect the short
+brought it to nine/twenty-four; [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
+now brings it to ten/twenty-six. Inspect the short
 catalogue with either CLI's `-list`; add `-group` for details and current values.
 
 ## Choose an experiment
