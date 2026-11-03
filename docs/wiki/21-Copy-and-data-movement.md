@@ -2,7 +2,7 @@
 
 The copy group compares four ways of moving float32 data without arithmetic:
 Scalar, GoCopy, SIMDPartial and SIMDTail. The catalogue now contains fourteen
-operations/thirty-eight implementations.
+operations/forty-one implementations.
 
 This experiment asks when explicit vector copying helps, and how it compares
 with Go's own copy implementation. It provides a movement reference alongside

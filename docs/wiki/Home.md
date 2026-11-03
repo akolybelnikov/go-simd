@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / F004 copy checkpoint, reviewed 2026-11-04.
+**Guide baseline:** architecture M3 / F004 complete for current scope, reviewed 2026-11-04.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -33,6 +33,8 @@ explicitly. This guide grows alongside each delivered feature.
 | Export ordered predicates as usable uint8 0/1 masks | [19 — Predicate export and byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) |
 | Compare byte masks with compact packed-bit output | [20 — Packed predicate masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) |
 | Compare moving exact bits with Go's built-in copy and explicit SIMD | [21 — Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) |
+| Clip values while keeping NaN payloads and signed-zero ties | [22 — Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts) |
+| Check F004 acceptance and the optional backlog | [23 — F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features) |
 
 ## What you can do today
 
@@ -54,6 +56,8 @@ explicitly. This guide grows alongside each delivered feature.
   and stores, and complete output digests outside timing.
 - Pack eight predicates per byte with defined LSB-first order, zero final padding,
   timed conversion/packing and physical output-size accounting.
+- Clip values through scalar branches, SIMD selection and repaired Min/Max, with
+  exact NaN/tie/zero-bit behavior and recorded bounds.
 - Compare source-loop, Go built-in and partial/tail SIMD copying over disjoint
   buffers, retaining complete exact-bit output evidence.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
@@ -101,6 +105,8 @@ useful repeated measurement.
 | 2026-11-03 | F004 predicate export: typed uint8 output, canonical 0/1, valid tail writes, complete output digests and 5*n accounting; twelve operations/thirty-two implementations |
 | 2026-11-03 | F004 packed predicates: LSB-first bits, zero padding, exact storage extent, timed packing, byte-boundary sweeps and complete output evidence; thirteen operations/thirty-four implementations |
 | 2026-11-04 | F004 copy: four movement controls, exact float32 bits, typed unary buffers, complete output digest, 8*n work and compiler/runtime interpretation; fourteen operations/thirty-eight implementations |
+
+| 2026-11-04 | F004 clamp and closure: ordered bounds, branches/selection/repaired MinMax, exact output bits, acceptance audit and complete baseline SDK ledger; fifteen operations/forty-one implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

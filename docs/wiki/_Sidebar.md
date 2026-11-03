@@ -24,4 +24,7 @@
 - [20 · Packed predicate masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks)
 - [21 · Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement)
 
+- [22 · Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
+- [23 · F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

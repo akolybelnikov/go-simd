@@ -2,7 +2,7 @@
 
 The predicatepack group stores eight truth values per byte. It offers Scalar
 and SIMDPartial, bringing that checkpoint to thirteen operations/thirty-four
-implementations. [Copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) now brings it to fourteen/thirty-eight. This extends the [canonical byte-mask experiment](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
+implementations. [Copy](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) brought it to fourteen/thirty-eight; [clamp](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts) completes the current scope at fifteen/forty-one. This extends the [canonical byte-mask experiment](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
 with a compact representation and measured packing cost.
 
 ## Run a bounded experiment

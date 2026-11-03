@@ -111,3 +111,18 @@ reported measurement.
 The tool currently has no saved-run comparison command, statistical verdict, or
 automatic regression threshold. Do not replace that missing analysis with a
 claim that every small median change is meaningful.
+
+
+## Clip distributions under the same numerical contract
+
+```powershell
+go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 5 -benchtime 100ms -format md
+go run ./examples/clamp
+```
+
+Compare none/all/alternating/clustered/shuffled in separate runs. Patterns here
+select clipped positions. SIMDMinMax includes explicit outside/tie/NaN repairs;
+the comparison is of complete matched kernels. Retain parameters, input hashes,
+width and policy when interpreting results. The [clamp guide](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
+shows signed-zero/NaN examples; [F004 acceptance](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
+marks the stopping point.

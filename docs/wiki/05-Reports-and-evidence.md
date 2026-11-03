@@ -217,3 +217,14 @@ bundles, cancellation recovery and worker isolation are deferred. A saved-run
 analyzer/offline re-render CLI is not implemented. Preserve evidence companions,
 source context, the experiment question and limitations when sharing summaries.
 The lab does not upload data or provision infrastructure automatically.
+
+
+## Clamp evidence
+
+Clamp records Case.Clamp with ordered-clamp-preserve-bits/v1 and actual SDK lanes.
+Exact lower/upper parameter bits, recipe/seed and input fingerprint are retained.
+ArrayResultSHA256 covers the complete little-endian float32 output after timing;
+it need not equal the input hash. The default standalone-clamp/v1 and developer
+legacy-report-clamp/v1 boundaries include all validation/broadcasts/repairs/stores.
+Native import requires positive integral child lanes and eight complete digest
+words. Different policies/widths cannot pool silently. See [clamp](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).

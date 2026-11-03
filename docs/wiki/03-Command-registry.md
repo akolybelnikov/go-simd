@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 copy checkpoint, reviewed 2026-11-04. Installed binaries run from any directory.
+Baseline: M3 / F004 complete for current scope, reviewed 2026-11-04. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all fourteen groups. Positional arguments are
+group. No explicit selection means all fifteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact fourteen-row operation table.
+`-list` prints runtime context and a compact fifteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+Clamp uses `8*n`, with bounds validation, broadcasts and semantic repairs timed.
 Copy uses `8*n`: one float32 read and one float32 write with disjoint measured buffers.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
 Dot and dotfma use `8*n+4`: two input arrays and one scalar result.
@@ -70,8 +71,8 @@ text, not a versioned machine-data export.
 | `-alpha` | `1.5` | Scale/affine/affinefma float32 multiplier |
 | `-beta` | `-0.5` | Affine/affinefma float32 offset; group defines fusion |
 | `-threshold` | `0` | Threshold/selection/predicate strict comparison |
-| `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds |
-| `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
+| `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds; inclusive clamp bounds |
+| `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate or clipped-position arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
@@ -83,6 +84,13 @@ arrangements; shuffled is approximately 50%, with the seed in input identity.
 Impossible true distributions fail before fixtures/artifacts; `-pattern none`
 permits all-false bounds. See [the worked pattern guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 for NaN/Inf/signed-zero, alias and rounding rules.
+
+Clamp uses `-lower`, `-upper`, `-pattern`, and `-seed` for shuffled positions.
+Here patterns describe values outside the bounds: none/all are exact, alternating
+clips even indices, clustered clips the first ceil(n/2), and shuffled is seeded
+approximately 50%. NaNs remain unchanged and count as unclipped. Reversed/NaN
+bounds fail before artifacts; [-Inf,+Inf] requires `-pattern none`. SIMDMinMax
+includes all signed-zero/tie/NaN repairs in timing. See [clamp examples](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
 
 Sum uses only `-sum-input`; other fixture/parameter settings do not alter its
 input identity. See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
@@ -156,6 +164,26 @@ make report COUNT=3 BENCHTIME=100ms ARGS="-group copy -bench BenchmarkCopy/n=64 
 make run ARGS="-group copy"
 ```
 
+Clamp reuses inclusive bounds and clipped-position patterns. Its three controls
+include branching, SIMD selection and repaired Min/Max. All preserve input NaN
+payloads and equality/zero bits. The complete output digest is retained after timing.
+
+```powershell
+simdreport -list -group clamp
+simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/clamp
+```
+
+```bash
+make list ARGS="-group clamp"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group clamp -lower=-1.5 -upper=2.5 -pattern=shuffled -seed=123 -bench BenchmarkClamp/n=64 -format md"
+make run ARGS="-group clamp"
+```
+
+Native BenchmarkClamp lives in ./internal/patterns; the report's developer
+backend supplies configured bounds/patterns to the child. See [the clamp guide](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -209,6 +237,7 @@ The outer `go run` process can also print `exit status 1`.
 | `predicate` | `BenchmarkPredicate` | `Scalar`, `SIMDPartial`; compare/select/convert/extract/byte stores included |
 | `predicatepack` | `BenchmarkPredicatePacked` | `Scalar`, `SIMDPartial`; valid-bit packing, normalization and stores included |
 | `copy` | `BenchmarkCopy` | `Scalar`, `GoCopy`, `SIMDPartial`, `SIMDTail`; exact bit movement |
+| `clamp` | `BenchmarkClamp` | `Scalar`, `SIMDPartial`, `SIMDMinMax`; ordered inclusive clipping and timed repairs |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dotfma` | `BenchmarkDotFMA` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4`; actual vector/software/tail path retained |
