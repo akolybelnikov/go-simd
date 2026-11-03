@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: ten operations and twenty-six scalar/SIMD
+An experimental Go SIMD laboratory: eleven operations and thirty scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -83,6 +83,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
+| dotfma | FMA updates with specified merge/fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4; actual path recorded |
 
 Both commands accept these fixture/parameter options. Each operation uses only its declared
 parameters; exact float32 bits and relevant fixture identity survive in evidence.
@@ -96,7 +97,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
-| `-dot-input` | `balanced` | Dot fixture: balanced, cancellation, mixed-magnitude |
+| `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
 | `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
 
 ```powershell
@@ -150,6 +151,18 @@ runs outside measurement; existing affine/dot remain unfused. See the
 ```powershell
 go run ./cmd/simdreport -group affinefma -fma-input rounding '-alpha=1.0000001192092896' '-beta=-1' -bench '^BenchmarkAffineFMA$/^n=8$' -count 3 -benchtime 100ms -format md
 go run ./examples/fma
+```
+
+Fused dot adds the separate `dotfma` group: Scalar and 1/2/4-vector accumulator
+strategies. Each multiply-accumulate rounds once to float32; accumulator merges
+and lane folds use ordinary rounded additions. Software execution preserves the
+same stripes. Evidence records the actual path for full vectors, scalar tails
+and emulation alongside fold order and scalar result bits. See the
+[fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
+
+```powershell
+go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/dotfma
 ```
 
 `simdbench` measures a fixed 1,048,576-element input and prints a quick table.
@@ -234,7 +247,7 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) are complete. Fused dot, clamp, packed-mask export
+and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md) are complete. Three-array MulAdd, clamp, packed-mask export
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,

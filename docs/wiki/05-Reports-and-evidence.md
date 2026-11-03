@@ -115,6 +115,14 @@ element's uint32 bits, including NaN/Inf safely; it is not an array checksum or
 a timing average. Startup probing is outside timing; software correction or
 vector broadcasts/arithmetic are inside. See [the FMA guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
+Fused dot uses `standalone-dot-fma/v1`, retaining both `Case.FMA` and
+`Case.Reduction`, plus `ScalarResultBits` for every observation. RoundingID is
+binary32-fma-updates-add-merge-rne/v1: updates fuse, merges/folds round normally.
+Actual PathID distinguishes software reference, software stripes, full vector,
+vector with software tail and tail-only software. A process passing the vector
+gate can still perform all FMA updates for a short case in software. Logical work is
+`8*n+4`; see [the fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
+
 ## Explicit developer backend
 
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
@@ -147,6 +155,14 @@ Fused affine uses `legacy-report-affine-fma/v1`. Strict child `fma-vector`,
 width and retained output cell; parent capabilities cannot establish them.
 Fused/unfused arithmetic stays separate. Additive v1 FMA fields are omitted
 from older unrelated cases.
+
+Fused dot uses `legacy-report-dot-fma/v1`. Strict child result-bits,
+simd-lanes, fma-vector and fma-path metrics establish the scalar bits, width,
+process gate and actual case path. Its five path codes (0..4) are specific to
+this operation; affine's existing 0/1 code contract stays unchanged. Missing,
+fractional, out-of-range or gate/size-inconsistent metrics fail import. Native
+and compiled cases agree on numerical/fixture/fold/path identity; their distinct
+harnesses keep timing series separate.
 
 ## Failure and sharing
 

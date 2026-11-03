@@ -1,5 +1,33 @@
 # F004 smoke evidence
 
+## Fused-dot checkpoint — 2026-11-03
+
+`dotfma-vector.measurements.json` and `dotfma-software.measurements.json` were
+generated on Windows/amd64, Go 1.27.3, GOEXPERIMENT=simd and GOMAXPROCS 16.
+Hardware execution used 256-bit / 8-lane SIMD and passed the vector FMA gate.
+Forced emulation used 128-bit / 4-lane software stripes. Source base was signed
+83e3d9f plus uncommitted fused-dot changes; absent embedded VCS facts remain unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/dotfma-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/dotfma-emulated-checkpoint
+Remove-Item Env:GODEBUG
+```
+
+Restore any prior GODEBUG value. Each capture retains eight observations:
+four strategies, two repetitions and exactly three iterations. ScalarResultBits
+is 0xa8800000 (-2^-46) for each of these observations. For other widths/orders,
+such as four accumulators at width 16, this fixture can return +0. No universal
+cross-strategy equality is claimed. Both FMA and Reduction identities retain
+process/actual paths, width, count and fold; logical work is 516 bytes per call.
+The software SIMD labels retain software-striped-fma32/v1 rather than scalar
+order. Different process contexts remain separate. Original numeric values,
+run IDs and timestamps are preserved; only filenames, LF endings and trailing
+whitespace differ. These are plumbing captures without performance conclusions.
+See [the fused-dot contract](../F004-fused-dot.md).
+
 ## Fused-affine checkpoint — 2026-11-03
 
 `fma-vector.measurements.json` and `fma-software.measurements.json` were generated

@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 fused-affine checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 fused-dot checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,15 +34,15 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all ten groups. Positional arguments are
+group. No explicit selection means all eleven groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact ten-row operation table.
+`-list` prints runtime context and a compact eleven-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary patterns and 12 for addition, computation and two-array selection.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
-Dot uses `8*n+4`: two input arrays and one scalar result.
+Dot and dotfma use `8*n+4`: two input arrays and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
 no artifacts. It advertises only implemented kernels, not proposed SDK patterns.
 Runtime emulation context does not guarantee acceleration or a speedup.
@@ -71,7 +71,7 @@ text, not a versioned machine-data export.
 | `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
-| `-dot-input` | `balanced` | Dot fixture: balanced, cancellation, mixed-magnitude |
+| `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
 | `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
 
 Scalars parse to float32 and are recorded as exact bits. Settings apply only to
@@ -85,9 +85,14 @@ Sum uses only `-sum-input`; other fixture/parameter settings do not alter its
 input identity. See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 for exact fold orders, cancellation examples and retained scalar-result bits.
 
-Dot uses only `-dot-input`, with its own pair of generated arrays. See
+Dot and dotfma use only `-dot-input`, sharing four pair recipes but keeping
+separate operation/generator identities. The fusion-sensitive recipe exposes
+product rounding; other fixtures retain their existing values. See
 [dot and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
-for product rounding, checked scalar returns and evidence examples.
+for product rounding, checked scalar returns and evidence examples. Use
+[dotfma](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) for fused updates, ordinary merge/fold additions and the five
+actual execution-path classes. Below-width cases use software tails; labels alone
+do not establish native FMA updates.
 
 ## Quick comparison: simdbench
 
@@ -137,8 +142,9 @@ The outer `go run` process can also print `exit status 1`.
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
+| `dotfma` | `BenchmarkDotFMA` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4`; actual vector/software/tail path retained |
 
-Sum/dot compare one, two and four vector accumulators. Existing -bench variant
+Sum/dot/dotfma compare one, two and four vector accumulators. Existing -bench variant
 selection chooses among them; no accumulator flag is added. Counts change fold
 order and the timed loop structure. See [accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 for the left-to-right merge, result identities and numerical examples.
@@ -309,6 +315,16 @@ git status --short
 `gofmt -w` edits source; `-l` only lists formatting issues. Race builds need a
 suitable C toolchain. Native output can be saved using redirection or
 PowerShell `Tee-Object`; add source/environment notes.
+
+For fused dot, the native wrapper is in `./internal/reduction`; direct native
+benchmarks use balanced input. Record a custom fixture through the developer
+report backend:
+
+```powershell
+simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./cmd/simdreport -backend go-test -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 2 -benchtime 3x -format md
+go run ./examples/dotfma
+```
 
 ## Environment settings
 

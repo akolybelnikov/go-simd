@@ -1,0 +1,628 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "dotfma",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "fusion-sensitive",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkDotFMA$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "software-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 128,
+    "float32_lanes": 4,
+    "gomaxprocs": 16,
+    "emulated": true,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261103-195903-1632412539",
+    "Environment": {
+      "ID": "benchmark-20261103-195903-1632412539/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-dot-fma/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-03T19:59:03Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 128\nSIMD float32 lanes: 4\nemulated: true\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-dot-fma/v1\ngroup: dotfma\nselection: \"^BenchmarkDotFMA$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nFMA32 vector gate: software-fma32/v1; per-case path and fold retained\nfixture: generated-dot-fma-float32-v1/fusion-sensitive\nnumerics: One binary32 nearest-even rounding per multiply-accumulate; not one rounding for the whole dot. Scalar folds left to right from +0. SIMDStriped/2/4 assign full vectors round-robin to 1/2/4 accumulators, merge lane-wise left to right, fold lanes low to high from +0, then software FMA tail updates. Gated vector FMA or software-striped execution preserves the declared order. Empty returns +0; unequal lengths fail before reading input. NaN payloads unspecified; signed zero/overflow follow each fold. Existing dot remains unfused.\nlogical traffic: 8*n + 4 bytes/call\n",
+    "Observations": [
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "left-to-right-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 0,
+              "TailID": "none"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 233.33333333333334,
+        "DurationNS": 700,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2211.4285714285716,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/Scalar-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "left-to-right-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 0,
+              "TailID": "none"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 333.3333333333333,
+        "DurationNS": 1000,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1548,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/Scalar-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-lane-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 1,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 400,
+        "DurationNS": 1200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1290,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-lane-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 1,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 433.3333333333333,
+        "DurationNS": 1300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1190.7692307692307,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-2-accumulators-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 2,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped-2",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped2",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 433.3333333333333,
+        "DurationNS": 1300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1190.7692307692307,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped2-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-2-accumulators-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 2,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped-2",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped2",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 333.3333333333333,
+        "DurationNS": 1000,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1548,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped2-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-4-accumulators-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 4,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped-4",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped4",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 400,
+        "DurationNS": 1200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1290,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped4-16"
+      },
+      {
+        "ScalarResultBits": 2826960896,
+        "Key": {
+          "RunID": "benchmark-20261103-195903-1632412539",
+          "EnvironmentID": "benchmark-20261103-195903-1632412539/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-dot-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "binary32-fma-updates-add-merge-rne/v1",
+              "PathID": "software-striped-fma32/v1",
+              "VectorPathID": "software-fma32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              }
+            },
+            "Reduction": {
+              "OrderID": "striped-4-accumulators-fma-dot-f32/v1",
+              "NativeLanes": {
+                "Value": 4,
+                "Known": true
+              },
+              "VectorAccumulators": 4,
+              "TailID": "fma-products-after-lanes/v1"
+            },
+            "OperationID": "dot-fma-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-striped-4",
+            "ArithmeticID": "float32-dot-fused-ordered-folds-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-dot-fma-float32-v1/fusion-sensitive",
+              "SHA256": "fc8d8b5464adbbbb57ead89418e3ba4ddec008dfc308347f3b08cd0c9e820c7b"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDStriped4",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 466.6666666666667,
+        "DurationNS": 1400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1105.7142857142858,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkDotFMA/n=64/SIMDStriped4-16"
+      }
+    ]
+  }
+}

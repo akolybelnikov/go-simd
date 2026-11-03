@@ -101,6 +101,16 @@ narrowed math.FMA is not a universal oracle. Keep FMA-only native metrics out
 of original callbacks; retain actual child path/width and last-output bits.
 Record software execution explicitly. A bounded probe is not exhaustive proof.
 
+Fused dot has separate arithmetic/harness identities and combines Case.FMA with
+Case.Reduction and scalar result bits. Verify each fused update with independent
+rational rounding, then ordinary merge/fold additions in their specified order.
+Software fallback must preserve stripes/counts rather than substitute scalar.
+Cover vector-unroll boundaries, tails, signed underflow, overflow cancellation,
+read-only overlaps and all fixtures through both backends. Validate the child's
+dot-specific five-path encoding against width, size and process gate; affine's
+existing 0/1 metrics remain unchanged. A passing process gate does not establish
+vector FMA work for a case shorter than one vector.
+
 ## Local validation commands
 
 ```powershell

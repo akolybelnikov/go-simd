@@ -1,5 +1,17 @@
 # 08 — Using the kernels in Go
 
+Fused dot adds reduction.DotFMAScalar and reduction.DotFMASIMD/2/4, accepting
+`(x,y []float32) (float32,error)`. They use corrected binary32 FMA updates,
+ordinary rounded accumulator merges/lane folds and software FMA tails. Unequal
+lengths return +0,reduction.ErrLengthMismatch before reading input; equal empty
+inputs return +0,nil. Inputs remain unchanged and read-only overlap is supported.
+There is no output slice; logical work is `8*n+4` bytes.
+
+Run `go run ./examples/dotfma` for fusion, accumulator-count and signed-zero
+examples. The [fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders)
+explains the exact order and actual vector/software/tail paths. Software fallback
+preserves each striped order; outputs need not equal the scalar fold.
+
 The current packages are under `internal/`, so Go restricts imports to this
 module's permitted source tree. A separate application cannot simply import
 `github.com/akolybelnikov/go-simd/internal/addition`. Use the checked-out lab and
