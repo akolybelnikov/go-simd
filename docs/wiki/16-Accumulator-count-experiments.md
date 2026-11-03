@@ -4,8 +4,10 @@ Sum and unfused dot now offer Scalar plus SIMDStriped, SIMDStriped2 and
 SIMDStriped4. The suffix is the number of independent vector accumulators in
 the algorithm. That checkpoint brought the catalogue to nine operations/twenty-four implementations.
 [Fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
-raised it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now raises it to eleven/thirty;
+raised it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) raised it to eleven/thirty;
 this page's sum/dot strategies preserve their existing arithmetic.
+
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings the catalogue to twelve/thirty-two.
 
 ## Run the comparison
 

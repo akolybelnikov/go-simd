@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 fused-dot checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 predicate-export checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,13 +34,14 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all eleven groups. Positional arguments are
+group. No explicit selection means all twelve groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact eleven-row operation table.
+`-list` prints runtime context and a compact twelve-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
-Logical traffic is 8 bytes per element for unary patterns and 12 for addition, computation and two-array selection.
+Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
+Predicate export uses `5*n`: one float32 input array and one uint8 output array.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
 Dot and dotfma use `8*n+4`: two input arrays and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
@@ -66,7 +67,7 @@ text, not a versioned machine-data export.
 | --- | --- | --- |
 | `-alpha` | `1.5` | Scale/affine/affinefma float32 multiplier |
 | `-beta` | `-0.5` | Affine/affinefma float32 offset; group defines fusion |
-| `-threshold` | `0` | Threshold/selection strict comparison |
+| `-threshold` | `0` | Threshold/selection/predicate strict comparison |
 | `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds |
 | `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
@@ -93,6 +94,25 @@ for product rounding, checked scalar returns and evidence examples. Use
 [dotfma](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) for fused updates, ordinary merge/fold additions and the five
 actual execution-path classes. Below-width cases use software tails; labels alone
 do not establish native FMA updates.
+
+Predicate export shares -threshold/-pattern/-seed with the existing predicate
+fixtures and writes uint8 0/1. No new flag or input type is introduced. Its
+`5*n` model includes byte output; conversion and extraction are timed. Evidence
+retains Case.Predicate and ByteResultSHA256 after timing. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
+
+```powershell
+simdreport -list -group predicate
+simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 3 -benchtime 100ms -format md
+```
+
+```bash
+make list ARGS="-group predicate"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group predicate -threshold=-1.5 -pattern shuffled -seed 123 -bench BenchmarkPredicate/n=64 -format md"
+```
+
+Quote the complete negative-decimal argument in PowerShell as shown. Native
+BenchmarkPredicate lives in ./internal/patterns; use -backend go-test for
+recorded custom fixture settings. Installed commands and Go/Make share flags.
 
 ## Quick comparison: simdbench
 
@@ -140,6 +160,7 @@ The outer `go run` process can also print `exit status 1`.
 | `threshold` | `BenchmarkThreshold` | `Scalar`, `SIMDPartial` |
 | `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
+| `predicate` | `BenchmarkPredicate` | `Scalar`, `SIMDPartial`; compare/select/convert/extract/byte stores included |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dotfma` | `BenchmarkDotFMA` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4`; actual vector/software/tail path retained |

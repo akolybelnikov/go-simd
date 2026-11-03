@@ -1,9 +1,10 @@
 # 04 — Operation and kernel guide
 
-The lab contains eleven operations and thirty implementations on `float32`
-slices: eight element-wise operations and three reductions. Array kernels have
+The lab contains twelve operations and thirty-two implementations on `float32`
+inputs: eight float32 element-wise outputs, one uint8 predicate output and three reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
-output slice. Sum accepts one input and returns one float32; dot/dotfma accept two
+output slice of their declared type. Predicate export writes canonical uint8 0/1.
+Sum accepts one input and returns one float32; dot/dotfma accept two
 inputs and returns a float32 plus a length-validation error.
 
 ## Complete kernel reference
@@ -20,6 +21,7 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/patterns` | `AffineScalar` / `AffineSIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | Explicit unfused float32 multiply/add |
 | `internal/patterns` | `AffineFMAScalar` / `AffineFMASIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | One-rounding binary32 affine; actual software/vector path retained |
 | `internal/patterns` | `ThresholdZeroScalar` / `ThresholdZeroSIMD(x,out []float32,t float32) error` | Scalar / SIMDPartial | Strict predicate, false to +0 |
+| `internal/patterns` | `PredicateGTScalar` / `PredicateGTSIMD(x []float32,out []uint8,t float32) error` | Scalar / SIMDPartial | Ordered comparison exported as canonical byte 0/1; conversion/extraction/stores included |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
 | `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |
@@ -137,6 +139,11 @@ New unary scale/affine/threshold/range account for `8*n`; two-array selection
 accounts for `12*n`. Numerical, alias and fixture rules are in
 [broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments).
 
+Predicate export requires disjoint input/output storage and returns a length
+error before writes. Equal empty/nil slices succeed. Logical work is `5*n`;
+input stays unchanged, and inactive tail lanes never escape. See
+[canonical byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) for full output evidence and examples.
+
 ## Internal machine identifiers
 
 Sum has no output slice or length-error sentinel. It leaves input unchanged,
@@ -170,6 +177,7 @@ The structured result model separates display names from identity:
 | sum | Operation `sum-f32` |
 | dot | Operation `dot-f32` |
 | dotfma | Operation `dot-fma-f32` |
+| predicate | Operation `predicate-gt-f32`; output encoding `uint8-zero-one/v1` |
 | SIMDStriped | Strategy `simd-striped` |
 | SIMDStriped2 | Strategy `simd-striped-2` |
 | SIMDStriped4 | Strategy `simd-striped-4` |
@@ -182,7 +190,8 @@ M2 defines these identities once in
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
-Twelve configured bindings cover broadcasts, predicates and fused affine. Sum, dot and dotfma each have four scalar-returning
+Twelve float32-output configured bindings cover broadcasts, predicates and fused affine;
+two additional BindUint8 bindings export predicates. Sum, dot and dotfma each have four scalar-returning
 bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 specifies the 1/2/4-vector strategies and their numerical differences.
 

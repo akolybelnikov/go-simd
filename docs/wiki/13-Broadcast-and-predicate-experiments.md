@@ -6,8 +6,10 @@ The [sum checkpoint](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-re
 raised that to eight/eighteen; [dot](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 brought it to nine/twenty. [Accumulator strategies](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 brought it to nine/twenty-four; [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
-brought it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now brings it to eleven/thirty. Inspect the short
+brought it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) brought it to eleven/thirty. Inspect the short
 catalogue with either CLI's `-list`; add `-group` for details and current values.
+
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings the catalogue to twelve/thirty-two.
 
 ## Choose an experiment
 

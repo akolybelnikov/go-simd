@@ -20,5 +20,6 @@
 
 - [17 · Fused affine and rounding](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
 - [18 · Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders)
+- [19 · Predicate export and byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks)
 
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

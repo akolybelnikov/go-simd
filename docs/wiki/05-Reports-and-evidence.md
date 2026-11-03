@@ -123,6 +123,13 @@ vector with software tail and tail-only software. A process passing the vector
 gate can still perform all FMA updates for a short case in software. Logical work is
 `8*n+4`; see [the fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
 
+Predicate export uses `standalone-predicate-export/v1`. Case.Predicate records
+EncodingID=uint8-zero-one/v1 and actual NativeLanes; mixed widths/encodings
+cannot pool. ByteResultSHA256 hashes every output byte in index order once after
+timing, separately from the input hash. It is output evidence rather than the
+mask data itself. Conversion, extraction and byte stores are timed; hashing is
+outside timing. Logical work is `5*n`. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
+
 ## Explicit developer backend
 
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
@@ -163,6 +170,13 @@ this operation; affine's existing 0/1 code contract stays unchanged. Missing,
 fractional, out-of-range or gate/size-inconsistent metrics fail import. Native
 and compiled cases agree on numerical/fixture/fold/path identity; their distinct
 harnesses keep timing series separate.
+
+Predicate export uses `legacy-report-predicate-export/v1`. Exact child
+simd-lanes and eight output-sha256-0..7 uint32 metrics reconstruct the complete
+output digest in big-endian word order. Missing, duplicate, fractional,
+non-finite, negative or oversized digest words and invalid widths fail import.
+Parent facts and expected output never replace child evidence. Existing v1
+captures omit the optional Predicate/ByteResultSHA256 fields when unrelated.
 
 ## Failure and sharing
 

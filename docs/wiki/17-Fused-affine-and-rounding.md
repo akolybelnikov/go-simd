@@ -3,7 +3,9 @@
 The affinefma group computes alpha*x+beta with one final float32 rounding.
 Existing affine still rounds its product before addition; dot remains unfused.
 That checkpoint brought the catalogue to ten operations and twenty-six implementations.
-[Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now brings it to eleven/thirty with separate update/fold semantics.
+[Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) brought it to eleven/thirty with separate update/fold semantics.
+
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings the catalogue to twelve/thirty-two.
 
 ## Run a fused experiment
 

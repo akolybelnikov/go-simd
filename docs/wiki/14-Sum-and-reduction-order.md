@@ -5,7 +5,9 @@ bringing the catalogue to eight operations/eighteen implementations. The later
 [dot checkpoint](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 raised that to nine/twenty; [2/4-accumulator strategies](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 brought it to nine/twenty-four. [Fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
-brought it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now brings it to eleven/thirty. This page specifies the original sum controls.
+brought it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) brought it to eleven/thirty. This page specifies the original sum controls.
+
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings the catalogue to twelve/thirty-two.
 
 ## Run sum
 

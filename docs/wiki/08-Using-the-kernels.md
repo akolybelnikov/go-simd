@@ -1,5 +1,15 @@
 # 08 — Using the kernels in Go
 
+Byte-mask export uses patterns.PredicateGTScalar and patterns.PredicateGTSIMD:
+`(x []float32,out []uint8,threshold float32) error`. Allocate one output byte
+per input element; true writes 1, equality/NaN writes 0. Length mismatch returns
+patterns.ErrLengthMismatch before writes. Equal empty/nil succeeds. Input bits
+are preserved; input/output storage must be disjoint. Cross-type unsafe aliases
+are unsupported. This typed path has no dummy float32 output.
+
+Run `go run ./examples/predicate`; see [the byte-mask guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) for
+conversion/extraction timing, valid tails, `5*n` accounting and output digests.
+
 Fused dot adds reduction.DotFMAScalar and reduction.DotFMASIMD/2/4, accepting
 `(x,y []float32) (float32,error)`. They use corrected binary32 FMA updates,
 ordinary rounded accumulator merges/lane folds and software FMA tails. Unequal

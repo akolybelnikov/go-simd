@@ -1,8 +1,8 @@
 # go-simd
 
-An experimental Go SIMD laboratory: eleven operations and thirty scalar/SIMD
+An experimental Go SIMD laboratory: twelve operations and thirty-two scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
-expression, broadcast scale/affine, predicate-based masking/selection, sum and dot. Run a quick
+expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
 on hardware, toolchain, size and background load; SIMD can be slower.
 
@@ -81,6 +81,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | threshold | `x > threshold ? x : +0` | Scalar, SIMDPartial |
 | selection | `x > threshold ? x : y` | Scalar, SIMDPartial |
 | rangefilter | `lower < x && x < upper ? x : +0` | Scalar, SIMDPartial |
+| predicate | `x > threshold ? uint8(1) : uint8(0)` | Scalar, SIMDPartial; conversion and byte stores included |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dotfma | FMA updates with specified merge/fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4; actual path recorded |
@@ -92,7 +93,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | --- | --- | --- |
 | `-alpha` | `1.5` | Scale and affine/affinefma multiplier |
 | `-beta` | `-0.5` | Affine/affinefma offset; group defines fusion |
-| `-threshold` | `0` | Threshold and selection |
+| `-threshold` | `0` | Threshold, selection and predicate export |
 | `-lower`, `-upper` | `-1`, `1` | Exclusive range bounds |
 | `-pattern` | `alternating` | Predicate fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate arrangement |
@@ -111,6 +112,16 @@ false, false masking yields +0 and selection preserves chosen operand bits.
 Impossible true distributions fail early; `-pattern none` permits deliberate
 all-false bounds. See [broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 for examples, numerical rules, byte accounting and the remaining F004 backlog.
+
+Predicate export creates a `[]uint8` mask with canonical 0/1 values. Strict
+comparison makes equality and NaN false. SIMD includes conversion, extraction
+and valid byte writes; logical work is `5*n`. Reports retain the full byte-output
+digest after timing. See [predicate export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
+
+```powershell
+go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/predicate
+```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
 SIMDStriped accumulates full vectors, folds lanes low to high, then handles the
@@ -247,7 +258,7 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md) are complete. Three-array MulAdd, clamp, packed-mask export
+and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md), are complete. Three-array MulAdd, clamp, packed-mask export
 and new types remain planned.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
@@ -255,6 +266,6 @@ Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`
 Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
 [patterns](internal/patterns/README.md) and [reductions](internal/reduction/README.md).
-The array-output kernels support disjoint output and
-exact in-place aliases; partial overlap is unsupported and length errors leave
-output unchanged. These internal packages are not a stable public API.
+Float32 array-output kernels support disjoint output and exact in-place aliases;
+partial overlap is unsupported. Predicate export requires disjoint float32 input
+and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.
