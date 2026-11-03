@@ -5,7 +5,8 @@ F004's dot checkpoint brought the lab to nine operations/twenty implementations.
 The later [accumulator checkpoint](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 adds SIMDStriped2/4 for a total of twenty-four implementations. This page specifies
 the original Scalar/SIMDStriped controls. [Fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
-is now available separately; dot remains unfused.
+is available separately. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now adds the dotfma group;
+this page's dot group remains unfused.
 
 ## Run a small dot experiment
 
@@ -42,8 +43,8 @@ No padded input lanes are multiplied or reduced.
 
 This is an **unfused** dot. For x=[-1,1+2^-23] and y=[1,1-2^-23], scalar returns
 +0 because the second product rounds to 1 before adding -1. A fused second
-multiply/add would retain -2^-46. An FMA variant would need a different contract
-and identity; it is not enabled by this checkpoint.
+multiply/add would retain -2^-46. The separate dotfma group provides that fused-update
+contract and identity; this dot group continues to round products separately.
 
 Different fold orders can lose rounding information in either direction. With
 w native lanes, length 2*w, y all ones and other x entries zero:
@@ -70,6 +71,11 @@ results. Empty inputs and all-negative-zero products yield +0 under these folds.
 | balanced (default) | x[i]=float32(i%33-16)/4; y[i]=float32(i%17-8)/8 |
 | cancellation | Repeat 64 x values: 2^24 at 0, 1 at 1, -2^24 at 32, otherwise zero; all y=1 |
 | mixed-magnitude | Repeat x=[1e-20,1,1e20,-1e20,-1,3,-3,1e-20] and y=[1e20,1e-20,1e-20,1e-20,1e20,1e-20,1e-20,1e20] as float32 |
+
+The fusion-sensitive recipe, shared with dotfma, repeats 64 entries:
+x[0]=-1,y[0]=1; x[32]=1+2^-23,y[32]=1-2^-23; otherwise x=y=0.
+It adds a fourth -dot-input choice without changing the three original recipes.
+At n=64 unfused scalar yields +0 while fused scalar yields -2^-46.
 
 The cancellation recipe produces Scalar=0 and SIMDStriped=1 at n=64 on the
 currently tested 4/8/16-lane widths. Retain actual width and size when comparing.

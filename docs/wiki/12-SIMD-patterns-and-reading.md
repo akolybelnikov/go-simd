@@ -1,13 +1,14 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** F004 broadcast/predicate, sum, dot, accumulator and fused-affine checkpoints implemented, reviewed 2026-11-03.
-The lab has ten operations/twenty-six implementations. The
+**Status:** F004 broadcast/predicate, sum, dot, accumulator, fused-affine and fused-dot checkpoints implemented, reviewed 2026-11-03.
+The lab has eleven operations/thirty implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 separate delivered patterns from the remaining proposals below.
 The [accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
-extends sum/dot to explicit 1/2/4-vector strategies.
+extends sum/dot to explicit 1/2/4-vector strategies. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) adds
+those same strategy choices with fused updates and separately rounded merges.
 
 ## Reading credit
 
@@ -27,8 +28,8 @@ The small numerical sketches below are our own planning examples.
 | Comparisons and mask logic | Threshold/selection/rangefilter implemented | Distribution/seed controls and range-mask And; exported masks deferred |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | No clamp kernel | Compare branches, selection, and min/max only under matching numerical rules |
-| Streaming accumulation | Sum and unfused dot with 1/2/4 independent accumulators and explicit merge/fold implemented | FMA remains a separate numerical gate |
-| Explicit FMA | Fused affine implemented with a one-rounding reference and recorded vector/software paths | Existing affine/dot stay unfused; fused dot/three-array MulAdd require separate contracts |
+| Streaming accumulation | Sum, unfused dot and fused dot with 1/2/4 independent accumulators and explicit merge/fold implemented | Keep fusion, order, width and count as distinct numerical identities |
+| Explicit FMA | Fused affine and dotfma implemented with corrected binary32 updates and actual vector/software/tail paths | Existing affine/dot stay unfused; three-array MulAdd remains a separate contract |
 | Permutes, horizontal folds, extraction | Sum includes portable store/fold cost; no isolated lane-rearrangement study | An explicitly scoped architecture-specific experiment |
 | Conversion, bit representation, saturation | No kernels for these families | A later bounded numeric/representation experiment |
 
@@ -105,11 +106,12 @@ element rather than assuming addition's tail treatment works for every pattern.
    checked scalar callbacks, separate product rounding and both-input identity.
    Two/four accumulators are complete with explicit assignment/merge and fold
    identity. Fused affine is complete with a corrected binary32 reference and explicit
-   execution paths; other fused families need separate contracts.
+   execution paths. Fused dot is complete with ordinary merge/fold additions,
+   scalar-result bits and count/width/path identity; three-array MulAdd remains separate.
 4. Add movement, conversion, or a gated `archsimd` experiment when it answers a
    documented learning question; grow numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. Broadcast/masking/selection and sum are implemented.
-Unfused dot and 2/4 accumulators are implemented. Fused affine is implemented; permutation, fused reductions and output-mask
-representations remain deferred.
+Unfused dot and 2/4 accumulators are implemented. Fused affine and fused dot are implemented; permutation, three-array MulAdd and
+output-mask representations remain deferred.

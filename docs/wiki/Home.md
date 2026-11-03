@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / F004 fused-affine checkpoint, reviewed 2026-11-03.
+**Guide baseline:** architecture M3 / F004 fused-dot checkpoint, reviewed 2026-11-03.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -29,6 +29,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Compute a dot product with explicit unfused rounding | [15 — Dot product and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding) |
 | Compare one, two and four independent vector accumulators | [16 — Accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments) |
 | Compare fused affine and inspect true float32 rounding | [17 — Fused affine and rounding](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding) |
+| Compare fused dot updates, accumulator orders and actual execution paths | [18 — Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) |
 
 ## What you can do today
 
@@ -39,11 +40,13 @@ explicitly. This guide grows alongside each delivered feature.
 - Compare left-to-right and striped float32 sum with balanced, cancellation and
   mixed-magnitude inputs, retaining scalar result bits and fold identity.
 - Compare unfused dot strategies over two generated arrays, with checked scalar
-  returns, product/fold semantics and the same three fixture choices.
+  returns, product/fold semantics and four fixture choices shared with fused dot.
 - Compare 1/2/4-vector accumulation strategies for sum/dot with explicit merge
   orders and retained accumulator-count/result identities.
 - Compare fused affine with a corrected software baseline and a gated vector
   or explicitly recorded software path.
+- Compare fused dot with Scalar and 1/2/4-vector accumulators, explicit merges,
+  software tails and per-case execution paths.
 - Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
 - Inspect registered operations and live SIMD context with either CLI's `-list`.
 - Run installed commands on a compatible local or remote machine without Go.
@@ -85,6 +88,7 @@ useful repeated measurement.
 | 2026-11-03 | F004 dot: unfused products, checked scalar returns, both-input fingerprints and compiled/native evidence parity; nine operations/twenty implementations |
 | 2026-11-03 | F004 accumulators: sum/dot with 1/2/4 vector accumulators, declared merge orders, count-sensitive examples and result identity; nine operations/twenty-four implementations |
 | 2026-11-03 | F004 fused affine: one-rounding reference, double-rounding counterexamples and explicit vector/software evidence; ten operations/twenty-six implementations |
+| 2026-11-03 | F004 fused dot: corrected FMA updates, four specified folds, actual vector/software/tail paths and shared fusion-sensitive fixture; eleven operations/thirty implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

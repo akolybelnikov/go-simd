@@ -81,7 +81,7 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Ten operations/twenty-six implementations
+or any group in the compact catalogue. Eleven operations/thirty implementations
 are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
@@ -89,6 +89,10 @@ CI runs this check. A local `runtime/cgo` build failure is a toolchain problem
 that can occur before the project's tests execute; see troubleshooting.
 
 ## 5. Run the small code example
+
+The current catalogue contains eleven operations and thirty implementations.
+Run `go run ./examples/dotfma` to compare fused updates, accumulator-count
+rounding and signed-zero differences; see [fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
 
 Run `go run ./examples/fma` for fused/unfused and double-rounding examples;
 see [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding) for its startup gate and recorded software path.

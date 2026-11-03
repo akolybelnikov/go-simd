@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all ten groups and many sizes up to 16,777,216 elements. That
+The default covers all eleven groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -121,9 +121,17 @@ The selected SDK's emulated MulAdd is not guaranteed fused, so the lab uses a
 corrected binary32 primitive and records that path. Inspect -list -group affinefma
 and Case.FMA; SIMDPartial alone does not prove acceleration. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
+For dotfma, inspect both Case.FMA and Case.Reduction. Software-striped execution
+preserves the selected accumulator order. Even with a vector process gate,
+cases shorter than one vector use software tails, and nonmultiples mix vector
+updates with a software tail. These are recorded per case. A fused update does
+not imply a single correctly rounded whole-dot result or bitwise agreement
+between accumulator counts; see [the worked examples](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
+
 ## Report a useful issue
 
-For dot, `-dot-input` accepts balanced, cancellation or mixed-magnitude. The
+For dot/dotfma, `-dot-input` accepts balanced, cancellation, mixed-magnitude
+or fusion-sensitive. The
 module-local kernels return ErrLengthMismatch before reading unequal-length
 inputs. Multiplication rounds before addition; differing scalar/SIMD results
 can follow the declared folds. Preserve both input identities, result bits and

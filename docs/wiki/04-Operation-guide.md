@@ -1,9 +1,9 @@
 # 04 — Operation and kernel guide
 
-The lab contains ten operations and twenty-six implementations on `float32`
-slices: eight element-wise operations and two reductions. Array kernels have
+The lab contains eleven operations and thirty implementations on `float32`
+slices: eight element-wise operations and three reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
-output slice. Sum accepts one input and returns one float32; dot accepts two
+output slice. Sum accepts one input and returns one float32; dot/dotfma accept two
 inputs and returns a float32 plus a length-validation error.
 
 ## Complete kernel reference
@@ -28,6 +28,9 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/reduction` | `DotSIMD(x,y []float32) (float32,error)` | SIMDStriped | Unfused vector products, one accumulator, lane fold/tail |
 | `internal/reduction` | `SumSIMD2(x)` / `SumSIMD4(x)` returning float32 | SIMDStriped2 / SIMDStriped4 | Round-robin vector accumulation, left-to-right lane-wise merge/fold/tail |
 | `internal/reduction` | `DotSIMD2(x,y)` / `DotSIMD4(x,y)` returning (float32,error) | SIMDStriped2 / SIMDStriped4 | Unfused products with 2/4 independent accumulators, merge/fold/tail |
+| `internal/reduction` | `DotFMAScalar(x,y []float32) (float32,error)` | Scalar | Corrected binary32 FMA updates left to right |
+| `internal/reduction` | `DotFMASIMD(x,y []float32) (float32,error)` | SIMDStriped | One accumulator; FMA updates, rounded lane fold, software FMA tail |
+| `internal/reduction` | `DotFMASIMD2(x,y)` / `DotFMASIMD4(x,y)` returning (float32,error) | SIMDStriped2 / SIMDStriped4 | 2/4 accumulators; actual vector/software stripes, rounded merge/fold, software FMA tail |
 
 Read the [addition source](https://github.com/akolybelnikov/go-simd/blob/main/internal/addition/add.go)
 and [computation source](https://github.com/akolybelnikov/go-simd/blob/main/internal/computation/compute.go).
@@ -148,6 +151,12 @@ unequal-length inputs, and allocates no output slice. Empty equal inputs return
 [dot and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 for its complete numerical/error contract and `8*n+4` accounting.
 
+DotFMA functions use the same checked scalar shape and input/error/empty rules,
+but fuse each multiply-accumulate. Ordinary merge/fold additions still round
+separately. Software fallback preserves the exact specified stripes and merges.
+See [fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) for order-sensitive examples, `8*n+4` accounting and
+per-case execution-path evidence.
+
 The structured result model separates display names from identity:
 
 | Display group / label | Internal identifier |
@@ -160,6 +169,7 @@ The structured result model separates display names from identity:
 | SIMDParallel | Strategy `simd-parallel-scalar-tail` |
 | sum | Operation `sum-f32` |
 | dot | Operation `dot-f32` |
+| dotfma | Operation `dot-fma-f32` |
 | SIMDStriped | Strategy `simd-striped` |
 | SIMDStriped2 | Strategy `simd-striped-2` |
 | SIMDStriped4 | Strategy `simd-striped-4` |
@@ -172,7 +182,7 @@ M2 defines these identities once in
 Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
-Twelve configured bindings cover broadcasts, predicates and fused affine. Sum and dot each have four scalar-returning
+Twelve configured bindings cover broadcasts, predicates and fused affine. Sum, dot and dotfma each have four scalar-returning
 bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 specifies the 1/2/4-vector strategies and their numerical differences.
 
@@ -182,4 +192,4 @@ specifies the 1/2/4-vector strategies and their numerical differences.
 is credited as the reading prompt for our
 [SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
 That review distinguishes implemented broadcasts, predicates and accumulation
-from planned movement/FMA experiments and checks the portable/`archsimd` boundary.
+from planned movement and three-array FMA experiments and checks the portable/`archsimd` boundary.

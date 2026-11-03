@@ -19,5 +19,6 @@
 - [16 · Accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 
 - [17 · Fused affine and rounding](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding)
+- [18 · Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders)
 
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

@@ -2,7 +2,8 @@
 
 The affinefma group computes alpha*x+beta with one final float32 rounding.
 Existing affine still rounds its product before addition; dot remains unfused.
-The catalogue now has ten operations and twenty-six implementations.
+That checkpoint brought the catalogue to ten operations and twenty-six implementations.
+[Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) now brings it to eleven/thirty with separate update/fold semantics.
 
 ## Run a fused experiment
 
@@ -143,4 +144,5 @@ falls back to invoking Go. Older unrelated evidence remains readable.
 Read the [kernel](https://github.com/akolybelnikov/go-simd/blob/main/internal/patterns/fma.go),
 [software primitive](https://github.com/akolybelnikov/go-simd/blob/main/internal/fma32/fma.go)
 and [detailed contract](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-fma.md).
-Fused dot, three-array MulAdd, other families and M4 remain future work.
+[Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) is now implemented as a separate group with Scalar and
+1/2/4-vector accumulators. Three-array MulAdd, other families and M4 remain future work.
