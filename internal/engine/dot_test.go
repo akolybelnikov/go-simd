@@ -60,13 +60,13 @@ func TestDotExecuteEvidenceAndPartialFailure(t *testing.T) {
 	}
 	run := result.Run{ID: "dot", Environment: result.Environment{ID: "env"}, BackendID: BackendID, HarnessID: DotHarnessID}
 	complete, err := Execute(plan, run, Testing{})
-	if err != nil || len(complete.Observations) != 4 {
+	if err != nil || len(complete.Observations) != 8 {
 		t.Fatal("dot execution failed", err)
 	}
 	for _, observation := range complete.Observations {
 		c := observation.Key.Case
 		want := uint32(0)
-		if observation.Label == "SIMDStriped" {
+		if observation.Label != "Scalar" {
 			want = math.Float32bits(1)
 		}
 		if observation.ScalarResultBits == nil || *observation.ScalarResultBits != want || c.Input.SHA256 != input.FingerprintForOperation(plan.Cases[0].Operation, 64, o) || c.Input.GeneratorID != "generated-dot-float32-v1/cancellation" || c.Reduction.NativeLanes.Value != vector.Len() || observation.Iterations != 3 || observation.DurationNS == nil {

@@ -5,6 +5,34 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 slice 2c — Multiple reduction accumulators — 2026-11-03
+
+- Added SIMDStriped2/4 for sum and unfused dot, with explicitly unrolled 2/4-vector
+  loops. Full vectors are assigned round-robin; remaining full vectors go to
+  accumulators 0/1/2, followed by a left-to-right lane-wise merge, low-to-high
+  lane fold and scalar tail. Dot products still round before addition, without FMA.
+- Preserved original scalar/one-vector kernel bodies and typed callback/harness
+  boundaries. New whole-kernel timings include validation, unrolling, merging,
+  extraction/fold and tail. Current widths allocate zero per call; the documented
+  larger-width scratch fallback remains visible in allocation counters.
+- Added strategy/order IDs and VectorAccumulators=2/4 through existing v1 fields.
+  Counts describe the algorithm, not measured physical registers. Native metrics,
+  result-bit retention, width compatibility and historical fold IDs remain intact.
+- Shared catalogue/listing/quick/report/native paths expose all four strategies
+  per reduction through existing benchmark selectors; no new flag or byte model.
+  Catalogue totals: nine operations and twenty-four implementations.
+- Tested independent rational assignment/product/merge/fold oracles, unroll and
+  tail boundaries, remaining full vectors, exceptional/subnormal values, finite
+  error bounds, dot length/overlap contracts, immutability, nonfusion and zero
+  current allocations. Count-sensitive cancellation cases verify real binding
+  identity; reports retain compatible four-strategy ordering and reject mixed widths.
+- Full tests/vet, pure packages and forced emulation pass. Exports, standalone
+  binary execution, compiled/native parity, examples and Make/CLI workflows cover
+  new variants. CI adds explicit native two/four-accumulator smoke cases.
+- Added the detailed contract, retained sum/dot smoke evidence, runnable example
+  and Wiki chapter; updated README/command/capability guides and retained reading credit.
+- Stopped after accumulator comparisons. FMA and M4 remain separate pending phases.
+
 ### F004 slice 2b — Unfused float32 dot product — 2026-11-03
 
 - Added dot-f32 / BenchmarkDot with Scalar and SIMDStriped. Products round to

@@ -4,7 +4,7 @@ import "testing"
 
 func TestSumScalarOutputContract(t *testing.T) {
 	op, ok := Lookup("sum-f32", "float32")
-	if !ok || op.Group != "sum" || op.BenchmarkName != "BenchmarkSum" || op.ArithmeticID != "float32-sum-ordered-folds-v1" || !op.ScalarResult() || len(op.Inputs) != 1 || len(op.Parameters) != 0 || len(op.Variants) != 2 {
+	if !ok || op.Group != "sum" || op.BenchmarkName != "BenchmarkSum" || op.ArithmeticID != "float32-sum-ordered-folds-v1" || !op.ScalarResult() || len(op.Inputs) != 1 || len(op.Parameters) != 0 || len(op.Variants) != 4 {
 		t.Fatalf("sum descriptor drift: %+v", op)
 	}
 	for _, n := range []int{0, 1, 1024} {

@@ -25,6 +25,8 @@ func TestDotBackendResultAndIdentityParity(t *testing.T) {
 		x, y, _ := input.MakeForOperation(op, 64, options)
 		scalar, _ := reduction.DotScalar(x, y)
 		striped, _ := reduction.DotSIMD(x, y)
+		striped2, _ := reduction.DotSIMD2(x, y)
+		striped4, _ := reduction.DotSIMD4(x, y)
 		var runs []result.Run
 		for _, backend := range []string{"compiled", "go-test"} {
 			output := t.TempDir()
@@ -59,13 +61,19 @@ func TestDotBackendResultAndIdentityParity(t *testing.T) {
 					}
 				}
 			}
-			if len(run.Observations) != 4 {
+			if len(run.Observations) != 8 {
 				t.Fatal("missing dot observations")
 			}
 			for _, o := range run.Observations {
 				want := math.Float32bits(scalar)
 				if o.Label == "SIMDStriped" {
 					want = math.Float32bits(striped)
+				}
+				if o.Label == "SIMDStriped2" {
+					want = math.Float32bits(striped2)
+				}
+				if o.Label == "SIMDStriped4" {
+					want = math.Float32bits(striped4)
 				}
 				if o.Key.Case.OperationID != catalog.Dot || o.Key.Case.Elements != 64 || o.ScalarResultBits == nil || *o.ScalarResultBits != want || o.Key.Case.Input.SHA256 != input.FingerprintFloat32(x, y) || o.Iterations != 3 {
 					t.Fatal("wrong dot result/selection/context", o)

@@ -82,6 +82,14 @@ func Lookup(id, typeID string) (Operation, error) {
 				bind = func(x, y []float32) func() (float32, error) {
 					return func() (float32, error) { return reduction.DotSIMD(x, y) }
 				}
+			case catalog.SIMDStriped2:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotSIMD2(x, y) }
+				}
+			case catalog.SIMDStriped4:
+				bind = func(x, y []float32) func() (float32, error) {
+					return func() (float32, error) { return reduction.DotSIMD4(x, y) }
+				}
 			default:
 				return Operation{}, fmt.Errorf("missing dot binding for %s", variant.ID)
 			}
@@ -95,6 +103,10 @@ func Lookup(id, typeID string) (Operation, error) {
 				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumScalar(x) } }
 			case catalog.SIMDStriped:
 				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumSIMD(x) } }
+			case catalog.SIMDStriped2:
+				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumSIMD2(x) } }
+			case catalog.SIMDStriped4:
+				bind = func(x []float32) func() float32 { return func() float32 { return reduction.SumSIMD4(x) } }
 			default:
 				return Operation{}, fmt.Errorf("missing sum binding for %s", variant.ID)
 			}

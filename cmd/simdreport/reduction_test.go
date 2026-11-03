@@ -52,7 +52,7 @@ func TestReductionBackendResultAndIdentityParity(t *testing.T) {
 				}
 			}
 		}
-		if len(run.Observations) != 4 {
+		if len(run.Observations) != 8 {
 			t.Fatal("missing sum observations")
 		}
 		for _, o := range run.Observations {
@@ -60,7 +60,7 @@ func TestReductionBackendResultAndIdentityParity(t *testing.T) {
 				t.Fatal("sum evidence incomplete")
 			}
 			want := uint32(0)
-			if o.Label == "SIMDStriped" {
+			if o.Label != "Scalar" {
 				want = math.Float32bits(1)
 			}
 			if *o.ScalarResultBits != want {

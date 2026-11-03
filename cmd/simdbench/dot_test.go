@@ -22,7 +22,7 @@ func TestQuickDotTypedCallbacks(t *testing.T) {
 		}
 		got, err := v.reduceChecked()
 		want := float32(0)
-		if v.name == "SIMDStriped" {
+		if v.name != "Scalar" {
 			want = 1
 		}
 		if err != nil || got != want {

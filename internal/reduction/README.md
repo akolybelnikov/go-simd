@@ -1,5 +1,24 @@
 # Ordered float32 reductions
 
+## Two/four accumulator strategies
+
+SumSIMD2/4 and DotSIMD2/4 assign full vectors round-robin to 2/4 independent
+accumulators, merge lane-wise left to right, fold lanes low to high from +0,
+then process the scalar tail. Dot products round before addition without FMA.
+Existing input/error/empty contracts apply; no output slice or new CLI flag.
+
+```powershell
+go run ./examples/accumulators
+go run ./cmd/simdreport -group dot -bench '^BenchmarkDot$/^n=1024$' -count 3 -benchtime 100ms -format md
+```
+
+All four strategies now appear for sum/dot. Algorithmic accumulator counts and
+fold identity survive in v1 evidence; original strategy IDs and kernel bodies
+stay unchanged. Current widths allocate zero per call. Comparisons include
+unrolling, merging and Go's register allocation; more accumulators need not win.
+See the [contract](../../docs/features/F004-accumulators.md) and
+[Wiki guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
+
 ## Unfused dot product
 
 `DotScalar(x,y []float32) (float32,error)` rounds each product to float32,
@@ -18,8 +37,8 @@ go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot
 both input arrays fingerprinted and no output array. Logical work is `8*n+4`.
 Typed checked callbacks propagate errors and retain result bits once after
 timing under distinct dot harnesses. Scalar is a timing baseline; order changes
-can alter rounding and exceptional values. FMA and multiple accumulators remain
-future work. See the [dot contract](../../docs/features/F004-dot.md) and
+can alter rounding and exceptional values. FMA remains future work; multiple
+accumulators are available above. See the [dot contract](../../docs/features/F004-dot.md) and
 [Wiki exercise](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
 
 ## Sum
