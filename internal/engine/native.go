@@ -12,8 +12,12 @@ const ReductionHarnessID = "standalone-reduction/v1"
 const DotHarnessID = "standalone-dot/v1"
 const FMAHarnessID = "standalone-affine-fma/v1"
 const DotFMAHarnessID = "standalone-dot-fma/v1"
+const PredicateHarnessID = "standalone-predicate-export/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ByteResult() {
+		return PredicateHarnessID
+	}
 	if op.ID == catalog.DotFMA {
 		return DotFMAHarnessID
 	}

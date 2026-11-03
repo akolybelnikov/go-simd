@@ -23,7 +23,7 @@ func (s *Selection) Register(flags *flag.FlagSet) {
 	flags.StringVar(&s.Input.DotInput, "dot-input", s.Input.DotInput, "dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive")
 	flags.Var(float32Flag{&s.Input.Alpha}, "alpha", "float32 scale/affine multiplier (broadcast per call)")
 	flags.Var(float32Flag{&s.Input.Beta}, "beta", "float32 affine offset (group defines fusion)")
-	flags.Var(float32Flag{&s.Input.Threshold}, "threshold", "float32 threshold for threshold/selection")
+	flags.Var(float32Flag{&s.Input.Threshold}, "threshold", "float32 threshold for threshold/selection/predicate")
 	flags.Var(float32Flag{&s.Input.Lower}, "lower", "float32 exclusive lower range bound")
 	flags.Var(float32Flag{&s.Input.Upper}, "upper", "float32 exclusive upper range bound")
 	flags.StringVar(&s.Input.Pattern, "pattern", s.Input.Pattern, "predicate fixture: none, all, alternating, clustered, shuffled")

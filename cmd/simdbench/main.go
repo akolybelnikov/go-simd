@@ -20,6 +20,7 @@ import (
 const benchmarkSize = 1 << 20
 
 var benchmarkSink float32
+var benchmarkByteSink []uint8
 
 type options struct {
 	input input.Options
@@ -40,6 +41,7 @@ type result struct {
 }
 
 type benchmarkGroup struct {
+	byteOutput   []uint8
 	scalar       *float32
 	output       []float32
 	name         string
@@ -108,6 +110,24 @@ func run(args []string, stdout, stderr io.Writer) error {
 					b.StopTimer()
 					*group.scalar = value
 					benchmarkSink = value
+				})
+			} else if group.byteOutput != nil {
+				stats = testing.Benchmark(func(b *testing.B) {
+					b.ReportAllocs()
+					b.SetBytes(group.logicalBytes)
+					b.ResetTimer()
+					if runErr != nil {
+						b.StopTimer()
+						return
+					}
+					for i := 0; i < b.N; i++ {
+						if runErr = item.run(); runErr != nil {
+							b.StopTimer()
+							return
+						}
+					}
+					b.StopTimer()
+					benchmarkByteSink = group.byteOutput
 				})
 			} else {
 				stats = testing.Benchmark(func(b *testing.B) {
@@ -193,6 +213,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			x, y, resultOut = a, b, out
 		}
 		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
+		if descriptor.ByteResult() {
+			item.byteOutput = make([]uint8, size)
+		}
 		if descriptor.ScalarResult() {
 			item.scalar = new(float32)
 			item.name += "\nfixture: " + options.Generator(descriptor)
@@ -207,6 +230,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.name += "\nFMA32 vector gate: " + platform.Current().FMA32Path + "; scalar tails use software FMA32"
 		}
 		for _, implementation := range operation.Implementations {
+			if descriptor.ByteResult() {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUint8(x, item.byteOutput, options)})
+				continue
+			}
 			if implementation.BindCheckedScalar != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, reduceChecked: implementation.BindCheckedScalar(x, y)})
 				continue

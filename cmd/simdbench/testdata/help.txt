@@ -30,7 +30,7 @@ Options:
   -sum-input string
     	sum fixture: balanced, cancellation, mixed-magnitude (default "balanced")
   -threshold value
-    	float32 threshold for threshold/selection
+    	float32 threshold for threshold/selection/predicate
   -upper value
     	float32 exclusive upper range bound (default 1)
 

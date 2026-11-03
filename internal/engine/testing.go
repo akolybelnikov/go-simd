@@ -13,13 +13,15 @@ type Testing struct{}
 
 var benchmarkMu sync.Mutex
 var sink float32
+var byteSink []uint8
 
 func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 	if err := (Config{Count: 1, Benchtime: benchtime}).Validate(); err != nil {
 		return Sample{}, err
 	}
 	scalar := p.Reduce != nil || p.ReduceChecked != nil
-	if p.Bytes < 0 || (!scalar && (p.Run == nil || len(p.Output) == 0)) || (scalar && (p.Scalar == nil || p.Run != nil || p.Output != nil)) || (p.Reduce != nil && p.ReduceChecked != nil) {
+	bytes := p.ByteOutput != nil
+	if p.Bytes < 0 || (bytes && (scalar || p.Scalar != nil || p.Output != nil || p.Run == nil || len(p.ByteOutput) == 0)) || (!bytes && !scalar && (p.Run == nil || len(p.Output) == 0)) || (scalar && (p.Scalar == nil || p.Run != nil || p.Output != nil)) || (p.Reduce != nil && p.ReduceChecked != nil) {
 		return Sample{}, fmt.Errorf("invalid prepared benchmark")
 	}
 	benchmarkMu.Lock()
@@ -31,6 +33,30 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 		return Sample{}, err
 	}
 	defer timing.Value.Set(previous)
+	if bytes {
+		var runErr error
+		stats := testing.Benchmark(func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(p.Bytes)
+			b.ResetTimer()
+			if runErr != nil {
+				b.StopTimer()
+				return
+			}
+			for i := 0; i < b.N; i++ {
+				if runErr = p.Run(); runErr != nil {
+					b.StopTimer()
+					return
+				}
+			}
+			b.StopTimer()
+			byteSink = p.ByteOutput
+		})
+		if runErr != nil {
+			return Sample{}, runErr
+		}
+		return Sample{stats.N, stats.T, stats.MemAllocs, stats.MemBytes}, nil
+	}
 	if p.ReduceChecked != nil {
 		var runErr error
 		stats := testing.Benchmark(func(b *testing.B) {

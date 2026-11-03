@@ -75,6 +75,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 			return err
 		}
 		fmt.Fprintf(&out, "logical traffic at n=1: %d bytes/call (effective, not DRAM)\n", bytes)
+		if op.ByteResult() {
+			fmt.Fprintln(&out, "logical traffic model: 5*n bytes/call; uint8 0/1 output")
+			fmt.Fprintln(&out, "SIMD boundary: partial load, compare, select 0/1, convert/extract, valid byte writes; all timed")
+		}
 		table := tabwriter.NewWriter(&out, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(table, "LABEL\tSTRATEGY ID\tMODE\tWORKER POLICY")
 		for _, variant := range op.Variants {

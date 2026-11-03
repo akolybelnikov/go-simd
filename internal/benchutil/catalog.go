@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 		benchmarkDotFMA(b, operation)
 		return
 	}
+	if operation.Descriptor.ByteResult() {
+		benchmarkPredicate(b, operation)
+		return
+	}
 	if operation.Descriptor.ScalarResult() {
 		benchmarkReduction(b, operation)
 		return

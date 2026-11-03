@@ -2,6 +2,7 @@
 package engine
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"math"
 	"runtime"
@@ -95,6 +96,7 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
+	ByteOutput    []uint8
 	ReduceChecked func() (float32, error)
 	Reduce        func() float32
 	Scalar        *float32
@@ -119,6 +121,7 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 	}
 	procs := runtime.GOMAXPROCS(0)
 	var a, b, out []float32
+	var byteOut []uint8
 	var scalar float32
 	previous := -1
 	fingerprint := ""
@@ -127,11 +130,17 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			a, b, out = input.MakeForOperation(c.Operation, c.Elements, plan.Input)
 			fingerprint = input.FingerprintFloat32(a, b)
 			previous = c.Elements
+			if c.Operation.ByteResult() {
+				byteOut = make([]uint8, c.Elements)
+			}
 		}
 		// Native developer benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.Parameterized() {
+		if c.Operation.ByteResult() {
+			prepared.Run = c.Implementation.BindUint8(a, byteOut, plan.Input)
+			prepared.ByteOutput = byteOut
+		} else if c.Operation.Parameterized() {
 			prepared.Run = c.Implementation.BindConfigured(a, b, out, plan.Input)
 		}
 		if c.Operation.ScalarResult() {
@@ -165,6 +174,14 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				return run, err
 			}
 			key.Case.Reduction = fold
+		}
+		if c.Operation.ByteResult() {
+			var vector simd.Float32s
+			identity, err := result.NewPredicateIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Predicate = identity
 		}
 		if c.Operation.ID == catalog.AffineFMA {
 			var vector simd.Float32s
@@ -207,6 +224,10 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			if c.Operation.ScalarResult() {
 				bits := math.Float32bits(scalar)
 				run.Observations[len(run.Observations)-1].ScalarResultBits = &bits
+			}
+			if c.Operation.ByteResult() {
+				digest := sha256.Sum256(byteOut)
+				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
 			}
 			if c.Operation.ID == catalog.AffineFMA {
 				bits := math.Float32bits(out[len(out)-1])
