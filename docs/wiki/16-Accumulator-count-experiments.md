@@ -7,7 +7,7 @@ the algorithm. That checkpoint brought the catalogue to nine operations/twenty-f
 raised it to ten/twenty-six. [Fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) raised it to eleven/thirty;
 this page's sum/dot strategies preserve their existing arithmetic.
 
-[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) now brings the catalogue to twelve/thirty-two.
+[Predicate byte export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) brought the catalogue to twelve/thirty-two; [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) now brings it to thirteen/thirty-four.
 
 ## Run the comparison
 

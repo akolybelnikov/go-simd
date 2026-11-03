@@ -1,8 +1,8 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot and predicate-export checkpoints implemented**, 2026-11-03.
+Status: **broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export and packed-predicate checkpoints implemented**, 2026-11-03.
 Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum, dot, fused affine, fused dot and predicate export. The catalogue totals twelve operations/thirty-two implementations.
+rangefilter, sum, dot, fused affine, fused dot, byte and packed predicate export. The catalogue totals thirteen operations/thirty-four implementations.
 See the [broadcast/predicate record](F004-broadcast-predicates.md) and
 [sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
 [Accumulator comparison record](F004-accumulators.md) adds two/four-vector
@@ -10,7 +10,9 @@ strategies. The [fused-affine record](F004-fma.md) adds one-rounding binary32
 arithmetic with corrected software and gated vector paths. The [fused-dot record](F004-fused-dot.md)
 adds FMA updates with ordinary merge/fold additions and actual per-case paths.
 [Predicate export](F004-predicate-export.md) adds canonical uint8 output with conversion/storage timed.
-Three-array MulAdd, clamp, packed export, movement and other input types stay planned.
+[Packed export](F004-packed-predicate.md) adds LSB-first bits, normalized padding,
+physical output extents and timed packing. Three-array MulAdd, clamp, movement
+and other input types stay planned.
 
 ## Purpose and evidence
 
@@ -44,8 +46,9 @@ distributions are recorded. Sum now adds a genuine scalar-return path and one
 vector accumulator with a specified lane/scalar-tail fold. Unfused dot adds
 checked scalar returns and rounded products over two input arrays. Both reductions
 now compare 1/2/4 independent vector accumulators with declared merge orders.
-Fused affine now adds a separately identified one-rounding contract. Predicate
-packed export, clamp, three-array MulAdd and permutations remain absent. Canonical
+Fused affine now adds a separately identified one-rounding contract.
+Clamp, three-array MulAdd and permutations remain absent. Packed export now
+specifies LSB-first bits, zero padding and actual physical output sizes. Canonical
 byte predicate export now includes conversion/extraction and a typed uint8 output. Fused dot now
 uses Scalar and 1/2/4 accumulators with separate fused arithmetic/fold/path identity.
 
@@ -60,7 +63,7 @@ and existing kernel timing paths are preserved.
 | --- | --- | --- | --- |
 | Contiguous load/operate/store | Yes, both operations | Portable full/partial loads and stores | Retain current arithmetic controls; add copy only to answer a movement question |
 | Broadcast scalar parameters | Implemented: scale/affine | `simd.BroadcastFloat32s` | Scalar/SIMD controls; no prepared-vector variant |
-| Comparisons / predicate output | Implemented comparisons and predicate-gt-f32 uint8 export | Greater/IfElse selects exact 0/1; ConvertToInt32/Store and valid byte writes | Canonical bytes implemented with timed conversion/storage; packed bits remain separate |
+| Comparisons / predicate output | Implemented comparisons and predicate-gt-f32 uint8 export | Greater/IfElse selects exact 0/1; ConvertToInt32/Store and valid byte writes | Canonical byte and packed LSB-first output implemented with timed conversion/packing/storage |
 | Mask composition | Implemented: rangefilter And | `Mask32s.And`, `Or`; no portable mask `ToBits` in this SDK | Strict-bound controls; Or remains deferred |
 | Masking / selection | Implemented: threshold/selection | `Float32s.Masked`, `IfElse` | `threshold-zero-f32` and `select-gt-f32` with matching scalar contracts |
 | Min/max and clamp | No | Portable `Min`, `Max` and comparison/selection | `clamp-f32`; compare implementations only after NaN/signed-zero/tie policies agree |
@@ -72,7 +75,9 @@ and existing kernel timing paths are preserved.
 | Numeric conversion / reinterpretation | No | Portable `ConvertToInt32`, `ToBits`, integer `BitsToFloat32` | Numeric conversion versus exact bit round-trip as different operations |
 | Saturation / integer logic / shifts | No | Type-dependent integer API; not available uniformly | A bounded clipping/overflow or bit-manipulation experiment when justified |
 
-Packed-mask export is another distinct representation: amd64
+Packed-mask export is implemented with valid-lane packing after normalized
+portable comparisons; no raw SDK mask bits escape. It remains distinct from byte
+masks. For a future register-only architecture-specific study, amd64
 `archsimd.Mask32x8.ToBits` exists, while portable `Mask32s.ToInt32s` exports an
 integer-vector representation. Do not invent a portable `Mask32s.ToBits`, assume
 raw true-lane encoding, or compare packed bits with scalar bool arrays without
@@ -96,10 +101,11 @@ matching both output and conversion boundaries.
    corrected binary32 reference and recorded vector/software gate. Fused dot is
    complete with four specified folds, software stripes preserving order and
    per-case vector/software/tail identity. Three-array MulAdd remains separate work.
-4. **Representation slice (predicate export complete):** canonical uint8 0/1,
-   typed byte output, valid tails, conversion/extraction/storage timed and full
-   output digest after timing. Stop after this byte-export checkpoint. Packed
-   masks, copy/reorder, standalone conversions and M4 remain separate work.
+4. **Representation slice (byte and packed predicates complete):** canonical uint8
+   0/1 or LSB-first packed bits, typed physical output extent, valid tails,
+   conversion/extraction/packing/storage timed and full output digest after timing.
+   Stop after packed export. Copy/reorder, standalone conversions and M4 remain
+   separate work.
    Fixed-width permutes/horizontal primitives need explicit `archsimd` gates.
 5. **Purposeful numeric breadth:** add float64 or a narrow integer family for a
    documented question about rounding, saturation, conversion, or bit operations.
@@ -195,12 +201,13 @@ These are candidate *logical* byte counts for float32 kernels, not DRAM counters
 | Two-array selection | `12*n` |
 | Three-array element-wise MulAdd | `16*n` |
 | Float32 predicate to uint8 0/1 | `5*n` |
+| Float32 predicate to packed uint8 bits | `4*n+ceil(n/8)` |
 | Float32 sum | `4*n + 4` |
 | Float32 dot product | `8*n + 4` |
 
 Record constant setup, scratch traffic, mask packing, output kind and byte units
 explicitly. Current descriptors derive `8*n`, `12*n`, sum's `4*n+4` or dot's
-`8*n+4`, plus predicate export's `5*n`; future output shapes
+`8*n+4`, plus byte predicate export's `5*n` or packed predicates' `4*n+ceil(n/8)`; future output shapes
 must retain their own logical traffic model.
 Exclude zero-work sizes from throughput claims; retain them in correctness tests.
 Do not pool contexts with different parameters, mask representation, fusion,

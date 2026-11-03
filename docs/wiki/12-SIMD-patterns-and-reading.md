@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
-**Status:** F004 broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot and predicate-export checkpoints implemented, reviewed 2026-11-03.
-The lab has twelve operations/thirty-two implementations. The
+**Status:** F004 broadcast/predicate, sum, dot, accumulator, fused-affine, fused-dot, predicate-export and packed-predicate checkpoints implemented, reviewed 2026-11-03.
+The lab has thirteen operations/thirty-four implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -25,7 +25,7 @@ The small numerical sketches below are our own planning examples.
 | --- | --- | --- |
 | Contiguous loads/stores and partial/scalar tails | Exercised in existing addition/expression kernels | Keep as controls; isolate movement only for a concrete question |
 | Broadcast constants | Scale/affine implemented | Compare per-call broadcasts and matched scalar controls |
-| Comparisons and mask logic | Threshold/selection/rangefilter plus canonical uint8 predicate export implemented | Distribution/seed controls, range-mask And and timed normalization/extraction/stores; packed bits deferred |
+| Comparisons and mask logic | Threshold/selection/rangefilter plus canonical byte and packed predicate export implemented | Distribution/seed controls, range-mask And and timed normalization/extraction/packing/stores |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | No clamp kernel | Compare branches, selection, and min/max only under matching numerical rules |
 | Streaming accumulation | Sum, unfused dot and fused dot with 1/2/4 independent accumulators and explicit merge/fold implemented | Keep fusion, order, width and count as distinct numerical identities |
@@ -110,10 +110,11 @@ element rather than assuming addition's tail treatment works for every pattern.
    scalar-result bits and count/width/path identity; three-array MulAdd remains separate.
 4. Predicate export is complete: typed uint8 0/1, timed conversion/extraction,
    valid tail writes and full output evidence. See [the byte-mask guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
-   Further movement, conversion or gated `archsimd` experiments need a documented
+   [Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) are also complete with explicit bit order,
+   padding and packing costs. Further movement, conversion or gated `archsimd` experiments need a documented
    learning question; grow input numeric types purposefully.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. Broadcast/masking/selection and sum are implemented.
 Unfused dot and 2/4 accumulators are implemented. Fused affine and fused dot are implemented; permutation, three-array MulAdd and
-packed output-mask representations remain deferred; canonical byte masks are implemented.
+copy/reorder and standalone conversions remain deferred; byte and packed masks are implemented.

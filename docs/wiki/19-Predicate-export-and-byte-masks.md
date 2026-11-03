@@ -2,7 +2,8 @@
 
 The predicate group creates a usable uint8 array: one byte per input element,
 exactly 1 when x > threshold and 0 otherwise. It adds Scalar and SIMDPartial,
-bringing the catalogue to twelve operations/thirty-two implementations.
+bringing that checkpoint to twelve operations/thirty-two implementations.
+[Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) now brings it to thirteen/thirty-four.
 
 This answers: how much does comparison plus producing a usable mask cost?
 The existing threshold group keeps numerical values or writes float32 zero;
@@ -141,8 +142,9 @@ Read the [kernels](https://github.com/akolybelnikov/go-simd/blob/main/internal/p
 and [implementation/evidence record](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-predicate-export.md).
 Tests check exact bytes, NaN/equality/signed-zero rules, valid tail writes,
 all distributions and backend evidence parity, including emulation.
-This checkpoint stops after byte-mask export. Packed masks, clamp, movement,
-three-array MulAdd, other input types and M4 remain separate work.
+The byte-mask contract remains as described. [Packed masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) are now
+available as a separate group with explicit bit order and packing costs. Clamp,
+movement, three-array MulAdd, other input types and M4 remain separate work.
 
 The implementation record links the signed code and retained hardware/emulated
 captures with reproduction commands and source provenance. Tiny fixed-iteration

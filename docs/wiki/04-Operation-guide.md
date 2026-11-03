@@ -1,7 +1,7 @@
 # 04 — Operation and kernel guide
 
-The lab contains twelve operations and thirty-two implementations on `float32`
-inputs: eight float32 element-wise outputs, one uint8 predicate output and three reductions. Array kernels have
+The lab contains thirteen operations and thirty-four implementations on `float32`
+inputs: eight float32 element-wise outputs, two uint8 predicate representations and three reductions. Array kernels have
 one or two declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
 Sum accepts one input and returns one float32; dot/dotfma accept two
@@ -22,6 +22,7 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/patterns` | `AffineFMAScalar` / `AffineFMASIMD(x,out []float32,alpha,beta float32) error` | Scalar / SIMDPartial | One-rounding binary32 affine; actual software/vector path retained |
 | `internal/patterns` | `ThresholdZeroScalar` / `ThresholdZeroSIMD(x,out []float32,t float32) error` | Scalar / SIMDPartial | Strict predicate, false to +0 |
 | `internal/patterns` | `PredicateGTScalar` / `PredicateGTSIMD(x []float32,out []uint8,t float32) error` | Scalar / SIMDPartial | Ordered comparison exported as canonical byte 0/1; conversion/extraction/stores included |
+| `internal/patterns` | `PredicateGTPackedScalar` / `PredicateGTPackedSIMD(x []float32,out []uint8,t float32) error` | Scalar / SIMDPartial | Ordered comparison packed LSB first into ceil(n/8) bytes; unused high bits zero; conversion/packing/stores included |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
 | `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |
@@ -144,6 +145,11 @@ error before writes. Equal empty/nil slices succeed. Logical work is `5*n`;
 input stays unchanged, and inactive tail lanes never escape. See
 [canonical byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) for full output evidence and examples.
 
+Packed predicate output requires exactly `ceil(n/8)` bytes; invalid lengths fail
+before writes. Input i maps to bit i%8 of byte i/8, with unused high bits zero.
+All output bytes are overwritten. Logical work is `4*n+ceil(n/8)`.
+See [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for decoding, boundaries and evidence.
+
 ## Internal machine identifiers
 
 Sum has no output slice or length-error sentinel. It leaves input unchanged,
@@ -178,6 +184,7 @@ The structured result model separates display names from identity:
 | dot | Operation `dot-f32` |
 | dotfma | Operation `dot-fma-f32` |
 | predicate | Operation `predicate-gt-f32`; output encoding `uint8-zero-one/v1` |
+| predicatepack | Operation `predicate-gt-packed-f32`; output encoding `uint8-packed-lsb0/v1` |
 | SIMDStriped | Strategy `simd-striped` |
 | SIMDStriped2 | Strategy `simd-striped-2` |
 | SIMDStriped4 | Strategy `simd-striped-4` |
@@ -191,7 +198,7 @@ Quick comparisons, native benchmark registration and the legacy importer consume
 that metadata. Run `go run ./cmd/simdbench -list` to inspect the current descriptor
 and runtime context. The original six bindings preserve their kernel/call paths;
 Twelve float32-output configured bindings cover broadcasts, predicates and fused affine;
-two additional BindUint8 bindings export predicates. Sum, dot and dotfma each have four scalar-returning
+four additional BindUint8 bindings export byte and packed predicates. Sum, dot and dotfma each have four scalar-returning
 bindings; [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments)
 specifies the 1/2/4-vector strategies and their numerical differences.
 

@@ -1,6 +1,6 @@
 # 03 — Command catalogue
 
-Baseline: M3 / F004 predicate-export checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
+Baseline: M3 / F004 packed-predicate checkpoint, reviewed 2026-11-03. Installed binaries run from any directory.
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
@@ -34,14 +34,15 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all twelve groups. Positional arguments are
+group. No explicit selection means all thirteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact twelve-row operation table.
+`-list` prints runtime context and a compact thirteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
-Predicate export uses `5*n`: one float32 input array and one uint8 output array.
+Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
+Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
 Dot and dotfma use `8*n+4`: two input arrays and one scalar result.
 Listing allocates no benchmark fixtures, runs no kernels/subprocesses, and saves
@@ -114,6 +115,28 @@ Quote the complete negative-decimal argument in PowerShell as shown. Native
 BenchmarkPredicate lives in ./internal/patterns; use -backend go-test for
 recorded custom fixture settings. Installed commands and Go/Make share flags.
 
+Packed predicate export shares the same options and input recipes. Output is
+`ceil(n/8)` bytes, input i in bit i%8 of byte i/8, unused high bits zero.
+Conversion/packing/stores are timed; the output digest is retained afterward.
+The packed group adds registered sizes 7,9,63,65 around byte boundaries.
+See [the packed-mask guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for decoding and accounting.
+
+```powershell
+simdreport -list -group predicatepack
+simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 3 -benchtime 100ms -format md
+go run ./examples/predicatepack
+```
+
+```bash
+make list ARGS="-group predicatepack"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group predicatepack -threshold=-1.5 -pattern shuffled -seed 123 -bench BenchmarkPredicatePacked/n=64 -format md"
+```
+
+Use direct quoted selectors for exact byte-boundary sweeps. An unanchored
+`n=65` also matches `n=65536`; the simple Make example chooses n=64.
+Native BenchmarkPredicatePacked is in ./internal/patterns; -backend go-test
+records custom settings and exact child width/output facts.
+
 ## Quick comparison: simdbench
 
 Each strategy uses **1,048,576 generated float32 elements**. Go calibrates one
@@ -161,6 +184,7 @@ The outer `go run` process can also print `exit status 1`.
 | `selection` | `BenchmarkSelection` | `Scalar`, `SIMDPartial` |
 | `rangefilter` | `BenchmarkRange` | `Scalar`, `SIMDPartial` |
 | `predicate` | `BenchmarkPredicate` | `Scalar`, `SIMDPartial`; compare/select/convert/extract/byte stores included |
+| `predicatepack` | `BenchmarkPredicatePacked` | `Scalar`, `SIMDPartial`; valid-bit packing, normalization and stores included |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dotfma` | `BenchmarkDotFMA` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4`; actual vector/software/tail path retained |

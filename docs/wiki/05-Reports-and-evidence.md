@@ -130,6 +130,13 @@ timing, separately from the input hash. It is output evidence rather than the
 mask data itself. Conversion, extraction and byte stores are timed; hashing is
 outside timing. Logical work is `5*n`. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
 
+Packed predicates use `standalone-packed-predicate/v1`. Case.Predicate records
+uint8-packed-lsb0/v1 and actual NativeLanes; ByteResultSHA256 covers the entire
+packed sequence including zeroed final padding. Physical output length is
+`ceil(n/8)`, and logical work is `4*n+ceil(n/8)`. Conversion/packing/stores are
+timed, hashing afterward. Byte-mask and packed series retain distinct output,
+operation, arithmetic and harness identities. See [the guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
+
 ## Explicit developer backend
 
 `-backend go-test` invokes `go env` and repository-relative `go test` deliberately.
@@ -177,6 +184,11 @@ output digest in big-endian word order. Missing, duplicate, fractional,
 non-finite, negative or oversized digest words and invalid widths fail import.
 Parent facts and expected output never replace child evidence. Existing v1
 captures omit the optional Predicate/ByteResultSHA256 fields when unrelated.
+
+Packed predicates use `legacy-report-packed-predicate/v1` with the same strict
+child width/digest-word requirements, retaining the packed encoding. Compiled
+and native selectors share additional byte boundaries 7,9,63,65. Expected
+output or parent capabilities never substitute for child facts.
 
 ## Failure and sharing
 

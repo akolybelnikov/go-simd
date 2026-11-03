@@ -82,7 +82,7 @@ empty strings; TXT/Markdown use an em dash.
 ## The report seems slow or quiet
 
 `-benchtime` applies per measurement, and `-count` repeats every selected case.
-The default covers all twelve groups and many sizes up to 16,777,216 elements. That
+The default covers all thirteen groups and many sizes up to 16,777,216 elements. That
 largest point needs about 192 MiB for its three slices, before other overhead.
 The command prints group progress and buffers the child output until that group
 finishes. Narrow the benchmark selection for early exploration.
@@ -140,6 +140,17 @@ and preserve input/parameter identity when reporting differences.
 In PowerShell, quote a complete negative decimal flag, such as
 `'-threshold=-1.5'`, to prevent the shell splitting the argument. The
 [predicate guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) includes checked launcher examples.
+
+## Packed output has fewer bytes than inputs
+
+This is expected: predicatepack needs ceil(n/8) output bytes. Input i is bit
+i%8 of byte i/8; unused high bits are zero. Wrong output length fails before
+writes. Partial output bytes carry across SIMD vectors, so output meaning stays
+the same on emulation and different widths. See [the examples](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
+
+An unanchored report selector n=65 also selects n=65536. Use the direct quoted
+`'^BenchmarkPredicatePacked$/^n=65$'` selector for that exact boundary case;
+simple Make examples use n=64 to avoid dollar-expansion complexity.
 
 ## Report a useful issue
 

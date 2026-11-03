@@ -1,5 +1,35 @@
 # F004 smoke evidence
 
+## Packed-predicate checkpoint — 2026-11-03
+
+`packed-predicate-vector.measurements.json` and
+`packed-predicate-software.measurements.json` were generated on Windows/amd64,
+Go 1.27.3, GOEXPERIMENT=simd and GOMAXPROCS 16. Hardware used 256-bit / 8-lane
+SIMD; forced emulation used 128-bit / 4-lane SIMD. Source base was signed
+f91aa33 plus uncommitted packed-predicate changes. Missing embedded VCS facts
+remain explicitly unknown.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 2 -benchtime 3x -format md -output artifacts/packed-predicate-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 2 -benchtime 3x -format md -output artifacts/packed-predicate-emulated-checkpoint
+Remove-Item Env:GODEBUG
+```
+
+Restore any prior GODEBUG value. Each capture has four observations, two
+strategies/repetitions and exactly three iterations. At n=65 physical output is
+9 bytes, with unused high bits of the last byte zero, and logical work 269 bytes.
+All ByteResultSHA256 values are
+`03e14f2501e827d24080a2cab6add687e892fe4d6d53e778685b2ef12d08925f`.
+The digest covers the complete packed output after timing; conversion, packing
+and stores are timed. Encoding is uint8-packed-lsb0/v1; each capture retains its
+actual process width and exact shared threshold/seed/input identity. Different
+hardware/emulated contexts remain separate. Numeric values, run IDs and UTC
+timestamps are preserved; only filenames, LF endings and trailing whitespace
+differ. These tiny captures verify plumbing without performance claims.
+See [the packed contract](../F004-packed-predicate.md).
+
 ## Predicate byte-export checkpoint — 2026-11-03
 
 `predicate-vector.measurements.json` and `predicate-software.measurements.json`

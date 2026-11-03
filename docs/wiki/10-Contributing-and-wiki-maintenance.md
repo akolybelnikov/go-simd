@@ -121,6 +121,14 @@ Keep relevant parameter/input identity and actual child width/encoding/digest
 facts. Match all fixture distributions through compiled/native and emulated
 paths. Do not generalize the old float32 in-place alias policy across types.
 
+Packed predicate export distinguishes logical input size from physical byte
+extent via PackedBits/OutputElements. Keep rounded counts overflow-safe and
+validate exact output length before writes. Specify LSB order, zero final
+padding, overwrite behavior and partial-byte carry across vector widths.
+Include packing cost in timing. Test byte/vector boundaries, stale true bits,
+negative-threshold padded lanes, child encoding/digest identity and selector
+parity. The packed callback is separate from the original byte callback.
+
 ## Local validation commands
 
 ```powershell
