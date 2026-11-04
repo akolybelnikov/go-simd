@@ -9,7 +9,7 @@ import (
 
 func TestPatternFixturesAndFingerprints(t *testing.T) {
 	for _, op := range catalog.All() {
-		if len(op.Inputs) > 2 {
+		if op.TypeID != catalog.Float32 || len(op.Inputs) > 2 {
 			continue
 		} // Ternary fixtures have their own arity/hash test.
 		for _, pattern := range []string{"none", "all", "alternating", "clustered", "shuffled"} {

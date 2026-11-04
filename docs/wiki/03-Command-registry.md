@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all sixteen groups. Positional arguments are
+group. No explicit selection means all seventeen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact sixteen-row operation table.
+`-list` prints runtime context and a compact seventeen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+Float64 addition uses `24*n`: two float64 reads and one write, with actual Float64 lanes.
 MulAdd uses `16*n`: three float32 input arrays and one output, without broadcasts/reduction.
 Clamp uses `8*n`, with bounds validation, broadcasts and semantic repairs timed.
 Copy uses `8*n`: one float32 read and one float32 write with disjoint measured buffers.
@@ -203,6 +204,26 @@ Installed simdreport accepts the same report flags. Native BenchmarkMulAdd is in
 ./internal/patterns. Both strategies retain complete output evidence and actual
 FMA paths; [the MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) explains the software scalar control.
 
+Float64 addition uses a fixed binary64 recipe with no operation-specific flags.
+Choose its explicit group; no implicit type conversion is performed.
+
+```powershell
+simdreport -list -group addition64
+go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/addition64
+simdlab catalog -group addition64
+```
+
+```bash
+make list ARGS="-group addition64"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group addition64 -bench BenchmarkAddition64/n=64 -format md"
+make run ARGS="-group addition64"
+```
+
+Installed simdreport accepts the same flags. Native BenchmarkAddition64 is in
+./internal/addition. See [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) for binary64 precision,
+actual-width evidence and the selected-SDK bounded partial-load workaround.
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -245,6 +266,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `addition64` | `BenchmarkAddition64` | `Scalar`, `SIMDPartial`; true binary64 arrays and actual-width boundaries |
 | `addition` | `BenchmarkAddition` | `Scalar`, `SIMDPartial`, `SIMDTail`, `SIMDParallel` |
 | `computation` | `BenchmarkComputation` | `Scalar`, `SIMD` |
 | `scale` | `BenchmarkScale` | `Scalar`, `SIMDPartial` |

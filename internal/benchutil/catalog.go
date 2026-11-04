@@ -13,9 +13,17 @@ import (
 // descriptors/bindings as simdbench. Kernel validation/call boundaries and the
 // preallocated per-size buffers retain the legacy benchmark contract.
 func BenchmarkOperation(b *testing.B, operationID string) {
-	operation, err := kernels.Lookup(operationID, catalog.Float32)
+	descriptor, ok := catalog.ByBenchmark(b.Name())
+	if !ok || descriptor.ID != operationID {
+		b.Fatal("native benchmark operation/catalogue mismatch")
+	}
+	operation, err := kernels.Lookup(operationID, descriptor.TypeID)
 	if err != nil {
 		b.Fatal(err)
+	}
+	if operation.Descriptor.ID == catalog.Add64 {
+		benchmarkAddition64(b, operation)
+		return
 	}
 	if operation.Descriptor.ID == catalog.MulAdd {
 		benchmarkMulAdd(b, operation)

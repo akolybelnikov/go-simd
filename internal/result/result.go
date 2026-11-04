@@ -29,6 +29,7 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
+	Vector                                        VectorIdentity    `json:",omitzero"`
 	Clamp                                         ClampIdentity     `json:",omitzero"`
 	Copy                                          CopyIdentity      `json:",omitzero"`
 	Predicate                                     PredicateIdentity `json:",omitzero"`
@@ -49,7 +50,7 @@ type MeasurementKey struct {
 }
 
 type Observation struct {
-	ArrayResultSHA256   string  `json:",omitempty"` // Complete float32 output bits, little endian, hashed after timing.
+	ArrayResultSHA256   string  `json:",omitempty"` // Complete typed floating-point output bits, little endian, hashed after timing.
 	ByteResultSHA256    string  `json:",omitempty"` // Full uint8 output, hashed only after measurement.
 	ArrayResultLastBits *uint32 `json:",omitempty"` // FMA checkpoint: last output element, not a full-array checksum.
 	ScalarResultBits    *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.
@@ -149,6 +150,7 @@ type Comparison struct {
 // comparisonContext omits strategy/workers for the legacy serial-scalar policy,
 // and size/fingerprint because the report intentionally sweeps input sizes.
 type comparisonContext struct {
+	Vector                                     VectorIdentity
 	Clamp                                      ClampIdentity
 	Copy                                       CopyIdentity
 	Predicate                                  PredicateIdentity
@@ -164,7 +166,7 @@ type comparisonContext struct {
 
 func contextFor(k MeasurementKey) comparisonContext {
 	c := k.Case
-	return comparisonContext{c.Clamp, c.Copy, c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
+	return comparisonContext{c.Vector, c.Clamp, c.Copy, c.Predicate, c.FMA.RoundingID, c.FMA.VectorPathID, c.FMA.NativeLanes, c.Reduction.NativeLanes, k.RunID, k.EnvironmentID, k.BackendID, k.HarnessID,
 		k.GOMAXPROCS, c.OperationID, c.TypeID, c.ArithmeticID,
 		c.Parameters, c.Input.GeneratorID, c.ExecutionMode}
 }

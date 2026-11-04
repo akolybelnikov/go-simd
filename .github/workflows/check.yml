@@ -35,6 +35,8 @@ jobs:
           go test ./cmd/simdreport -run='^TestCopyResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestClampResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestMulAddResultsAndBackendIdentity$' -count=1
+          go test ./internal/addition -run='Addition64' -count=1
+          go test ./cmd/simdreport -run='^TestAddition64ResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -58,3 +60,6 @@ jobs:
 
       - name: Check three-array fused multiply-add
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkMulAdd$/^n=(1|8|16)$' -benchtime=1x
+
+      - name: Check float64 addition
+        run: go test ./internal/addition -run='^$' -bench='^BenchmarkAddition64$/^n=(1|8|16)$' -benchtime=1x

@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyAddition64HarnessID = "legacy-report-addition64/v1"
 const LegacyMulAddHarnessID = "legacy-report-muladd-fma/v1"
 
 type LegacyOptions struct {
@@ -163,6 +164,22 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.Add64 {
+			harness = LegacyAddition64HarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("addition64 requires integral actual float64 lanes")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Vector = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && op.ID == catalog.MulAdd {
 			harness = LegacyMulAddHarnessID
 			vector, path, lanes := metrics["fma-vector"], metrics["fma-path"], metrics["simd-lanes"]
@@ -295,6 +312,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				run.Metadata += "FMA32 child vector path: " + vectorPath + "\n"
 			}
 		}
+		if options.GeneratedInputs && knownOp && op.ID == catalog.Add64 {
+			c.Input = InputIdentity{input.Addition64GeneratorID, input.Addition64Fingerprint(size)}
+		}
 		if options.GeneratedInputs && c.TypeID == "float32" {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
@@ -370,7 +390,7 @@ func legacyCase(benchmark, label string, size int, procs OptionalInt) Case {
 	}
 	if variant, ok := catalog.LegacyVariant(label); ok {
 		c.StrategyID = variant.ID
-		if c.TypeID == catalog.Float32 {
+		if c.TypeID != "unknown" {
 			knownProcs := 0
 			if procs.Known {
 				knownProcs = procs.Value

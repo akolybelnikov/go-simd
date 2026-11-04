@@ -70,6 +70,9 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.Add64 {
+			fmt.Fprintf(&out, "fixture: %s\nSIMD float64 lanes: %d\nlogical traffic: 24*n bytes/call; complete binary64 output digest after timing\n", options.Generator(op), machine.Bits/64)
+		}
 		if op.ID == catalog.MulAdd {
 			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
 			fmt.Fprintln(&out, "three streamed arrays; no broadcasts/reduction; software scalar control; logical traffic 16*n; complete output digest after timing")

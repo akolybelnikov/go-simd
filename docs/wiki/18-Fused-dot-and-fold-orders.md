@@ -1,7 +1,7 @@
 # 18 — Fused dot and fold orders
 
 Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has sixteen operations/forty-three
+original F004 closure. The current catalogue has seventeen operations/forty-five
 implementations; future/stop statements below describe this earlier checkpoint.
 
 The dotfma group applies one float32 rounding to each x*y+accumulator update.

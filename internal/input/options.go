@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.Add64 {
+		return Addition64GeneratorID
+	}
 	if op.ID == catalog.MulAdd {
 		return "generated-muladd-float32-v1/" + o.FMAFixture()
 	}
@@ -259,6 +262,9 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 // when required. Scalar returns and byte outputs have no float32 output slice;
 // callers allocate the typed byte output separately outside measurement.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if op.TypeID != catalog.Float32 {
+		panic("float32 fixture helper requires float32 input type")
+	}
 	if len(op.Inputs) > 2 {
 		panic("three-array fixtures require input.MakeMulAdd")
 	}
@@ -308,6 +314,9 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ID == catalog.Add64 {
+		return Addition64Fingerprint(n)
+	}
 	if op.ID == catalog.MulAdd {
 		return fingerprintMulAdd(n, o)
 	}

@@ -41,13 +41,15 @@ type result struct {
 }
 
 type benchmarkGroup struct {
-	copyOutput   bool
-	byteOutput   []uint8
-	scalar       *float32
-	output       []float32
-	name         string
-	logicalBytes int64
-	variants     []variant
+	typeID        string
+	float64Output []float64
+	copyOutput    bool
+	byteOutput    []uint8
+	scalar        *float32
+	output        []float32
+	name          string
+	logicalBytes  int64
+	variants      []variant
 }
 
 func main() {
@@ -130,6 +132,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 					b.StopTimer()
 					benchmarkByteSink = group.byteOutput
 				})
+			} else if group.float64Output != nil {
+				stats, runErr = measureQuickFloat64(item.run, group.float64Output, group.logicalBytes)
 			} else if group.copyOutput {
 				stats, runErr = measureQuickCopy(item.run, group.output, group.logicalBytes)
 			} else {
@@ -149,7 +153,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 			}
 			results = append(results, result{name: item.name, stats: stats})
 		}
-		if err := printResults(stdout, group.name, results); err != nil {
+		if err := printTypedResults(stdout, group.name, group.typeID, results); err != nil {
 			return err
 		}
 	}
@@ -163,7 +167,7 @@ func parseOptions(args []string, stderr io.Writer) (options, error) {
 	flags.SetOutput(stderr)
 	selection.Register(flags)
 	flags.Usage = func() {
-		cli.Help(stderr, flags, "Quick comparison on 1,048,576 float32 elements; -list inspects without measuring.", "simdbench -list", "simdbench -group addition", "simdbench -group computation")
+		cli.Help(stderr, flags, "Quick comparison on 1,048,576 elements; -list inspects without measuring.", "simdbench -list", "simdbench -group addition", "simdbench -group computation")
 	}
 	if err := flags.Parse(args); err != nil {
 		return options{}, err
@@ -210,7 +214,11 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		}
 		x, y, resultOut := a, b, out
 		var third []float32
-		if descriptor.ID == catalog.MulAdd {
+		var doubleA, doubleB, doubleOut []float64
+		if descriptor.ID == catalog.Add64 {
+			doubleA, doubleB, doubleOut = input.MakeAddition64(size)
+			resultOut = nil
+		} else if descriptor.ID == catalog.MulAdd {
 			x, y, third, resultOut = input.MakeMulAdd(size, options)
 		} else if descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
 			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
@@ -218,7 +226,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
 			x, y, resultOut = a, b, out
 		}
-		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut}
+		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut, typeID: descriptor.TypeID, float64Output: doubleOut}
+		if descriptor.ID == catalog.Add64 {
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; actual float64 lanes; logical traffic 24*n"
+		}
 		if descriptor.ID == catalog.Copy {
 			item.copyOutput = true
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; disjoint buffers; GoCopy uses Go compiler/runtime copy"
@@ -250,6 +261,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; three streamed arrays, logical traffic 16*n"
 		}
 		for _, implementation := range operation.Implementations {
+			if implementation.BindFloat64 != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindFloat64(doubleA, doubleB, doubleOut)})
+				continue
+			}
 			if implementation.BindTernary != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindTernary(x, y, third, resultOut)})
 				continue
@@ -287,7 +302,13 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 }
 
 func printResults(w io.Writer, title string, results []result) error {
-	if _, err := fmt.Fprintf(w, "\n%s (%d float32 elements)\n", title, benchmarkSize); err != nil {
+	return printTypedResults(w, title, catalog.Float32, results)
+}
+func printTypedResults(w io.Writer, title, elementType string, results []result) error {
+	if elementType == "" {
+		elementType = catalog.Float32
+	}
+	if _, err := fmt.Fprintf(w, "\n%s (%d %s elements)\n", title, benchmarkSize, elementType); err != nil {
 		return err
 	}
 	table := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)

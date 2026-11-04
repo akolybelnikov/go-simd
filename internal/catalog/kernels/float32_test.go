@@ -24,7 +24,7 @@ func TestExactLegacyKernelBindings(t *testing.T) {
 	}
 	registered := 0
 	for _, descriptor := range catalog.All() {
-		if descriptor.ID == catalog.MulAdd || descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
+		if descriptor.TypeID != catalog.Float32 || descriptor.ID == catalog.MulAdd || descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
 			continue
 		}
 		op, err := Lookup(descriptor.ID, descriptor.TypeID)
@@ -56,7 +56,7 @@ func TestBoundAndNativeKernelsPreserveContracts(t *testing.T) {
 	var vector simd.Float32s
 	w := vector.Len()
 	for _, descriptor := range catalog.All() {
-		if descriptor.ID == catalog.MulAdd || descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
+		if descriptor.TypeID != catalog.Float32 || descriptor.ID == catalog.MulAdd || descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
 			continue
 		}
 		op, err := Lookup(descriptor.ID, descriptor.TypeID)
