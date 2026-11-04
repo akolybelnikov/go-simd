@@ -209,7 +209,7 @@ func TestBenchmarkGroups(t *testing.T) {
 	}{
 		{function: "add", want: 1},
 		{function: "compute", want: 1},
-		{function: "all", want: 19},
+		{function: "all", want: 20},
 	} {
 		groups, err := benchmarkGroups(tt.function, a, b, out)
 		if err != nil {

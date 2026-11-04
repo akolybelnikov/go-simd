@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
 **Status:** F004 complete for the agreed current scope, including clamp; reviewed 2026-11-04.
-The lab has nineteen operations/forty-nine implementations. The
+The lab has twenty operations/fifty-one implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -44,6 +44,9 @@ Float64/integer operations remain future experiments.
 [Exact bit roundtrip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) now exercises Float32s.ToBits and
 Uint32s.BitsToFloat32 with full bit preservation. Numeric conversion remains
 a separate future contract.
+
+[Opaque XOR](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) now exercises Uint32s.Xor on two streamed bit-pattern
+arrays. Further shifts/rotates and direct integer-word input studies remain future.
 
 ## Portable methods and architecture-specific methods differ
 

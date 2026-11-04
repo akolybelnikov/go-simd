@@ -12,7 +12,7 @@ import (
 
 func TestNativeGroupIsolationWithinSharedPackage(t *testing.T) {
 	const selection = "^Benchmark.*$/^n=8$/^Scalar$"
-	for _, group := range []string{"addition", "addition64", "bitroundtrip"} {
+	for _, group := range []string{"addition", "addition64", "bitroundtrip", "xorbits"} {
 		t.Run(group, func(t *testing.T) {
 			output := t.TempDir()
 			stdout, stderr, e := runReportProcess(t, "-group="+group, "-backend=go-test", "-bench="+selection, "-count=1", "-benchtime=1x", "-output", output)

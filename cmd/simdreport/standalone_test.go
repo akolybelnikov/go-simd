@@ -77,6 +77,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone scalar result or fold identity lost")
 				}
 			}
+			if group == "xorbits" {
+				if len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Vector.NativeLanes.Value != capture.Machine.Lanes {
+					t.Fatal("standalone XOR evidence lost")
+				}
+			}
 			if group == "bitroundtrip" {
 				if observation.ArrayResultSHA256 != observation.Key.Case.Input.SHA256 || observation.Key.Case.Vector.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone opaque bits lost")

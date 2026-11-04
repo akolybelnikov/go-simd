@@ -15,6 +15,7 @@ const DotFMAHarnessID = "standalone-dot-fma/v1"
 const PredicateHarnessID = "standalone-predicate-export/v1"
 const PackedPredicateHarnessID = "standalone-packed-predicate/v1"
 const CopyHarnessID = "standalone-copy/v1"
+const XorBitsHarnessID = "standalone-xor-bits/v1"
 const BitRoundTripHarnessID = "standalone-bit-roundtrip/v1"
 const SaturatingAdd8HarnessID = "standalone-saturating-add8/v1"
 const Addition64HarnessID = "standalone-addition64/v1"
@@ -22,6 +23,9 @@ const MulAddHarnessID = "standalone-muladd-fma/v1"
 const ClampHarnessID = "standalone-clamp/v1"
 
 func HarnessFor(op catalog.Operation) string {
+	if op.ID == catalog.XorBits {
+		return XorBitsHarnessID
+	}
 	if op.ID == catalog.BitRoundTrip {
 		return BitRoundTripHarnessID
 	}

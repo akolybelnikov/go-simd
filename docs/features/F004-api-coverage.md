@@ -19,16 +19,16 @@ SDK baseline; another Go version or target must be inventoried independently.
 | Status | Declarations | Meaning |
 | --- | --- | --- |
 | Deferred bridge | 28 | To/from architecture vectors; optional gated extension. |
-| Deferred member | 284 | Separate experiment needs an explicit contract. |
+| Deferred member | 283 | Separate experiment needs an explicit contract. |
 | Deferred type | 8 | No input/output kernel for that vector type. |
-| Exercised member | 28 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
+| Exercised member | 29 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
 | Exercised type | 6 | Vector type used by current kernels; not a separate command. |
 | Infrastructure used | 5 | Live sizing/runtime metadata, rather than arithmetic experiments. |
 | Utility outside scope | 22 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
 
 Float32, float64 and uint8 are CLI input types; the latter two initially support
 addition and saturating addition respectively. Int32s is used solely for predicate export
-scratch, Uint32s is an internal bit-reinterpretation vector, and Mask32s is
+scratch, Uint32s is an internal bit-reinterpretation/logic vector, and Mask32s is
 internal comparison state. Uint8s saturation now uses real byte inputs; predicate export remains distinct. FMA availability remains gated by its verified
 reference and actual path; SDK emulation is recorded separately.
 
@@ -445,7 +445,7 @@ further typed operations and integer input types. No new commands are implied by
 | `Uint32s.String` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
 | `Uint32s.Sub` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint32s.ToArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
-| `Uint32s.Xor` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `Uint32s.Xor` | Exercised member | Timed opaque32-bit XOR in xorbits, through Float32/Uint32 reinterpretation. |
 
 ## Uint64s members
 

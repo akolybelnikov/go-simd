@@ -2524,8 +2524,8 @@
       "receiver": "Uint32s",
       "kind": "method",
       "source": "simd_stubs.go",
-      "status": "Deferred member",
-      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+      "status": "Exercised member",
+      "reason": "Timed opaque32-bit XOR in xorbits, through Float32/Uint32 reinterpretation."
     },
     {
       "name": "Add",

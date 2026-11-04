@@ -1,0 +1,316 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "xorbits",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkXorBits$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-164834-2911873826",
+    "Environment": {
+      "ID": "benchmark-20261104-164834-2911873826/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-xor-bits/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T16:48:34Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-xor-bits/v1\ngroup: xorbits\nselection: \"^BenchmarkXorBits$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-xor-float32-bits-v1\nopaque32-bit XOR; no floating arithmetic; full output digest; logical traffic 12*n\nnumerics: Exact uint32 XOR of opaque float32 representations, including NaN payload/sign/exponent bits; no floating arithmetic or numeric conversion. All lengths equal before writes; valid empty/nil, disjoint/exact aliases; partial overlap unsupported. Validation, width setup, bounded loads, bitwise path and stores timed;12*n logical bytes. Complete input/output bit digests after timing; actual Float32/Uint32 lane width retained. Source labels do not prove instruction selection.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "1e222ec788549b5b0e10bfdb4ac300a1c3527e700919b49c7177aff8dac10adb",
+        "Key": {
+          "RunID": "benchmark-20261104-164834-2911873826",
+          "EnvironmentID": "benchmark-20261104-164834-2911873826/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-xor-bits/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "xor-bits-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-opaque-uint32-xor-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-xor-float32-bits-v1",
+              "SHA256": "649744f7234ecdda76a15c867a4c262f3159f51f110e72cf634683957ba78aa7"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5760,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkXorBits/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "1e222ec788549b5b0e10bfdb4ac300a1c3527e700919b49c7177aff8dac10adb",
+        "Key": {
+          "RunID": "benchmark-20261104-164834-2911873826",
+          "EnvironmentID": "benchmark-20261104-164834-2911873826/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-xor-bits/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "xor-bits-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-opaque-uint32-xor-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-xor-float32-bits-v1",
+              "SHA256": "649744f7234ecdda76a15c867a4c262f3159f51f110e72cf634683957ba78aa7"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5760,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkXorBits/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "1e222ec788549b5b0e10bfdb4ac300a1c3527e700919b49c7177aff8dac10adb",
+        "Key": {
+          "RunID": "benchmark-20261104-164834-2911873826",
+          "EnvironmentID": "benchmark-20261104-164834-2911873826/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-xor-bits/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "xor-bits-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-opaque-uint32-xor-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-xor-float32-bits-v1",
+              "SHA256": "649744f7234ecdda76a15c867a4c262f3159f51f110e72cf634683957ba78aa7"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5760,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkXorBits/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "1e222ec788549b5b0e10bfdb4ac300a1c3527e700919b49c7177aff8dac10adb",
+        "Key": {
+          "RunID": "benchmark-20261104-164834-2911873826",
+          "EnvironmentID": "benchmark-20261104-164834-2911873826/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-xor-bits/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "xor-bits-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-opaque-uint32-xor-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-xor-float32-bits-v1",
+              "SHA256": "649744f7234ecdda76a15c867a4c262f3159f51f110e72cf634683957ba78aa7"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5760,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkXorBits/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

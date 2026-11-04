@@ -39,6 +39,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Compare true binary64 addition with its own scalar/SIMD controls | [25 — Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) |
 | Add uint8 values with saturation instead of wraparound | [26 — Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) |
 | Preserve every float32 bit through integer reinterpretation | [27 — Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) |
+| Apply exact word XOR to float32 sign/exponent/payload bits | [28 — XOR of float32 bit patterns](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) |
 
 ## What you can do today
 
@@ -119,6 +120,8 @@ useful repeated measurement.
 | 2026-11-04 | F004 uint8 saturation: real byte inputs, exhaustive pair validation, typed bindings, 3*n work, actual lanes/full numeric-byte evidence; eighteen operations/forty-seven implementations |
 
 | 2026-11-04 | F004 bit roundtrip: exact Float32/Uint32 reinterpretation, all NaN/zero bits, full output evidence and instruction-selection interpretation; nineteen operations/forty-nine implementations |
+
+| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty operations/fifty-one implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

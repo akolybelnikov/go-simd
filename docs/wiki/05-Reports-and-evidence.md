@@ -258,3 +258,10 @@ Case.Predicate is absent. Run `go run ./examples/saturatingadd8`.
 through Uint32s reinterpretation. Input/output hashes must agree; actual lanes
 are retained. Use `go run ./examples/bitroundtrip`; work is8*n, and timing does
 not establish whether a bitcast instruction was emitted.
+
+
+## XOR of opaque words
+
+[XOR bits](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) computes exact uint32 logic on two float32 representations,
+with no floating arithmetic. Both operands and every result bit contribute to
+retained hashes; actual lanes are recorded. Use `go run ./examples/xorbits`.

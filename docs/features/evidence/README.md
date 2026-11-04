@@ -1,5 +1,25 @@
 # F004 smoke evidence
 
+## Opaque Float32 XOR — 2026-11-04
+
+Normal/emulated xorbits captures retain four observations each, n=64,
+count 2, 3x, fixed raw-word/mask inputs. Every output digest agrees across modes.
+Windows/amd64, Go1.27.3-X:simd, GOMAXPROCS16; normal 256 bits/8 lanes,
+emulated 128 bits/4 lanes. Base a322627 plus uncommitted XOR changes; missing
+embedded VCS facts remain unknown. Original samples/run IDs/timestamps retained;
+LF/trailing whitespace normalized. No performance claim.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group xorbits -bench '^BenchmarkXorBits$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/xor-bits-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group xorbits -bench '^BenchmarkXorBits$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/xor-bits-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+See [the XOR contract](../F004-xor-bits.md): raw word logic, no floating arithmetic.
+
+
 ## Exact bit reinterpretation — 2026-11-04
 
 Normal/emulated bitroundtrip captures retain four observations each, n=64,

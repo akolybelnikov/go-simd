@@ -194,6 +194,9 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			prepared.Output = nil
 			prepared.Float64Output = doubleOut
 			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ID == catalog.XorBits {
+			prepared.Run = c.Implementation.Bind(a, b, out)
+			prepared.RetainOutputAfterTiming = true
 		} else if c.Operation.ID == catalog.MulAdd {
 			prepared.Run = c.Implementation.BindTernary(a, b, third, out)
 			prepared.RetainOutputAfterTiming = true
@@ -252,7 +255,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			}
 			key.Case.Predicate = identity
 		}
-		if c.Operation.ID == catalog.BitRoundTrip {
+		if c.Operation.ID == catalog.BitRoundTrip || c.Operation.ID == catalog.XorBits {
 			var vector simd.Float32s
 			identity, err := result.NewVectorIdentity(vector.Len())
 			if err != nil {
@@ -344,7 +347,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			if c.Operation.ID == catalog.Add64 {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat64(doubleOut, nil)
 			}
-			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp || c.Operation.ID == catalog.MulAdd || c.Operation.ID == catalog.BitRoundTrip {
+			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp || c.Operation.ID == catalog.MulAdd || c.Operation.ID == catalog.BitRoundTrip || c.Operation.ID == catalog.XorBits {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat32(out, nil)
 			}
 			if c.Operation.ID == catalog.AffineFMA {

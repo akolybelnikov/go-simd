@@ -5,6 +5,23 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — XOR of opaque Float32 words — 2026-11-04
+
+- Add xorbits / xor-bits-f32 / BenchmarkXorBits with Scalar/SIMDPartial:
+  twenty operations/fifty-one implementations. Compute exact uint32 XOR of two
+  float32 representations, including sign/exponent/payload bits; no floating
+  arithmetic or numeric conversion and no new uint32 CLI input family.
+- Time validation, width setup, bounded loads, bitwise path and stores with
+  12*n logical bytes. Retain both inputs/every output bit and actual lanes under
+  dedicated harnesses; require complete native metrics and preserve historical
+  unknown input. Keep shared-package native groups scoped to their own leaves.
+- Test independent per-bit truth, random/special values, tails, aliases/canaries,
+  input preservation, errors/allocations, bindings/fixtures, normal/emulated
+  backend/worker parity and all-group no-Go standalone execution.
+- Update README/registry, Wiki chapter28, example, contract, retained captures,
+  SDK Xor coverage, CI and local tracker status/navigation. Further shifts,
+  rotates and direct integer-word input studies remain future work.
+
 ### F004 extension — Exact bit reinterpretation round trip — 2026-11-04
 
 - Add bitroundtrip / bit-roundtrip-f32 / BenchmarkBitRoundTrip with Scalar and

@@ -35,4 +35,6 @@
 
 - [27 · Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip)
 
+- [28 · XOR of float32 bit patterns](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

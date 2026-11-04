@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyXorBitsHarnessID = "legacy-report-xor-bits/v1"
 const LegacyBitRoundTripHarnessID = "legacy-report-bit-roundtrip/v1"
 const LegacySaturatingAdd8HarnessID = "legacy-report-saturating-add8/v1"
 const LegacyAddition64HarnessID = "legacy-report-addition64/v1"
@@ -166,11 +167,14 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
-		if knownOp && op.ID == catalog.BitRoundTrip {
+		if knownOp && (op.ID == catalog.BitRoundTrip || op.ID == catalog.XorBits) {
 			harness = LegacyBitRoundTripHarnessID
+			if op.ID == catalog.XorBits {
+				harness = LegacyXorBitsHarnessID
+			}
 			lanes := metrics["simd-lanes"]
 			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
-				return Run{}, fmt.Errorf("bitroundtrip requires actual integral Float32 lanes")
+				return Run{}, fmt.Errorf("bit representation requires actual integral Float32 lanes")
 			}
 			identity, err := NewVectorIdentity(int(lanes.Value))
 			if err != nil {
@@ -356,7 +360,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
 			if !ok {
-				if op.ID == catalog.MulAdd {
+				if op.ID == catalog.XorBits {
+					fingerprint = input.FingerprintForOperation(op, size, input.DefaultOptions())
+				} else if op.ID == catalog.MulAdd {
 					if options.InputOptions != nil {
 						fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
 					}
@@ -369,7 +375,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				}
 				fingerprints[cacheKey] = fingerprint
 			}
-			if op.ID == catalog.MulAdd {
+			if op.ID == catalog.XorBits {
+				c.Input = InputIdentity{input.XorBitsGeneratorID, fingerprint}
+			} else if op.ID == catalog.MulAdd {
 				if options.InputOptions != nil {
 					c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
 				}

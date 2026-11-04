@@ -40,6 +40,7 @@ jobs:
           go test ./internal/integer -count=1
           go test ./cmd/simdreport -run='^TestSaturatingAdd8ResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestBitRoundTripResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestXorBitsResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -72,3 +73,6 @@ jobs:
 
       - name: Check bit reinterpretation round trip
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkBitRoundTrip$/^n=(1|8|16)$' -benchtime=1x
+
+      - name: Check opaque bitwise XOR
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkXorBits$/^n=(1|8|16)$' -benchtime=1x
