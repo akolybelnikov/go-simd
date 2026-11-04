@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyBitRoundTripHarnessID = "legacy-report-bit-roundtrip/v1"
 const LegacySaturatingAdd8HarnessID = "legacy-report-saturating-add8/v1"
 const LegacyAddition64HarnessID = "legacy-report-addition64/v1"
 const LegacyMulAddHarnessID = "legacy-report-muladd-fma/v1"
@@ -165,6 +166,22 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.BitRoundTrip {
+			harness = LegacyBitRoundTripHarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("bitroundtrip requires actual integral Float32 lanes")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Vector = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && op.ID == catalog.SaturatingAdd8 {
 			harness = LegacySaturatingAdd8HarnessID
 			lanes := metrics["simd-lanes"]
@@ -343,7 +360,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 					if options.InputOptions != nil {
 						fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
 					}
-				} else if op.ID == catalog.Copy {
+				} else if op.ID == catalog.Copy || op.ID == catalog.BitRoundTrip {
 					fingerprint = input.FingerprintForOperation(op, size, input.DefaultOptions())
 				} else if !op.Parameterized() && !op.ScalarResult() {
 					fingerprint = input.GeneratedFloat32Fingerprint(size)
@@ -356,8 +373,8 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				if options.InputOptions != nil {
 					c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
 				}
-			} else if op.ID == catalog.Copy {
-				c.Input = InputIdentity{input.CopyGeneratorID, fingerprint}
+			} else if op.ID == catalog.Copy || op.ID == catalog.BitRoundTrip {
+				c.Input = InputIdentity{input.DefaultOptions().Generator(op), fingerprint}
 			} else if !op.Parameterized() && !op.ScalarResult() {
 				c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}
 			} else if options.InputOptions != nil {

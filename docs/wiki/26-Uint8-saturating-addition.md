@@ -1,7 +1,8 @@
 # 26 — Uint8 saturating addition
 
 saturatingadd8 is the first experiment with true uint8 input arrays. The
-catalogue now has **eighteen operations and forty-seven implementations**.
+saturation checkpoint brought the catalogue to **eighteen operations and forty-seven
+implementations**. [Bit roundtrip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) now brings it to nineteen/forty-nine.
 The operation computes min(a+b,255), using a widened scalar sum and portable
 SIMD AddSaturated. Numeric byte output is distinct from predicate masks.
 

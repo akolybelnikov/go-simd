@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all eighteen groups. Positional arguments are
+group. No explicit selection means all nineteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact eighteen-row operation table.
+`-list` prints runtime context and a compact nineteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+Bit roundtrip uses `8*n`: one float32 read/write with exact bits through reinterpretation.
 Uint8 saturation uses `3*n`: two byte reads and one write; actual Uint8 lanes retained.
 Float64 addition uses `24*n`: two float64 reads and one write, with actual Float64 lanes.
 MulAdd uses `16*n`: three float32 input arrays and one output, without broadcasts/reduction.
@@ -243,6 +244,25 @@ make run ARGS="-group saturatingadd8"
 Installed simdreport uses the same flags. Native BenchmarkSaturatingAdd8 is in
 ./internal/integer. See [saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) for exact bytes, aliases and evidence.
 
+Bit roundtrip has a fixed raw-bit fixture, with no numeric conversion or new flags.
+
+```powershell
+simdreport -list -group bitroundtrip
+go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/bitroundtrip
+simdlab catalog -group bitroundtrip
+```
+
+```bash
+make list ARGS="-group bitroundtrip"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group bitroundtrip -bench BenchmarkBitRoundTrip/n=64 -format md"
+make run ARGS="-group bitroundtrip"
+```
+
+Installed simdreport accepts the same flags. Native BenchmarkBitRoundTrip is in
+./internal/patterns. [The representation guide](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) explains exact NaN/zero
+payloads and why timing does not establish bitcast instruction emission.
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -285,6 +305,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `bitroundtrip` | `BenchmarkBitRoundTrip` | `Scalar`, `SIMDPartial`; exact opaque bits, no numeric conversion |
 | `saturatingadd8` | `BenchmarkSaturatingAdd8` | `Scalar`, `SIMDPartial`; numeric uint8 saturation, not masks |
 | `addition64` | `BenchmarkAddition64` | `Scalar`, `SIMDPartial`; true binary64 arrays and actual-width boundaries |
 | `addition` | `BenchmarkAddition` | `Scalar`, `SIMDPartial`, `SIMDTail`, `SIMDParallel` |

@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.BitRoundTrip {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "exact opaque bits through Uint32s reinterpretation; not numeric conversion; compiler may eliminate bitcasts; 8*n logical bytes")
+		}
 		if op.ID == catalog.SaturatingAdd8 {
 			fmt.Fprintf(&out, "fixture: %s\nSIMD uint8 lanes: %d\nlogical traffic: 3*n bytes/call; full numeric byte output, not predicate bits\n", options.Generator(op), machine.Bits/8)
 		}

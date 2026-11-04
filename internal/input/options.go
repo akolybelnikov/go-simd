@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.BitRoundTrip {
+		return "generated-bit-roundtrip-float32-v1"
+	}
 	if op.ID == catalog.SaturatingAdd8 {
 		return SaturatingAdd8GeneratorID
 	}
@@ -271,7 +274,7 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 	if len(op.Inputs) > 2 {
 		panic("three-array fixtures require input.MakeMulAdd")
 	}
-	if op.ID == catalog.Copy {
+	if op.ID == catalog.Copy || op.ID == catalog.BitRoundTrip {
 		a, out = make([]float32, n), make([]float32, n)
 		for i := range a {
 			a[i] = copyValue(i)
@@ -326,7 +329,7 @@ func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
 	if op.ID == catalog.MulAdd {
 		return fingerprintMulAdd(n, o)
 	}
-	if op.ID == catalog.Copy {
+	if op.ID == catalog.Copy || op.ID == catalog.BitRoundTrip {
 		return fingerprintGenerated(n, false, func(i int) (float32, float32) { return copyValue(i), 0 })
 	}
 	if op.ScalarResult() {

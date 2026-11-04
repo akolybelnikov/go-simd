@@ -5,6 +5,26 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Exact bit reinterpretation round trip — 2026-11-04
+
+- Add bitroundtrip / bit-roundtrip-f32 / BenchmarkBitRoundTrip with Scalar and
+  SIMDPartial: nineteen operations/forty-nine implementations. Preserve every
+  opaque float32 bit through Float32bits/frombits or ToBits/BitsToFloat32,
+  including signed zeros and quiet/signaling NaN payloads; no numeric conversion.
+- Time validation, width setup, bounded loads, representation path and stores
+  with 8*n logical bytes. Retain all input/output bits, actual lanes and dedicated
+  harnesses; keep copy-specific identity separate and historical unknowns unknown.
+- Use fixed raw-bit fixtures with a distinct generator namespace and no relevant
+  scalar/fixture flags. Propagate typed unary execution and complete output
+  evidence through quick/native/compiled/agent/worker paths and standalone use.
+- Test random/special bits, tails, aliases/canaries/unchanged input, errors and
+  allocations, strict native facts and normal/emulated/backend/worker parity.
+  Keep frozen legacy tests explicitly focused on their original two operations.
+- Update README/registry, Wiki chapter27, example, contract, retained captures,
+  SDK source-use ledger, CI and local tracker statuses/links. Explain compiler
+  bitcast elimination: timings alone establish no emitted instruction or latency.
+  Numeric conversions and further representation studies remain future work.
+
 ### Native shared-package group isolation — 2026-11-04
 
 - Resolve broad native selectors to the selected group's registered leaves when

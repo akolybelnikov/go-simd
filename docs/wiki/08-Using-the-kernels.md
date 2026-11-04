@@ -203,3 +203,11 @@ Use `go run ./examples/addition64`; logical work is 24*n.
 [Saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) uses real []uint8 operands/output, 3*n work and
 actual byte-lane identity. ByteResultSHA256 covers the numeric output, while
 Case.Predicate is absent. Run `go run ./examples/saturatingadd8`.
+
+
+## Opaque-bit representation round trip
+
+[Bit roundtrip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) preserves every float32 bit, including NaN payloads,
+through Uint32s reinterpretation. Input/output hashes must agree; actual lanes
+are retained. Use `go run ./examples/bitroundtrip`; work is8*n, and timing does
+not establish whether a bitcast instruction was emitted.

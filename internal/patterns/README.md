@@ -122,3 +122,15 @@ software path. Valid empty input and exact aliases are supported; partial
 overlap is outside the contract. All validation/dispatch/loads/FMA/stores are
 timed, with 16*n logical bytes. Fixtures and full output digest are outside timing.
 Run `go run ./examples/muladd`; see [the contract](../../docs/features/F004-muladd.md).
+
+
+## Exact representation round trip
+
+BitRoundTripScalar/BitRoundTripSIMD accept (x,out []float32) error and preserve
+every opaque 32-bit representation through uint32 bitcasts. No numeric conversion
+or arithmetic occurs, including on signed zeros and NaN payloads. Length errors
+precede writes; empty/disjoint/exact aliases succeed, partial overlap is excluded.
+Validation, width setup, bounded loads, reinterpretation path and stores are timed
+with 8*n logical bytes; complete output hashing follows timing. Compilers may
+eliminate representational steps. Run `go run ./examples/bitroundtrip`; see
+[the contract](../../docs/features/F004-bit-roundtrip.md).
