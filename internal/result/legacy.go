@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacySaturatingAdd8HarnessID = "legacy-report-saturating-add8/v1"
 const LegacyAddition64HarnessID = "legacy-report-addition64/v1"
 const LegacyMulAddHarnessID = "legacy-report-muladd-fma/v1"
 
@@ -164,6 +165,22 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.SaturatingAdd8 {
+			harness = LegacySaturatingAdd8HarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("saturatingadd8 requires actual integral Uint8 lanes")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Vector = identity
+			byteDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && op.ID == catalog.Add64 {
 			harness = LegacyAddition64HarnessID
 			lanes := metrics["simd-lanes"]
@@ -239,7 +256,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				return Run{}, fmt.Errorf("copy %w", err)
 			}
 		}
-		if knownOp && op.ByteResult() {
+		if knownOp && op.ByteResult() && op.TypeID == catalog.Float32 {
 			harness = LegacyPredicateHarnessID
 			lanes := metrics["simd-lanes"]
 			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
@@ -311,6 +328,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			if len(run.Observations) == 0 {
 				run.Metadata += "FMA32 child vector path: " + vectorPath + "\n"
 			}
+		}
+		if options.GeneratedInputs && knownOp && op.ID == catalog.SaturatingAdd8 {
+			c.Input = InputIdentity{input.SaturatingAdd8GeneratorID, input.SaturatingAdd8Fingerprint(size)}
 		}
 		if options.GeneratedInputs && knownOp && op.ID == catalog.Add64 {
 			c.Input = InputIdentity{input.Addition64GeneratorID, input.Addition64Fingerprint(size)}

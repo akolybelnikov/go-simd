@@ -215,7 +215,11 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		x, y, resultOut := a, b, out
 		var third []float32
 		var doubleA, doubleB, doubleOut []float64
-		if descriptor.ID == catalog.Add64 {
+		var byteA, byteB, byteOut []uint8
+		if descriptor.ID == catalog.SaturatingAdd8 {
+			byteA, byteB, byteOut = input.MakeSaturatingAdd8(size)
+			resultOut = nil
+		} else if descriptor.ID == catalog.Add64 {
 			doubleA, doubleB, doubleOut = input.MakeAddition64(size)
 			resultOut = nil
 		} else if descriptor.ID == catalog.MulAdd {
@@ -226,7 +230,7 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
 			x, y, resultOut = a, b, out
 		}
-		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut, typeID: descriptor.TypeID, float64Output: doubleOut}
+		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut, typeID: descriptor.TypeID, float64Output: doubleOut, byteOutput: byteOut}
 		if descriptor.ID == catalog.Add64 {
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; actual float64 lanes; logical traffic 24*n"
 		}
@@ -237,7 +241,7 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		if descriptor.ID == catalog.Clamp || descriptor.ID == catalog.MulAdd {
 			item.copyOutput = true
 		}
-		if descriptor.ByteResult() {
+		if descriptor.ByteResult() && item.byteOutput == nil {
 			length, err := descriptor.OutputElements(size)
 			if err != nil {
 				return nil, err
@@ -260,7 +264,14 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		if descriptor.ID == catalog.MulAdd {
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; three streamed arrays, logical traffic 16*n"
 		}
+		if descriptor.ID == catalog.SaturatingAdd8 {
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; true uint8 arrays, saturation at 255; logical traffic 3*n"
+		}
 		for _, implementation := range operation.Implementations {
+			if implementation.BindByteArrays != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindByteArrays(byteA, byteB, item.byteOutput)})
+				continue
+			}
 			if implementation.BindFloat64 != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindFloat64(doubleA, doubleB, doubleOut)})
 				continue

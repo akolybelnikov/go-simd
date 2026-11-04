@@ -1,7 +1,7 @@
 # go-simd
 
-An experimental Go SIMD laboratory: seventeen operations and forty-five scalar/SIMD
-implementations over generated `float32` and `float64` slices, including addition, a compute
+An experimental Go SIMD laboratory: eighteen operations and forty-seven scalar/SIMD
+implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
 on hardware, toolchain, size and background load; SIMD can be slower.
@@ -20,6 +20,9 @@ with three real streamed operands and full output evidence.
 
 Float64 [addition](docs/features/F004-addition64.md) adds true typed arrays,
 actual-width boundaries and binary64 evidence after MulAdd.
+
+Uint8 [saturating addition](docs/features/F004-saturating-add8.md) adds the first
+real byte-input experiment, distinct from predicate output.
 
 ## Start here
 
@@ -104,6 +107,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| saturatingadd8 | min(a+b,255) over true uint8 arrays | Scalar widened sum, SIMDPartial AddSaturated |
 | addition64 | Binary64 a+b, true float64 arrays | Scalar, SIMDPartial; actual Float64 lanes |
 | addition | `a+b` | Scalar, SIMDPartial, SIMDTail, SIMDParallel |
 | computation | `a*a+b*b+a*b` | Scalar, SIMD |
@@ -206,6 +210,15 @@ retains actual Float64 lanes. Existing addition remains float32. See [Float64 ad
 ```powershell
 go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/addition64
+```
+
+Uint8 saturation computes min(a+b,255), with true byte inputs/output and 3*n
+logical traffic. It preserves the distinction between clipping and wraparound.
+See [uint8 saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition).
+
+```powershell
+go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/saturatingadd8
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
@@ -353,6 +366,6 @@ Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
 [patterns](internal/patterns/README.md), [reductions](internal/reduction/README.md)
 and [movement](internal/movement/README.md).
-Float32/Float64 array-output kernels support disjoint output and exact in-place aliases;
+Float32/Float64/Uint8 array-output kernels support disjoint output and exact in-place aliases;
 partial overlap is unsupported. Predicate export requires disjoint float32 input
 and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.

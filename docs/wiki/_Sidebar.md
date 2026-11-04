@@ -31,4 +31,6 @@
 
 - [25 · Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition)
 
+- [26 · Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

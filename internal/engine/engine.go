@@ -151,7 +151,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 	procs := runtime.GOMAXPROCS(0)
 	var a, b, third, out []float32
 	var doubleA, doubleB, doubleOut []float64
-	var byteOut []uint8
+	var byteA, byteB, byteOut []uint8
 	var scalar float32
 	previous := -1
 	fingerprint := ""
@@ -160,7 +160,10 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			return run, fmt.Errorf("before %s: %w", c.Name, err)
 		}
 		if c.Elements != previous {
-			if c.Operation.ID == catalog.Add64 {
+			if c.Operation.ID == catalog.SaturatingAdd8 {
+				byteA, byteB, byteOut = input.MakeSaturatingAdd8(c.Elements)
+				fingerprint = input.FingerprintUint8(byteA, byteB)
+			} else if c.Operation.ID == catalog.Add64 {
 				doubleA, doubleB, doubleOut = input.MakeAddition64(c.Elements)
 				fingerprint = input.FingerprintFloat64(doubleA, doubleB)
 			} else if c.Operation.ID == catalog.MulAdd {
@@ -171,7 +174,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 				fingerprint = input.FingerprintFloat32(a, b)
 			}
 			previous = c.Elements
-			if c.Operation.ByteResult() {
+			if c.Operation.ByteResult() && c.Operation.ID != catalog.SaturatingAdd8 {
 				length, err := c.Operation.OutputElements(c.Elements)
 				if err != nil {
 					return run, err
@@ -182,7 +185,11 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 		// Original native benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.ID == catalog.Add64 {
+		if c.Operation.ID == catalog.SaturatingAdd8 {
+			prepared.Run = c.Implementation.BindByteArrays(byteA, byteB, byteOut)
+			prepared.Output = nil
+			prepared.ByteOutput = byteOut
+		} else if c.Operation.ID == catalog.Add64 {
 			prepared.Run = c.Implementation.BindFloat64(doubleA, doubleB, doubleOut)
 			prepared.Output = nil
 			prepared.Float64Output = doubleOut
@@ -234,7 +241,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			}
 			key.Case.Reduction = fold
 		}
-		if c.Operation.ByteResult() {
+		if c.Operation.ByteResult() && c.Operation.TypeID == catalog.Float32 {
 			var vector simd.Float32s
 			identity, err := result.NewPredicateIdentity(vector.Len())
 			if c.Operation.ID == catalog.PredicateGTPacked {
@@ -244,6 +251,14 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 				return run, err
 			}
 			key.Case.Predicate = identity
+		}
+		if c.Operation.ID == catalog.SaturatingAdd8 {
+			var vector simd.Uint8s
+			identity, err := result.NewVectorIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Vector = identity
 		}
 		if c.Operation.ID == catalog.Add64 {
 			var vector simd.Float64s

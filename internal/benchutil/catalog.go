@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if operation.Descriptor.ID == catalog.SaturatingAdd8 {
+		benchmarkSaturatingAdd8(b, operation)
+		return
+	}
 	if operation.Descriptor.ID == catalog.Add64 {
 		benchmarkAddition64(b, operation)
 		return

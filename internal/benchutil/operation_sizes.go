@@ -13,6 +13,9 @@ func OperationSizes(op catalog.Operation, width int) []int {
 	if op.TypeID == catalog.Float64 {
 		width = max(1, width/2)
 	}
+	if op.TypeID == catalog.Uint8 {
+		width *= 4
+	}
 	sizes := BenchmarkSizes(width)
 	if op.ID == catalog.PredicateGTPacked {
 		sizes = append(sizes, 7, 9, 63, 65)
