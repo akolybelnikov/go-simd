@@ -77,6 +77,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone scalar result or fold identity lost")
 				}
 			}
+			if group == "copy64" {
+				if observation.ArrayResultSHA256 != observation.Key.Case.Input.SHA256 || len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Vector.NativeLanes.Value*64 != capture.Machine.Bits {
+					t.Fatal("standalone copy64 bits lost")
+				}
+			}
 			if group == "clmul64" {
 				if len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Vector.CarrylessCapabilityID == "" || observation.Key.Case.Vector.NativeLanes.Value*64 != capture.Machine.Bits {
 					t.Fatal("standalone carryless facts lost")

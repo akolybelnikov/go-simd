@@ -2,7 +2,7 @@
 
 addition64 is the first operation over true []float64 inputs/output. The
 Float64 checkpoint brought the catalogue to **seventeen operations and forty-five
-implementations**. [Uint8 saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) now brings the current total to eighteen/forty-seven.
+implementations**. The current catalogue is 23 operations /58 implementations; earlier counts describe delivery checkpoints.
 The original addition group remains float32 with its original strategies.
 
 ## Run through any launcher

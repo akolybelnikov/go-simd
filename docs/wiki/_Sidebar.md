@@ -26,21 +26,14 @@
 
 - [22 · Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
 - [23 · F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
-
 - [24 · Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add)
-
 - [25 · Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition)
-
 - [26 · Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition)
-
 - [27 · Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip)
-
 - [28 · XOR of float32 bit patterns](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns)
 
-[Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)
-
-
 - [29 · Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum)
-
-
 - [30 · Carryless polynomial multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication)
+- [31 · Exact Float64 copy](https://github.com/akolybelnikov/go-simd/wiki/31-Exact-Float64-copy)
+
+[Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

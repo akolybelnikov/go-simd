@@ -1,8 +1,8 @@
 # 20 — Export predicates as packed bits
 
-Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has twenty-two operations/fifty-one
-implementations; future/stop statements below describe this earlier checkpoint.
+Current catalogue: **23 operations / 58 implementations**. Counts and stop
+statements below describe this chapter’s historical delivery checkpoint. See
+[the current contract index](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-completion.md).
 
 The predicatepack group stores eight truth values per byte. It offers Scalar
 and SIMDPartial, bringing that checkpoint to thirteen operations/thirty-four

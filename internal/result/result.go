@@ -212,7 +212,7 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 		bySize[c.Elements][c.StrategyID] = s
 	}
 	table := Comparison{Title: title, BaselinePolicy: "legacy-serial-scalar/v1"}
-	if summaries[0].Key.Case.OperationID == catalog.Copy {
+	if summaries[0].Key.Case.OperationID == catalog.Copy || summaries[0].Key.Case.OperationID == catalog.Copy64 {
 		table.BaselinePolicy = "copy-source-loop/v1"
 	}
 	if summaries[0].Key.Case.OperationID == catalog.DotFMA {

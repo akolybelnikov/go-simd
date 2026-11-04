@@ -65,6 +65,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.ID == catalog.Clmul64 {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\ntrue uint64 polynomial low64 product; full digest, actual lanes and SDK carryless capability retained; 24*n logical bytes\n" + op.NumericalPolicy + "\n"
 	}
+	if op.ID == catalog.Copy64 {
+		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nexact unary binary64 bits; source loop/GoCopy/SIMDPartial; full digest and actual lanes;16*n logical bytes\n" + op.NumericalPolicy + "\n"
+	}
 	if op.ID == catalog.Add64 {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nfloat64 input/output; full binary64 output digest after timing; logical traffic 24*n\nnumerics: " + op.NumericalPolicy + "\n"
 	}

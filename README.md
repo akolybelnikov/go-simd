@@ -1,10 +1,10 @@
 # go-simd
 
-An experimental Go SIMD laboratory: twenty-two operations and fifty-five scalar/SIMD
-implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
-expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
-comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
-on hardware, toolchain, size and background load; SIMD can be slower.
+An experimental Go SIMD laboratory: **23 operations / 58 implementations** over
+generated `float32`, `float64`, `uint8` and `uint64` slices. Explore arithmetic,
+broadcasts, masks, reductions, exact bits, movement and polynomial multiplication.
+Run quick comparisons or save repeated measurements as TXT, Markdown or CSV.
+Results depend on hardware, toolchain, size and background load; SIMD can be slower.
 
 **M3:** both commands run as standalone binaries on a compatible local machine,
 cloud VM or remote server. The default report backend needs neither Go nor the
@@ -15,17 +15,9 @@ See the [acceptance record](docs/features/F004-completion.md) and
 [SDK coverage ledger](docs/features/F004-api-coverage.md) for delivered experiments
 and explicitly deferred extensions.
 
-Three-array [fused multiply-add](docs/features/F004-muladd.md) extends that baseline
-with three real streamed operands and full output evidence.
-
-Float64 [addition](docs/features/F004-addition64.md) adds true typed arrays,
-actual-width boundaries and binary64 evidence after MulAdd.
-
-Uint8 [saturating addition](docs/features/F004-saturating-add8.md) adds the first
-real byte-input experiment, distinct from predicate output.
-
-Exact [bit reinterpretation](docs/features/F004-bit-roundtrip.md) adds a
-representation study with no numeric conversion and complete bit evidence.
+Eight extensions add three-array FMA, Float64 addition/copy, uint8 saturation,
+bit roundtrip/XOR, fixed-block sum8 and uint64 carryless products. Their exact
+contracts and evidence are indexed in [F004 completion](docs/features/F004-completion.md).
 
 ## Start here
 
@@ -110,6 +102,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| copy64 | Exact binary64 bit copy, including NaN payloads | Scalar source loop, GoCopy, SIMDPartial |
 | clmul64 | Low64 polynomial product over GF(2) on true uint64 arrays | Scalar shift/XOR, SIMDPartial Even/Odd extraction |
 | sum8 | One specified-order float32 result per eight inputs, padded with +0 | Scalar, SIMDPartial |
 | xorbits | Exact XOR of two opaque float32 bit patterns | Scalar uint32 logic, SIMDPartial ToBits/Xor/BitsToFloat32 |
@@ -144,7 +137,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds; inclusive clamp bounds |
 | `-pattern` | `alternating` | Predicate/clipped-position fixture: none, all, alternating, clustered, shuffled |
 | `-seed` | `42` | Deterministic shuffled predicate/clipped-position arrangement |
-| `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
+| `-sum-input` | `balanced` | Sum/sum8 fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
 | `-fma-input` | `balanced` | Fused affine/muladd fixture: balanced, rounding, mixed-magnitude |
 
@@ -379,12 +372,9 @@ lists every Make target/variable, CLI flag and native Go benchmark control.
 The [progressive Wiki](https://github.com/akolybelnikov/go-simd/wiki) includes
 kernel examples, recipes, numerical contracts, troubleshooting and credited SIMD
 reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md)
-and [migration record](docs/migration/README.md). F004's
-[broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
-[ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
-checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), plus [copy](docs/features/F004-copy.md) and [clamp](docs/features/F004-clamp.md), complete the original F004 scope. [Three-array MulAdd](docs/features/F004-muladd.md) now extends it. Reordering, standalone conversions
-and additional typed operations remain optional extensions; M4 and HTML are separate roadmap work.
+and [migration record](docs/migration/README.md). The [F004 contract index](docs/features/F004-completion.md) links the original
+15-operation scope and all eight delivered extensions. Further operations,
+imported data, agent workflows and HTML have separate tracker entries.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
@@ -392,12 +382,14 @@ Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
 [patterns](internal/patterns/README.md), [reductions](internal/reduction/README.md)
 and [movement](internal/movement/README.md).
-Float32/Float64/Uint8 array-output kernels support disjoint output and exact in-place aliases;
-partial overlap is unsupported. Predicate export requires disjoint float32 input
+Elementwise Float32/Float64/Uint8/Uint64 array-output kernels support disjoint output and exact in-place aliases;
+partial overlap is unsupported. Sum8 supports its same-start projected output
+prefix, with exactly ceil(n/8) values. Predicate export requires disjoint float32 input
 and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.
 
 
-Fixed-block horizontal sums use projected output `ceil(n/8)` and timed pair/fold work. See [sum8](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) and run `go run ./examples/sum8`.
-
-
-Carryless multiplication uses `-group clmul64`, true uint64 arrays and `24*n` logical bytes. [The carryless guide](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) explains the result, lane extraction and capability evidence. Identical flags work with installed, Go and Make launchers; use `go run ./examples/clmul64` for 3 times 3 = 5.
+| Focused example | Guide |
+| --- | --- |
+| `go run ./examples/sum8` | [Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) |
+| `go run ./examples/clmul64` | [Carryless polynomial multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) |
+| `go run ./examples/copy64` | [Exact Float64 copy](https://github.com/akolybelnikov/go-simd/wiki/31-Exact-Float64-copy) |

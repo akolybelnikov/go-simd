@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyCopy64HarnessID = "legacy-report-copy64/v1"
 const LegacyClmul64HarnessID = "legacy-report-clmul64/v1"
 const LegacySum8HarnessID = "legacy-report-sum8/v1"
 const LegacyXorBitsHarnessID = "legacy-report-xor-bits/v1"
@@ -252,6 +253,22 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				return Run{}, err
 			}
 		}
+		if knownOp && op.ID == catalog.Copy64 {
+			harness = LegacyCopy64HarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("copy64 requires integral actual float64 lanes")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Vector = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && op.ID == catalog.Add64 {
 			harness = LegacyAddition64HarnessID
 			lanes := metrics["simd-lanes"]
@@ -405,6 +422,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		}
 		if options.GeneratedInputs && knownOp && op.ID == catalog.Clmul64 {
 			c.Input = InputIdentity{input.Clmul64GeneratorID, input.Clmul64Fingerprint(size)}
+		}
+		if options.GeneratedInputs && knownOp && op.ID == catalog.Copy64 {
+			c.Input = InputIdentity{input.Copy64GeneratorID, input.Copy64Fingerprint(size)}
 		}
 		if options.GeneratedInputs && knownOp && op.ID == catalog.Add64 {
 			c.Input = InputIdentity{input.Addition64GeneratorID, input.Addition64Fingerprint(size)}

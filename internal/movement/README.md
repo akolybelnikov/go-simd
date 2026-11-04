@@ -27,3 +27,12 @@ go run ./cmd/simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 3 -be
 Installed commands and Make use the same options. See the
 [feature record](../../docs/features/F004-copy.md) and
 [Wiki guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
+
+
+## Exact Float64 copy
+
+Copy64Scalar/Copy64Go/Copy64SIMD use true unary float64 arrays, exact raw bits
+including signaling NaNs, strict lengths and 16*n logical bytes. SDK partial
+loads/stores are bounded by actual Float64 lanes. GoCopy is a compiler/runtime
+control. See [the contract](../../docs/features/F004-copy64.md) and run
+`go run ./examples/copy64`.

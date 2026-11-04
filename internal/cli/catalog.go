@@ -89,6 +89,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.ID == catalog.SaturatingAdd8 {
 			fmt.Fprintf(&out, "fixture: %s\nSIMD uint8 lanes: %d\nlogical traffic: 3*n bytes/call; full numeric byte output, not predicate bits\n", options.Generator(op), machine.Bits/8)
 		}
+		if op.ID == catalog.Copy64 {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "exact unary binary64 movement; 16*n logical bytes; full output bits and actual lanes retained")
+		}
 		if op.ID == catalog.Add64 {
 			fmt.Fprintf(&out, "fixture: %s\nSIMD float64 lanes: %d\nlogical traffic: 24*n bytes/call; complete binary64 output digest after timing\n", options.Generator(op), machine.Bits/64)
 		}
@@ -142,7 +146,7 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 					}
 				}
 			}
-			if op.ID == catalog.Copy && !variant.UsesSIMD {
+			if (op.ID == catalog.Copy || op.ID == catalog.Copy64) && !variant.UsesSIMD {
 				mode = "source loop (compiler-selected)"
 				if variant.ID == catalog.GoCopy {
 					mode = "Go builtin (compiler/runtime)"
