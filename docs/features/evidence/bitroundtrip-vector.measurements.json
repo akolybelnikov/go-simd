@@ -1,0 +1,316 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "bitroundtrip",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkBitRoundTrip$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-162832-785975524",
+    "Environment": {
+      "ID": "benchmark-20261104-162832-785975524/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-bit-roundtrip/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T16:28:32Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-bit-roundtrip/v1\ngroup: bitroundtrip\nselection: \"^BenchmarkBitRoundTrip$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-bit-roundtrip-float32-v1\nexact bit reinterpretation; compiler may eliminate bitcasts; full output digest; logical traffic 8*n\nnumerics: Exact float32 bit preservation through uint32 reinterpretation, including signed zeros, subnormals, infinities and quiet/signaling NaN payloads; no numeric conversion. Length errors before writes, valid empty/nil, disjoint/exact alias; partial overlap unsupported. Validation, width setup, bounded loads, reinterpretation path and stores timed; 8*n logical bytes, full output digest after timing. Compiler may eliminate representational steps; labels/timing do not establish instruction emission.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261104-162832-785975524",
+          "EnvironmentID": "benchmark-20261104-162832-785975524/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-bit-roundtrip/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "bit-roundtrip-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-uint32-bit-roundtrip-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-bit-roundtrip-float32-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5120,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkBitRoundTrip/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261104-162832-785975524",
+          "EnvironmentID": "benchmark-20261104-162832-785975524/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-bit-roundtrip/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "bit-roundtrip-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-uint32-bit-roundtrip-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-bit-roundtrip-float32-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 3840,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkBitRoundTrip/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261104-162832-785975524",
+          "EnvironmentID": "benchmark-20261104-162832-785975524/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-bit-roundtrip/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "bit-roundtrip-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-uint32-bit-roundtrip-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-bit-roundtrip-float32-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5120,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkBitRoundTrip/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273",
+        "Key": {
+          "RunID": "benchmark-20261104-162832-785975524",
+          "EnvironmentID": "benchmark-20261104-162832-785975524/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-bit-roundtrip/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "bit-roundtrip-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-uint32-bit-roundtrip-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-bit-roundtrip-float32-v1",
+              "SHA256": "ba1b8dbfef6511e4d01e339bf15d3c05542c1cda7945de30b0386e287efb3273"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 5120,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkBitRoundTrip/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

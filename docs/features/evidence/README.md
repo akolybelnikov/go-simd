@@ -1,5 +1,26 @@
 # F004 smoke evidence
 
+## Exact bit reinterpretation — 2026-11-04
+
+Normal/emulated bitroundtrip captures retain four observations each, n=64,
+count 2, 3x, fixed raw-bit recipe. Every input/output digest agrees across modes.
+Windows/amd64, Go1.27.3-X:simd, GOMAXPROCS16; normal 256 bits/8 float32 lanes,
+emulated 128 bits/4 float32 lanes. Base 10e496a plus uncommitted roundtrip changes;
+missing embedded VCS facts remain unknown. Original numeric data/run IDs/timestamps
+are preserved, with LF/trailing whitespace normalized. No timing claims.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/bit-roundtrip-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/bit-roundtrip-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+See [the representation contract](../F004-bit-roundtrip.md). Bitcasts may be
+optimized away; these are whole-kernel plumbing observations, not instruction latency.
+
+
 ## Uint8 saturating addition — 2026-11-04
 
 Normal/emulated saturatingadd8 captures retain four observations each, n=64,

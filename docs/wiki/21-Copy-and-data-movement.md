@@ -1,7 +1,7 @@
 # 21 — Copy data and compare Go's built-in control
 
 Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has eighteen operations/forty-seven
+original F004 closure. The current catalogue has nineteen operations/forty-nine
 implementations; future/stop statements below describe this earlier checkpoint.
 
 The copy group compares four ways of moving float32 data without arithmetic:

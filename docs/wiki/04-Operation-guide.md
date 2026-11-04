@@ -1,7 +1,7 @@
 # 04 — Operation and kernel guide
 
-The lab contains eighteen operations and forty-seven implementations: sixteen operations on `float32`
-inputs, one float64 addition and one uint8 saturation operation. Float32 inputs provide ten arithmetic/selection/clipping float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
+The lab contains nineteen operations and forty-nine implementations: seventeen operations on `float32`
+inputs, one float64 addition and one uint8 saturation operation. Float32 inputs provide eleven arithmetic/selection/clipping/representation float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
 one, two or three declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
 Sum accepts one input and returns one float32; dot/dotfma accept two
@@ -27,6 +27,7 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/patterns` | `PredicateGTPackedScalar` / `PredicateGTPackedSIMD(x []float32,out []uint8,t float32) error` | Scalar / SIMDPartial | Ordered comparison packed LSB first into ceil(n/8) bytes; unused high bits zero; conversion/packing/stores included |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
+| `internal/patterns` | `BitRoundTripScalar` / `BitRoundTripSIMD(x,out []float32) error` | Scalar / SIMDPartial | Exact Float32/Uint32 representation round trip; all bits preserved |
 | `internal/patterns` | `MulAddScalar` / `MulAddSIMD(a,b,c,out []float32) error` | Scalar / SIMDPartial | Three streamed arrays; one-rounding binary32 FMA; actual software/vector path |
 | `internal/patterns` | `ClampScalar` / `ClampSIMD` / `ClampSIMDMinMax(x,out []float32,lower,upper float32) error` | Scalar / SIMDPartial / SIMDMinMax | Ordered inclusive clipping; preserve original tie/NaN bits; Min/Max repairs timed |
 | `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |

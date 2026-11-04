@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: eighteen operations and forty-seven scalar/SIMD
+An experimental Go SIMD laboratory: nineteen operations and forty-nine scalar/SIMD
 implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -23,6 +23,9 @@ actual-width boundaries and binary64 evidence after MulAdd.
 
 Uint8 [saturating addition](docs/features/F004-saturating-add8.md) adds the first
 real byte-input experiment, distinct from predicate output.
+
+Exact [bit reinterpretation](docs/features/F004-bit-roundtrip.md) adds a
+representation study with no numeric conversion and complete bit evidence.
 
 ## Start here
 
@@ -107,6 +110,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| bitroundtrip | Exact Float32/Uint32/Float32 representation round trip | Scalar bitcast source, SIMDPartial ToBits/BitsToFloat32; all bits preserved |
 | saturatingadd8 | min(a+b,255) over true uint8 arrays | Scalar widened sum, SIMDPartial AddSaturated |
 | addition64 | Binary64 a+b, true float64 arrays | Scalar, SIMDPartial; actual Float64 lanes |
 | addition | `a+b` | Scalar, SIMDPartial, SIMDTail, SIMDParallel |
@@ -219,6 +223,16 @@ See [uint8 saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-sa
 ```powershell
 go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/saturatingadd8
+```
+
+Bitroundtrip preserves every float32 bit through uint32 reinterpretation,
+including NaN payloads and signed zero. Logical work is 8*n. Compilers may remove
+the bitcast steps; the experiment measures a complete kernel, not instruction
+latency. See [bit representation](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip).
+
+```powershell
+go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/bitroundtrip
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;

@@ -224,7 +224,7 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			resultOut = nil
 		} else if descriptor.ID == catalog.MulAdd {
 			x, y, third, resultOut = input.MakeMulAdd(size, options)
-		} else if descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
+		} else if descriptor.ID == catalog.Copy || descriptor.ID == catalog.BitRoundTrip || descriptor.Parameterized() || descriptor.ScalarResult() {
 			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
 		} else if out == nil {
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
@@ -238,7 +238,7 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.copyOutput = true
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; disjoint buffers; GoCopy uses Go compiler/runtime copy"
 		}
-		if descriptor.ID == catalog.Clamp || descriptor.ID == catalog.MulAdd {
+		if descriptor.ID == catalog.Clamp || descriptor.ID == catalog.MulAdd || descriptor.ID == catalog.BitRoundTrip {
 			item.copyOutput = true
 		}
 		if descriptor.ByteResult() && item.byteOutput == nil {
@@ -263,6 +263,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		}
 		if descriptor.ID == catalog.MulAdd {
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; three streamed arrays, logical traffic 16*n"
+		}
+		if descriptor.ID == catalog.BitRoundTrip {
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; exact bits through uint32 reinterpretation, not value conversion; logical traffic 8*n"
 		}
 		if descriptor.ID == catalog.SaturatingAdd8 {
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; true uint8 arrays, saturation at 255; logical traffic 3*n"

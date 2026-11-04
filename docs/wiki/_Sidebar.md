@@ -33,4 +33,6 @@
 
 - [26 · Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition)
 
+- [27 · Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

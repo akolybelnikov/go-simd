@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / completed F004 baseline plus MulAdd/Float64/Uint8 extensions, reviewed 2026-11-04.
+**Guide baseline:** architecture M3 / completed F004 baseline plus MulAdd/Float64/Uint8/representation extensions, reviewed 2026-11-04.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -38,6 +38,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Stream three operand arrays through fused multiply-add | [24 — Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) |
 | Compare true binary64 addition with its own scalar/SIMD controls | [25 — Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) |
 | Add uint8 values with saturation instead of wraparound | [26 — Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) |
+| Preserve every float32 bit through integer reinterpretation | [27 — Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) |
 
 ## What you can do today
 
@@ -116,6 +117,8 @@ useful repeated measurement.
 | 2026-11-04 | F004 Float64 addition: true binary64 arrays/bindings, actual lane boundaries, 24*n work, full binary64 evidence and bounded emulated partial loads; seventeen operations/forty-five implementations |
 
 | 2026-11-04 | F004 uint8 saturation: real byte inputs, exhaustive pair validation, typed bindings, 3*n work, actual lanes/full numeric-byte evidence; eighteen operations/forty-seven implementations |
+
+| 2026-11-04 | F004 bit roundtrip: exact Float32/Uint32 reinterpretation, all NaN/zero bits, full output evidence and instruction-selection interpretation; nineteen operations/forty-nine implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

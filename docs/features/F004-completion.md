@@ -1,5 +1,9 @@
 # F004 completion — Agreed experimental scope
 
+Current extension: [exact bit roundtrip](F004-bit-roundtrip.md) brings the
+catalogue to nineteen operations/forty-nine implementations. Earlier counts
+below remain historical.
+
 Current extension: [uint8 saturation](F004-saturating-add8.md) brings the
 catalogue to eighteen operations/forty-seven implementations. Original baseline
 and earlier extension counts below remain historical.

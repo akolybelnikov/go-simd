@@ -76,6 +76,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.BitRoundTrip {
+			bind, ok := bitRoundTripBindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing bit roundtrip binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUnary: bind})
+			continue
+		}
 		if descriptor.ID == catalog.SaturatingAdd8 {
 			bind, ok := uint8Bindings[variant.ID]
 			if !ok {
