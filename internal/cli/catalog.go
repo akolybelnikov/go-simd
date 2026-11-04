@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.Clmul64 {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "SDK-controlled carryless capability is recorded per run; low64 polynomial result; 24*n logical bytes")
+		}
 		if op.ID == catalog.Sum8 {
 			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
 			fmt.Fprintln(&out, "output extent: ceil(n/8) float32 values; fixed (0+4,1+5,2+6,3+7), then left fold; pad+0; all work timed;4*n+4*ceil(n/8) logical bytes")
@@ -121,6 +125,9 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 				if machine.Emulated {
 					mode = "portable emulation"
 				}
+			}
+			if op.ID == catalog.Clmul64 && variant.UsesSIMD {
+				mode = "SDK-controlled carryless (capability in run evidence)"
 			}
 			if op.ID == catalog.DotFMA {
 				mode = "software FMA32"

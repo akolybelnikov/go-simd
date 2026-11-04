@@ -11,7 +11,7 @@ var retainedFloat64Sink []float64
 
 // Keep the binary64 callback separate from existing float32 timing contracts.
 func measureFloat64Context(ctx context.Context, p Prepared, benchtime string) (Sample, error) {
-	if p.Run == nil || len(p.Float64Output) == 0 || p.Output != nil || p.ByteOutput != nil || p.Reduce != nil || p.ReduceChecked != nil || p.Scalar != nil || p.Bytes < 0 || !p.RetainOutputAfterTiming {
+	if p.Uint64Output != nil || p.Run == nil || len(p.Float64Output) == 0 || p.Output != nil || p.ByteOutput != nil || p.Reduce != nil || p.ReduceChecked != nil || p.Scalar != nil || p.Bytes < 0 || !p.RetainOutputAfterTiming {
 		return Sample{}, fmt.Errorf("invalid prepared float64 benchmark")
 	}
 	benchmarkMu.Lock()

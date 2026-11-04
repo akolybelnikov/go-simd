@@ -117,6 +117,13 @@ func validateObservations(capture Capture) error {
 		if key.Case.OperationID == "" || key.Case.TypeID == "" || key.Case.StrategyID == "" || key.Case.Elements < 1 || key.Case.Input.GeneratorID == "" {
 			return readError("invalid_observation", "observation %d case identity is incomplete", index)
 		}
+		if key.Case.OperationID == catalog.Clmul64 {
+			v := key.Case.Vector
+			n := v.NativeLanes.Value
+			if !v.NativeLanes.Known || (n != 2 && n != 4 && n != 8) || (v.CarrylessCapabilityID != result.CarrylessCapability(true) && v.CarrylessCapabilityID != result.CarrylessCapability(false)) || observation.ArrayResultSHA256 == "" {
+				return readError("invalid_carryless_evidence", "observation %d carryless capability/lanes/output is incomplete", index)
+			}
+		}
 		if key.Case.OperationID == catalog.Sum8 {
 			op, _ := catalog.ByGroup("sum8")
 			count, err := op.OutputElements(key.Case.Elements)

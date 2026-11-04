@@ -1,7 +1,7 @@
 # 14 — Sum and reduction order
 
 Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has twenty-one operations/fifty-one
+original F004 closure. The current catalogue has twenty-two operations/fifty-one
 implementations; future/stop statements below describe this earlier checkpoint.
 
 Sum's F004 checkpoint added one float32 input array and one returned float32,

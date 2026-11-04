@@ -34,10 +34,10 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all twenty-one groups. Positional arguments are
+group. No explicit selection means all twenty-two groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact twenty-one-row operation table.
+`-list` prints runtime context and a compact twenty-two-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
@@ -324,6 +324,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `clmul64` | `BenchmarkClmul64` | `Scalar`, `SIMDPartial`; low64 GF(2) product, SDK capability retained |
 | `sum8` | `BenchmarkSum8` | `Scalar`, `SIMDPartial`; fixed eight-input pair/fold, +0 padding |
 | `xorbits` | `BenchmarkXorBits` | `Scalar`, `SIMDPartial`; exact XOR of opaque float32 words |
 | `bitroundtrip` | `BenchmarkBitRoundTrip` | `Scalar`, `SIMDPartial`; exact opaque bits, no numeric conversion |
@@ -550,3 +551,6 @@ and [experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experi
 ## Fixed-block sum8
 
 Use `-group sum8` with existing `-sum-input` recipes. Logical work is `4*n+4*ceil(n/8)` bytes; the output count is `ceil(n/8)`. [Examples and the exact order](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) apply equally to installed, Go and Make launchers.
+
+
+Carryless multiplication uses `-group clmul64`, true uint64 arrays and `24*n` logical bytes. [The carryless guide](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) explains the result, lane extraction and capability evidence. Identical flags work with installed, Go and Make launchers; use `go run ./examples/clmul64` for 3 times 3 = 5.
