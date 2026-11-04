@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyClmul64HarnessID = "legacy-report-clmul64/v1"
 const LegacySum8HarnessID = "legacy-report-sum8/v1"
 const LegacyXorBitsHarnessID = "legacy-report-xor-bits/v1"
 const LegacyBitRoundTripHarnessID = "legacy-report-bit-roundtrip/v1"
@@ -105,6 +106,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		metrics := map[string]Metric{}
 		for i := 2; i+1 < len(fields); i += 2 {
 			unit := fields[i+1]
+			if unit == "clmul-hardware" && metrics[unit].Available {
+				return Run{}, fmt.Errorf("duplicate carryless capability metric")
+			}
 			if strings.HasPrefix(unit, "output-sha256-") {
 				value, err := strconv.ParseFloat(fields[i], 64)
 				if err != nil || !finite(value) || value < 0 {
@@ -116,7 +120,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				metrics[unit] = Metric{value, true}
 			}
 			switch unit {
-			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits", "output-elements":
+			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits", "output-elements", "clmul-hardware":
 				value, err := strconv.ParseFloat(fields[i], 64)
 				if err != nil || !finite(value) || value < 0 {
 					return Run{}, fmt.Errorf("line %d: invalid %s measurement", lineNumber, unit)
@@ -220,6 +224,30 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			}
 			c.Vector = identity
 			byteDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
+		if knownOp && op.ID == catalog.Clmul64 {
+			harness = LegacyClmul64HarnessID
+			lanes := metrics["simd-lanes"]
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("clmul64 requires integral actual uint64 lanes")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			capability := metrics["clmul-hardware"]
+			if !capability.Available || (capability.Value != 0 && capability.Value != 1) {
+				return Run{}, fmt.Errorf("clmul64 requires exact SDK hardware capability")
+			}
+			identity.CarrylessCapabilityID = CarrylessCapability(capability.Value == 1)
+			if identity.NativeLanes.Value != 2 && identity.NativeLanes.Value != 4 && identity.NativeLanes.Value != 8 {
+				return Run{}, fmt.Errorf("unsupported carryless width")
+			}
+			c.Vector = identity
+			arrayDigest, err = outputDigest(metrics)
 			if err != nil {
 				return Run{}, err
 			}
@@ -374,6 +402,9 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		}
 		if options.GeneratedInputs && knownOp && op.ID == catalog.SaturatingAdd8 {
 			c.Input = InputIdentity{input.SaturatingAdd8GeneratorID, input.SaturatingAdd8Fingerprint(size)}
+		}
+		if options.GeneratedInputs && knownOp && op.ID == catalog.Clmul64 {
+			c.Input = InputIdentity{input.Clmul64GeneratorID, input.Clmul64Fingerprint(size)}
 		}
 		if options.GeneratedInputs && knownOp && op.ID == catalog.Add64 {
 			c.Input = InputIdentity{input.Addition64GeneratorID, input.Addition64Fingerprint(size)}

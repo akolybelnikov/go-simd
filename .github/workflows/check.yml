@@ -42,6 +42,7 @@ jobs:
           go test ./cmd/simdreport -run='^TestBitRoundTripResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestXorBitsResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestSum8ResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestClmul64ResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -80,3 +81,6 @@ jobs:
 
       - name: Check fixed-block horizontal sums
         run: go test ./internal/reduction -run='^$' -bench='^BenchmarkSum8$/^n=(7|8|9|15|16|17)$' -benchtime=1x
+
+      - name: Check low64 carryless multiplication
+        run: go test ./internal/integer -run='^$' -bench='^BenchmarkClmul64$/^n=(1|3|4|5|8|16)$' -benchtime=1x

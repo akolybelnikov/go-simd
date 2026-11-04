@@ -51,7 +51,7 @@ type MeasurementKey struct {
 }
 
 type Observation struct {
-	ArrayResultSHA256   string  `json:",omitempty"` // Complete typed floating-point output bits, little endian, hashed after timing.
+	ArrayResultSHA256   string  `json:",omitempty"` // Complete typed numeric-array output bits, little endian, hashed after timing.
 	ByteResultSHA256    string  `json:",omitempty"` // Full uint8 output, hashed only after measurement.
 	ArrayResultLastBits *uint32 `json:",omitempty"` // FMA checkpoint: last output element, not a full-array checksum.
 	ScalarResultBits    *uint32 `json:",omitempty"` // Actual returned float32, including non-finite bit patterns.

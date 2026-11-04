@@ -17,9 +17,9 @@ func TestPackedBoundarySweepAndPreservedSizes(t *testing.T) {
 				}
 				continue
 			}
-			if op.TypeID == catalog.Float64 {
+			if op.TypeID == catalog.Float64 || op.TypeID == catalog.Uint64 {
 				if !slices.Equal(sizes, BenchmarkSizes(w/2)) {
-					t.Fatal("float64 sweep uses wrong width")
+					t.Fatal("64-bit sweep uses wrong width")
 				}
 				continue
 			}

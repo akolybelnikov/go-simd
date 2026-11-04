@@ -364,3 +364,13 @@ hardware and emulated execution are checked separately.
 ## Fixed-block sum8
 
 [Normal](sum8-vector.measurements.json) and [emulated](sum8-sdk-emulated.measurements.json) retain n=64, cancellation, count 2, 3x at source base 78f6f13 plus uncommitted sum8 changes, Windows/amd64 Go1.27.3-X:simd. Original samples and timestamps retained. Every full output digest agrees; physical extent is 8. These verify plumbing, not performance. Reproduce with `go run ./cmd/simdreport -group sum8 -sum-input cancellation -bench '^BenchmarkSum8$/^n=64$' -count 2 -benchtime 3x -format md`, then repeat with `GODEBUG=simd=0`.
+
+
+## Low64 carryless multiplication
+
+[Normal](clmul64-vector.measurements.json) and [SDK-emulated](clmul64-sdk-emulated.measurements.json)
+use n=64, count 2, 3x, Windows/amd64 Go1.27.3-X:simd, source base 9640ce7 plus
+uncommitted carryless changes. All full output digests agree. Samples/timestamps
+retained; no speed claim. Reproduce with `go run ./cmd/simdreport -group clmul64
+-bench '^BenchmarkClmul64$/^n=64$' -count 2 -benchtime 3x -format md`, then repeat
+with `GODEBUG=simd=0`.

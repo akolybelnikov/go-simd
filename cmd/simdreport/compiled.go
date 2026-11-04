@@ -62,6 +62,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.ID == catalog.SaturatingAdd8 {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\ntrue uint8 arrays; saturation at 255; full output ByteResultSHA256; logical traffic 3*n\nnumerics: " + op.NumericalPolicy + "\n"
 	}
+	if op.ID == catalog.Clmul64 {
+		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\ntrue uint64 polynomial low64 product; full digest, actual lanes and SDK carryless capability retained; 24*n logical bytes\n" + op.NumericalPolicy + "\n"
+	}
 	if op.ID == catalog.Add64 {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nfloat64 input/output; full binary64 output digest after timing; logical traffic 24*n\nnumerics: " + op.NumericalPolicy + "\n"
 	}

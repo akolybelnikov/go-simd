@@ -1,6 +1,6 @@
 # 04 — Operation and kernel guide
 
-The lab contains twenty-one operations and fifty-three implementations: eighteen operations on `float32`
+The lab contains twenty-two operations and fifty-five implementations: eighteen operations on `float32`
 inputs, one float64 addition and one uint8 saturation operation. Float32 inputs provide twelve arithmetic/selection/clipping/representation float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
 one, two or three declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
@@ -232,3 +232,9 @@ from implemented copy and implemented three-array FMA and planned reordering exp
 ## Clamp
 
 [Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts) explains inclusive bounds, exact NaN/zero behavior and timed Min/Max repairs. Run `go run ./examples/clamp`.
+
+
+| Package | Typed entry points | Strategies | Contract |
+| --- | --- | --- | --- |
+| `internal/integer` | `Clmul64Scalar/Clmul64SIMD(a,b,out []uint64)` | Scalar / SIMDPartial | [Low64 polynomial product](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) |
+| `internal/reduction` | `Sum8Scalar/Sum8SIMD(x,out []float32)` | Scalar / SIMDPartial | Fixed-eight pair/fold, output ceil(n/8) |

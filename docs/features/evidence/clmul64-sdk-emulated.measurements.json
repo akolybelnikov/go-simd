@@ -1,0 +1,320 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "clmul64",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkClmul64$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "software-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 128,
+    "float32_lanes": 4,
+    "gomaxprocs": 16,
+    "emulated": true,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-171600-2465881048",
+    "Environment": {
+      "ID": "benchmark-20261104-171600-2465881048/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-clmul64/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T17:16:00Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 128\nSIMD float32 lanes: 4\nemulated: true\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-clmul64/v1\ngroup: clmul64\nselection: \"^BenchmarkClmul64$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-clmul-uint64-v1\ntrue uint64 polynomial low64 product; full digest, actual lanes and SDK carryless capability retained;24*n logical bytes\nExact polynomial multiplication over GF(2) modulo x^64; XOR coefficient addition, high product bits discarded. True uint64 arrays, no floating conversion. Validate lengths and SDK widths 2/4/8 before writes; empty/disjoint/exact aliases valid, partial overlap unsupported. Both Even/Odd products, scratch stores, extraction and output writes timed;24*n logical bytes. Retain actual lanes, complete output bits and SDK carryless capability; capability is not emitted-instruction proof or a cryptographic claim.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "d8f7e4631d4eb968b00d75ac8bdce97092ccf133c10eb442e0a0aa45b188fc70",
+        "Key": {
+          "RunID": "benchmark-20261104-171600-2465881048",
+          "EnvironmentID": "benchmark-20261104-171600-2465881048/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clmul64/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 2,
+                "Known": true
+              },
+              "CarrylessCapabilityID": "sdk-software-clmul-only/v1"
+            },
+            "OperationID": "clmul-low64-u64",
+            "TypeID": "uint64",
+            "StrategyID": "scalar",
+            "ArithmeticID": "gf2-polynomial-product-mod-x64-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-clmul-uint64-v1",
+              "SHA256": "02f66042f6acd9ef248c932770a289a88cb3107df9152a81752e3f0967d99261"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 2700,
+        "DurationNS": 8100,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 568.8888888888889,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClmul64/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "d8f7e4631d4eb968b00d75ac8bdce97092ccf133c10eb442e0a0aa45b188fc70",
+        "Key": {
+          "RunID": "benchmark-20261104-171600-2465881048",
+          "EnvironmentID": "benchmark-20261104-171600-2465881048/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clmul64/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 2,
+                "Known": true
+              },
+              "CarrylessCapabilityID": "sdk-software-clmul-only/v1"
+            },
+            "OperationID": "clmul-low64-u64",
+            "TypeID": "uint64",
+            "StrategyID": "scalar",
+            "ArithmeticID": "gf2-polynomial-product-mod-x64-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-clmul-uint64-v1",
+              "SHA256": "02f66042f6acd9ef248c932770a289a88cb3107df9152a81752e3f0967d99261"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 1333.3333333333333,
+        "DurationNS": 4000,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1152,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClmul64/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "d8f7e4631d4eb968b00d75ac8bdce97092ccf133c10eb442e0a0aa45b188fc70",
+        "Key": {
+          "RunID": "benchmark-20261104-171600-2465881048",
+          "EnvironmentID": "benchmark-20261104-171600-2465881048/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clmul64/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 2,
+                "Known": true
+              },
+              "CarrylessCapabilityID": "sdk-software-clmul-only/v1"
+            },
+            "OperationID": "clmul-low64-u64",
+            "TypeID": "uint64",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "gf2-polynomial-product-mod-x64-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-clmul-uint64-v1",
+              "SHA256": "02f66042f6acd9ef248c932770a289a88cb3107df9152a81752e3f0967d99261"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 1033.3333333333333,
+        "DurationNS": 3100,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1486.4516129032259,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClmul64/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "d8f7e4631d4eb968b00d75ac8bdce97092ccf133c10eb442e0a0aa45b188fc70",
+        "Key": {
+          "RunID": "benchmark-20261104-171600-2465881048",
+          "EnvironmentID": "benchmark-20261104-171600-2465881048/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-clmul64/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 2,
+                "Known": true
+              },
+              "CarrylessCapabilityID": "sdk-software-clmul-only/v1"
+            },
+            "OperationID": "clmul-low64-u64",
+            "TypeID": "uint64",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "gf2-polynomial-product-mod-x64-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-clmul-uint64-v1",
+              "SHA256": "02f66042f6acd9ef248c932770a289a88cb3107df9152a81752e3f0967d99261"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 1000,
+        "DurationNS": 3000,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1536,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkClmul64/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

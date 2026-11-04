@@ -32,7 +32,7 @@ capabilities, not a promise to deliver every possible extension.
 | Multiple vector accumulators | Implemented SIMDStriped2/4 for sum, unfused dot and fused dot; explicit round-robin assignment and left-to-right merge |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Twenty-one operations / fifty-three implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
+| Shared runtime catalogue | Twenty-two operations / fifty-five implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
 | Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -52,7 +52,7 @@ capabilities, not a promise to deliver every possible extension.
 | Offline saved-run analysis or re-render command | Not implemented |
 
 M0-M3 and the original F004 scope are complete. MulAdd, Float64 addition, uint8 saturation, bit roundtrip and XOR extend the current
-catalogue to twenty-one operations and fifty-three implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
+catalogue to twenty-two operations and fifty-five implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
 and [complete baseline API ledger](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-api-coverage.md).
 Reordering, numeric conversions and additional typed operations are
 optional extensions, rather than unfinished slices in this checkpoint.
@@ -99,3 +99,6 @@ Return to [Home](https://github.com/akolybelnikov/go-simd/wiki), or use the
 to choose an implemented workflow.
 The [pattern review and credited reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading)
 explain the F004 backlog without presenting proposed patterns as implemented.
+
+
+Uint64 is a true CLI input type for clmul64. Carryless capability is retained separately from SDK emulation and does not prove emitted instructions. See [carryless multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication).

@@ -34,6 +34,9 @@ func (Testing) MeasureContext(ctx context.Context, p Prepared, benchtime string)
 	if err := (Config{Count: 1, Benchtime: benchtime}).Validate(); err != nil {
 		return Sample{}, err
 	}
+	if p.Uint64Output != nil {
+		return measureUint64Context(ctx, p, benchtime)
+	}
 	if p.Float64Output != nil {
 		return measureFloat64Context(ctx, p, benchtime)
 	}

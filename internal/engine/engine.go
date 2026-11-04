@@ -97,6 +97,7 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
+	Uint64Output            []uint64
 	Float64Output           []float64
 	RetainOutputAfterTiming bool
 	ByteOutput              []uint8
@@ -151,6 +152,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 	procs := runtime.GOMAXPROCS(0)
 	var a, b, third, out []float32
 	var doubleA, doubleB, doubleOut []float64
+	var wordA, wordB, wordOut []uint64
 	var byteA, byteB, byteOut []uint8
 	var scalar float32
 	previous := -1
@@ -160,7 +162,10 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			return run, fmt.Errorf("before %s: %w", c.Name, err)
 		}
 		if c.Elements != previous {
-			if c.Operation.ID == catalog.SaturatingAdd8 {
+			if c.Operation.ID == catalog.Clmul64 {
+				wordA, wordB, wordOut = input.MakeClmul64(c.Elements)
+				fingerprint = input.FingerprintUint64(wordA, wordB)
+			} else if c.Operation.ID == catalog.SaturatingAdd8 {
 				byteA, byteB, byteOut = input.MakeSaturatingAdd8(c.Elements)
 				fingerprint = input.FingerprintUint8(byteA, byteB)
 			} else if c.Operation.ID == catalog.Add64 {
@@ -185,7 +190,12 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 		// Original native benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.ID == catalog.SaturatingAdd8 {
+		if c.Operation.ID == catalog.Clmul64 {
+			prepared.Run = c.Implementation.BindUint64(wordA, wordB, wordOut)
+			prepared.Output = nil
+			prepared.Uint64Output = wordOut
+			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ID == catalog.SaturatingAdd8 {
 			prepared.Run = c.Implementation.BindByteArrays(byteA, byteB, byteOut)
 			prepared.Output = nil
 			prepared.ByteOutput = byteOut
@@ -271,6 +281,15 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			}
 			key.Case.Vector = identity
 		}
+		if c.Operation.ID == catalog.Clmul64 {
+			var vector simd.Uint64s
+			identity, err := result.NewVectorIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			identity.CarrylessCapabilityID = result.CarrylessCapability(simd.HasHardwareCarrylessMultiply())
+			key.Case.Vector = identity
+		}
 		if c.Operation.ID == catalog.Add64 {
 			var vector simd.Float64s
 			identity, err := result.NewVectorIdentity(vector.Len())
@@ -350,6 +369,9 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			if c.Operation.ByteResult() {
 				digest := sha256.Sum256(byteOut)
 				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
+			}
+			if c.Operation.ID == catalog.Clmul64 {
+				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintUint64(wordOut, nil)
 			}
 			if c.Operation.ID == catalog.Add64 {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat64(doubleOut, nil)

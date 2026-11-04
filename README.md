@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: twenty-one operations and fifty-three scalar/SIMD
+An experimental Go SIMD laboratory: twenty-two operations and fifty-five scalar/SIMD
 implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -110,6 +110,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| clmul64 | Low64 polynomial product over GF(2) on true uint64 arrays | Scalar shift/XOR, SIMDPartial Even/Odd extraction |
 | sum8 | One specified-order float32 result per eight inputs, padded with +0 | Scalar, SIMDPartial |
 | xorbits | Exact XOR of two opaque float32 bit patterns | Scalar uint32 logic, SIMDPartial ToBits/Xor/BitsToFloat32 |
 | bitroundtrip | Exact Float32/Uint32/Float32 representation round trip | Scalar bitcast source, SIMDPartial ToBits/BitsToFloat32; all bits preserved |
@@ -397,3 +398,6 @@ and uint8 output storage. Length errors leave output unchanged. These internal p
 
 
 Fixed-block horizontal sums use projected output `ceil(n/8)` and timed pair/fold work. See [sum8](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) and run `go run ./examples/sum8`.
+
+
+Carryless multiplication uses `-group clmul64`, true uint64 arrays and `24*n` logical bytes. [The carryless guide](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) explains the result, lane extraction and capability evidence. Identical flags work with installed, Go and Make launchers; use `go run ./examples/clmul64` for 3 times 3 = 5.

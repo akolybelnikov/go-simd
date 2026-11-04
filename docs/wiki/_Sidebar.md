@@ -41,3 +41,6 @@
 
 
 - [29 · Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum)
+
+
+- [30 · Carryless polynomial multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication)

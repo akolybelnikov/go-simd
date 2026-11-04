@@ -10,7 +10,7 @@ import (
 // for the packed representation in both compiled and native selection.
 func OperationSizes(op catalog.Operation, width int) []int {
 	// width is the process float32 lane count; float64 has half as many lanes.
-	if op.TypeID == catalog.Float64 {
+	if op.TypeID == catalog.Float64 || op.TypeID == catalog.Uint64 {
 		width = max(1, width/2)
 	}
 	if op.TypeID == catalog.Uint8 {

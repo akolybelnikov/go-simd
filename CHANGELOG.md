@@ -5,6 +5,19 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Low64 carryless multiplication — 2026-11-04
+
+- Add clmul64 Scalar/SIMDPartial on true uint64 arrays: exact GF(2) product
+  modulo x^64, 22 operations / 55 implementations. Time both SDK Even/Odd
+  products, scratch stores and extraction with 24*n logical bytes.
+- Add typed uint64 bindings, fixture hashes, sinks and full output evidence
+  through quick/native/compiled/agent/worker paths. Retain actual lanes and SDK
+  capability; reject incomplete native/capture facts and mixed comparisons.
+- Test independent coefficient convolution, exhaustive small operands, random
+  words, truncation/tails, aliases/canaries/errors/allocations, both backends,
+  SDK emulation and workers. Add CI smoke, example, Wiki30, captures, SDK ledger
+  and local tracker migration. Further variants remain future.
+
 ### F004 extension — Fixed-block horizontal sum — 2026-11-04
 
 - Add sum8 Scalar/SIMDPartial with matched eight-input pair/fold order and +0
