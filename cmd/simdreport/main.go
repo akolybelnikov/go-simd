@@ -112,7 +112,7 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 		return err
 	}
 	op, _ := catalog.ByGroup(group)
-	configured := op.Parameterized() || op.ScalarResult()
+	configured := op.Parameterized() || op.ScalarResult() || op.ID == catalog.MulAdd
 	requested := bench
 	if configured {
 		bench = plan.NativeSelection()

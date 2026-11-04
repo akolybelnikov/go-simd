@@ -148,7 +148,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 		return run, fmt.Errorf("no benchmark measurements found")
 	}
 	procs := runtime.GOMAXPROCS(0)
-	var a, b, out []float32
+	var a, b, third, out []float32
 	var byteOut []uint8
 	var scalar float32
 	previous := -1
@@ -158,8 +158,13 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			return run, fmt.Errorf("before %s: %w", c.Name, err)
 		}
 		if c.Elements != previous {
-			a, b, out = input.MakeForOperation(c.Operation, c.Elements, plan.Input)
-			fingerprint = input.FingerprintFloat32(a, b)
+			if c.Operation.ID == catalog.MulAdd {
+				a, b, third, out = input.MakeMulAdd(c.Elements, plan.Input)
+				fingerprint = input.FingerprintTernaryFloat32(a, b, third)
+			} else {
+				a, b, out = input.MakeForOperation(c.Operation, c.Elements, plan.Input)
+				fingerprint = input.FingerprintFloat32(a, b)
+			}
 			previous = c.Elements
 			if c.Operation.ByteResult() {
 				length, err := c.Operation.OutputElements(c.Elements)
@@ -172,7 +177,10 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 		// Original native benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.ID == catalog.Copy {
+		if c.Operation.ID == catalog.MulAdd {
+			prepared.Run = c.Implementation.BindTernary(a, b, third, out)
+			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ID == catalog.Copy {
 			prepared.Run = c.Implementation.BindUnary(a, out)
 			prepared.RetainOutputAfterTiming = true
 		} else if c.Operation.ID == catalog.Clamp {
@@ -243,7 +251,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			}
 			key.Case.Clamp = identity
 		}
-		if c.Operation.ID == catalog.AffineFMA {
+		if c.Operation.ID == catalog.AffineFMA || c.Operation.ID == catalog.MulAdd {
 			var vector simd.Float32s
 			identity, err := result.NewFMAIdentity(c.Implementation.Descriptor.ID, fmacap.Path(), vector.Len())
 			if err != nil {
@@ -292,7 +300,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 				digest := sha256.Sum256(byteOut)
 				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
 			}
-			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp {
+			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp || c.Operation.ID == catalog.MulAdd {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat32(out, nil)
 			}
 			if c.Operation.ID == catalog.AffineFMA {

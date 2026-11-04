@@ -1,5 +1,9 @@
 # 16 — Accumulator-count experiments
 
+Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
+original F004 closure. The current catalogue has sixteen operations/forty-three
+implementations; future/stop statements below describe this earlier checkpoint.
+
 Sum and unfused dot now offer Scalar plus SIMDStriped, SIMDStriped2 and
 SIMDStriped4. The suffix is the number of independent vector accumulators in
 the algorithm. That checkpoint brought the catalogue to nine operations/twenty-four implementations.

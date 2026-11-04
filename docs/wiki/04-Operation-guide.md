@@ -1,8 +1,8 @@
 # 04 — Operation and kernel guide
 
-The lab contains fifteen operations and forty-one implementations on `float32`
-inputs: nine arithmetic/selection/clipping float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
-one or two declared inputs, scalar parameters where needed and a caller-provided
+The lab contains sixteen operations and forty-three implementations on `float32`
+inputs: ten arithmetic/selection/clipping float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
+one, two or three declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
 Sum accepts one input and returns one float32; dot/dotfma accept two
 inputs and returns a float32 plus a length-validation error.
@@ -25,6 +25,7 @@ inputs and returns a float32 plus a length-validation error.
 | `internal/patterns` | `PredicateGTPackedScalar` / `PredicateGTPackedSIMD(x []float32,out []uint8,t float32) error` | Scalar / SIMDPartial | Ordered comparison packed LSB first into ceil(n/8) bytes; unused high bits zero; conversion/packing/stores included |
 | `internal/patterns` | `SelectGTScalar` / `SelectGTSIMD(x,y,out []float32,t float32) error` | Scalar / SIMDPartial | Bit-preserving selection |
 | `internal/patterns` | `RangeZeroScalar` / `RangeZeroSIMD(x,out []float32,lo,hi float32) error` | Scalar / SIMDPartial | Strict range masks combined with And |
+| `internal/patterns` | `MulAddScalar` / `MulAddSIMD(a,b,c,out []float32) error` | Scalar / SIMDPartial | Three streamed arrays; one-rounding binary32 FMA; actual software/vector path |
 | `internal/patterns` | `ClampScalar` / `ClampSIMD` / `ClampSIMDMinMax(x,out []float32,lower,upper float32) error` | Scalar / SIMDPartial / SIMDMinMax | Ordered inclusive clipping; preserve original tie/NaN bits; Min/Max repairs timed |
 | `internal/reduction` | `SumScalar(x []float32) float32` | Scalar | Left-to-right float32 sum from +0 |
 | `internal/reduction` | `SumSIMD(x []float32) float32` | SIMDStriped | One vector accumulator, low-to-high lane fold, scalar tail |
@@ -221,7 +222,7 @@ specifies the 1/2/4-vector strategies and their numerical differences.
 is credited as the reading prompt for our
 [SIMD pattern review](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading).
 That review distinguishes implemented broadcasts, predicates and accumulation
-from implemented copy and planned reordering/three-array FMA experiments and checks the portable/`archsimd` boundary.
+from implemented copy and implemented three-array FMA and planned reordering experiments and checks the portable/`archsimd` boundary.
 
 
 ## Clamp

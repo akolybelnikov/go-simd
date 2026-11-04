@@ -34,6 +34,7 @@ jobs:
           go test ./cmd/simdreport -run='^TestPackedPredicateResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestCopyResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestClampResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestMulAddResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -54,3 +55,6 @@ jobs:
 
       - name: Check ordered clamp controls
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkClamp$/^n=(1|8|16)$' -benchtime=1x
+
+      - name: Check three-array fused multiply-add
+        run: go test ./internal/patterns -run='^$' -bench='^BenchmarkMulAdd$/^n=(1|8|16)$' -benchtime=1x

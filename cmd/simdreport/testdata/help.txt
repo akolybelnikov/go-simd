@@ -22,7 +22,7 @@ Options:
   -dot-input string
     	dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive (default "balanced")
   -fma-input string
-    	fused affine fixture: balanced, rounding, mixed-magnitude (default "balanced")
+    	fused affine/muladd fixture: balanced, rounding, mixed-magnitude (default "balanced")
   -format string
     	saved report format: txt, md, or csv (terminal stays text) (default "txt")
   -function string

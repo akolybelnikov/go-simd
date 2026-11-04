@@ -1,8 +1,12 @@
 # 21 — Copy data and compare Go's built-in control
 
+Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
+original F004 closure. The current catalogue has sixteen operations/forty-three
+implementations; future/stop statements below describe this earlier checkpoint.
+
 The copy group compares four ways of moving float32 data without arithmetic:
-Scalar, GoCopy, SIMDPartial and SIMDTail. The catalogue now contains fourteen
-operations/forty-one implementations.
+Scalar, GoCopy, SIMDPartial and SIMDTail. The copy checkpoint brought the catalogue to fourteen
+operations/thirty-eight implementations. The [MulAdd extension](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) now brings it to sixteen/forty-three.
 
 This experiment asks when explicit vector copying helps, and how it compares
 with Go's own copy implementation. It provides a movement reference alongside

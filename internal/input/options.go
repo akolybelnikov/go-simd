@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.MulAdd {
+		return "generated-muladd-float32-v1/" + o.FMAFixture()
+	}
 	if op.ID == catalog.Clamp {
 		if o.Pattern == "shuffled" {
 			return fmt.Sprintf("clamp-float32-v1/shuffled/seed=%d", o.Seed)
@@ -256,6 +259,9 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 // when required. Scalar returns and byte outputs have no float32 output slice;
 // callers allocate the typed byte output separately outside measurement.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if len(op.Inputs) > 2 {
+		panic("three-array fixtures require input.MakeMulAdd")
+	}
 	if op.ID == catalog.Copy {
 		a, out = make([]float32, n), make([]float32, n)
 		for i := range a {
@@ -302,6 +308,9 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ID == catalog.MulAdd {
+		return fingerprintMulAdd(n, o)
+	}
 	if op.ID == catalog.Copy {
 		return fingerprintGenerated(n, false, func(i int) (float32, float32) { return copyValue(i), 0 })
 	}

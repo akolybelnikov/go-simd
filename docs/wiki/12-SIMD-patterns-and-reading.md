@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
 **Status:** F004 complete for the agreed current scope, including clamp; reviewed 2026-11-04.
-The lab has fifteen operations/forty-one implementations. The
+The lab has sixteen operations/forty-three implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -29,7 +29,7 @@ The small numerical sketches below are our own planning examples.
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | Implemented clamp Scalar/SIMDPartial/SIMDMinMax | Ordered inclusive bounds with timed repairs for exact NaN/tie/signed-zero bits |
 | Streaming accumulation | Sum, unfused dot and fused dot with 1/2/4 independent accumulators and explicit merge/fold implemented | Keep fusion, order, width and count as distinct numerical identities |
-| Explicit FMA | Fused affine and dotfma implemented with corrected binary32 updates and actual vector/software/tail paths | Existing affine/dot stay unfused; three-array MulAdd remains a separate contract |
+| Explicit FMA | Fused affine and dotfma implemented with corrected binary32 updates and actual vector/software/tail paths | Existing affine/dot stay unfused; three-array MulAdd now has its own implemented contract |
 | Permutes, horizontal folds, extraction | Sum includes portable store/fold cost; no isolated lane-rearrangement study | An explicitly scoped architecture-specific experiment |
 | Conversion, bit representation, saturation | Predicate export includes 0/1 conversion/narrowing; standalone value/bit/saturation studies pending | Keep canonical byte output distinct from packed bits and raw mask storage |
 
@@ -107,7 +107,7 @@ element rather than assuming addition's tail treatment works for every pattern.
    Two/four accumulators are complete with explicit assignment/merge and fold
    identity. Fused affine is complete with a corrected binary32 reference and explicit
    execution paths. Fused dot is complete with ordinary merge/fold additions,
-   scalar-result bits and count/width/path identity; three-array MulAdd remains separate.
+   scalar-result bits and count/width/path identity; three-array MulAdd is implemented as a separate operation.
 4. Predicate export is complete: typed uint8 0/1, timed conversion/extraction,
    valid tail writes and full output evidence. See [the byte-mask guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
    [Packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) are also complete with explicit bit order,
@@ -118,6 +118,6 @@ element rather than assuming addition's tail treatment works for every pattern.
 
 This is the operations feature backlog, not a change to the architecture
 migration sequence. Broadcast/masking/selection and sum are implemented.
-Unfused dot and 2/4 accumulators are implemented. Fused affine and fused dot are implemented; permutation, three-array MulAdd and
+Unfused dot and 2/4 accumulators are implemented. Fused affine and fused dot are implemented; three-array MulAdd is also implemented; permutation and
 reordering and standalone conversions remain deferred; byte/packed masks, copy and clamp are implemented. F004 is complete for the
 agreed current scope; the [acceptance/coverage audit](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features) records the optional extension boundary.

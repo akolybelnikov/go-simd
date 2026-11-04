@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: fifteen operations and forty-one scalar/SIMD
+An experimental Go SIMD laboratory: sixteen operations and forty-three scalar/SIMD
 implementations over generated `float32` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -14,6 +14,9 @@ source checkout at runtime. Reports stay on the machine where you run the CLI.
 See the [acceptance record](docs/features/F004-completion.md) and
 [SDK coverage ledger](docs/features/F004-api-coverage.md) for delivered experiments
 and explicitly deferred extensions.
+
+Three-array [fused multiply-add](docs/features/F004-muladd.md) extends that baseline
+with three real streamed operands and full output evidence.
 
 ## Start here
 
@@ -109,6 +112,7 @@ and strategy details. Existing aliases remain for addition/computation.
 | predicate | `x > threshold ? uint8(1) : uint8(0)` | Scalar, SIMDPartial; conversion and byte stores included |
 | predicatepack | Same predicate packed LSB first, eight bits per byte | Scalar, SIMDPartial; conversion, packing and stores included |
 | copy | Exact float32 bit copy | Scalar source loop, GoCopy built-in control, SIMDPartial, SIMDTail |
+| muladd | Three-array one-rounding a*b+c | Scalar software reference; SIMDPartial verified vector/software path |
 | clamp | Clip outside inclusive bounds; preserve equality/NaN bits | Scalar, SIMDPartial selection, SIMDMinMax with timed semantic repairs |
 | sum | One returned float32, specified fold orders | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
 | dot | Unfused float32 products and specified reduction folds | Scalar, SIMDStriped, SIMDStriped2, SIMDStriped4 |
@@ -127,7 +131,7 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-seed` | `42` | Deterministic shuffled predicate/clipped-position arrangement |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
-| `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
+| `-fma-input` | `balanced` | Fused affine/muladd fixture: balanced, rounding, mixed-magnitude |
 
 ```powershell
 go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench '^BenchmarkSelection$/^n=1024$' -count 3 -benchtime 100ms -format md
@@ -180,6 +184,15 @@ complete output digest is retained after timing. See [clamp](https://github.com/
 ```powershell
 go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/clamp
+```
+
+MulAdd streams three arrays and rounds a*b+c once. It shares -fma-input recipes,
+with no scalar coefficients. Logical work is 16*n; Scalar uses corrected software
+FMA32, while SIMDPartial records its verified vector/software path. See [MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add).
+
+```powershell
+go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/muladd
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
@@ -318,7 +331,7 @@ and [migration record](docs/migration/README.md). F004's
 [broadcast/predicate slice](docs/features/F004-broadcast-predicates.md) and
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
-and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), plus [copy](docs/features/F004-copy.md) and [clamp](docs/features/F004-clamp.md), complete the current F004 scope. Three-array MulAdd, reordering, standalone conversions
+and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), plus [copy](docs/features/F004-copy.md) and [clamp](docs/features/F004-clamp.md), complete the original F004 scope. [Three-array MulAdd](docs/features/F004-muladd.md) now extends it. Reordering, standalone conversions
 and new input types remain optional extensions; M4 and HTML are separate roadmap work.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,

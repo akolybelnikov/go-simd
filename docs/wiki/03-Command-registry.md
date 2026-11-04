@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all fifteen groups. Positional arguments are
+group. No explicit selection means all sixteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact fifteen-row operation table.
+`-list` prints runtime context and a compact sixteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+MulAdd uses `16*n`: three float32 input arrays and one output, without broadcasts/reduction.
 Clamp uses `8*n`, with bounds validation, broadcasts and semantic repairs timed.
 Copy uses `8*n`: one float32 read and one float32 write with disjoint measured buffers.
 Sum uses `4*n+4` bytes per call: one input array and one scalar result.
@@ -76,7 +77,7 @@ text, not a versioned machine-data export.
 | `-seed` | `42` | Deterministic shuffled pattern seed |
 | `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
-| `-fma-input` | `balanced` | Fused affine fixture: balanced, rounding, mixed-magnitude |
+| `-fma-input` | `balanced` | Fused affine/muladd fixture: balanced, rounding, mixed-magnitude |
 
 Scalars parse to float32 and are recorded as exact bits. Settings apply only to
 operations declaring them. Predicate fixtures guarantee none/all truth or mixed
@@ -184,6 +185,24 @@ make run ARGS="-group clamp"
 Native BenchmarkClamp lives in ./internal/patterns; the report's developer
 backend supplies configured bounds/patterns to the child. See [the clamp guide](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
 
+MulAdd uses -fma-input balanced/rounding/mixed-magnitude; alpha/beta do not apply.
+
+```powershell
+simdreport -list -group muladd
+go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/muladd
+```
+
+```bash
+make list ARGS="-group muladd"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group muladd -fma-input=rounding -bench BenchmarkMulAdd/n=64 -format md"
+make run ARGS="-group muladd"
+```
+
+Installed simdreport accepts the same report flags. Native BenchmarkMulAdd is in
+./internal/patterns. Both strategies retain complete output evidence and actual
+FMA paths; [the MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) explains the software scalar control.
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -237,6 +256,7 @@ The outer `go run` process can also print `exit status 1`.
 | `predicate` | `BenchmarkPredicate` | `Scalar`, `SIMDPartial`; compare/select/convert/extract/byte stores included |
 | `predicatepack` | `BenchmarkPredicatePacked` | `Scalar`, `SIMDPartial`; valid-bit packing, normalization and stores included |
 | `copy` | `BenchmarkCopy` | `Scalar`, `GoCopy`, `SIMDPartial`, `SIMDTail`; exact bit movement |
+| `muladd` | `BenchmarkMulAdd` | `Scalar`, `SIMDPartial`; three streamed arrays and one-rounding FMA |
 | `clamp` | `BenchmarkClamp` | `Scalar`, `SIMDPartial`, `SIMDMinMax`; ordered inclusive clipping and timed repairs |
 | `sum` | `BenchmarkSum` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
 | `dot` | `BenchmarkDot` | `Scalar`, `SIMDStriped`, `SIMDStriped2`, `SIMDStriped4` |
