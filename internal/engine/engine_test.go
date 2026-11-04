@@ -1,9 +1,11 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -104,6 +106,76 @@ func TestDirectObservationsAndPartialFailure(t *testing.T) {
 	}
 }
 
+type cancellingBackend struct {
+	cancel func()
+	calls  int
+}
+
+func (b *cancellingBackend) Measure(p Prepared, benchtime string) (Sample, error) {
+	return b.MeasureContext(context.Background(), p, benchtime)
+}
+
+func (b *cancellingBackend) MeasureContext(_ context.Context, p Prepared, _ string) (Sample, error) {
+	b.calls++
+	if err := p.Run(); err != nil {
+		return Sample{}, err
+	}
+	b.cancel()
+	return Sample{Iterations: 5, Duration: 2 * time.Nanosecond}, nil
+}
+
+func TestExecuteContextCancellation(t *testing.T) {
+	plan, err := Prepare("addition", Config{2, "5x", "^BenchmarkAddition$/^n=8$/^Scalar$"}, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := result.Run{ID: "cancel", Environment: result.Environment{ID: "env"}, BackendID: BackendID, HarnessID: HarnessID}
+
+	cancelled, cancel := context.WithCancel(context.Background())
+	cancel()
+	backend := &fakeBackend{}
+	partial, err := ExecuteContext(cancelled, plan, run, backend)
+	if !errors.Is(err, context.Canceled) || len(partial.Observations) != 0 || backend.calls != 0 {
+		t.Fatalf("pre-cancel partial=%+v calls=%d err=%v", partial, backend.calls, err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancelling := &cancellingBackend{cancel: cancel}
+	partial, err = ExecuteContext(ctx, plan, run, cancelling)
+	if !errors.Is(err, context.Canceled) || len(partial.Observations) != 1 || cancelling.calls != 1 {
+		t.Fatalf("mid-cancel partial=%+v calls=%d err=%v", partial, cancelling.calls, err)
+	}
+	if partial.Observations[0].Iterations != 5 || partial.Observations[0].DurationNS == nil {
+		t.Fatalf("completed sample not retained: %+v", partial.Observations[0])
+	}
+}
+
+func TestExecuteContextRejectsNilDependencies(t *testing.T) {
+	run := result.Run{ID: "cancel"}
+	if _, err := ExecuteContext(nil, Plan{}, run, &fakeBackend{}); err == nil {
+		t.Fatal("nil context accepted")
+	}
+	if _, err := ExecuteContext(context.Background(), Plan{}, run, nil); err == nil {
+		t.Fatal("nil backend accepted")
+	}
+}
+
+func TestExecuteObservedCheckpointsCompletedObservations(t *testing.T) {
+	plan, err := Prepare("addition", Config{2, "1x", "^BenchmarkAddition$/^n=8$/^Scalar$"}, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := result.Run{ID: "observed", Environment: result.Environment{ID: "env"}, BackendID: BackendID, HarnessID: HarnessID}
+	var counts []int
+	completed, err := ExecuteObserved(context.Background(), plan, run, &fakeBackend{}, func(snapshot result.Run) error {
+		counts = append(counts, len(snapshot.Observations))
+		return nil
+	})
+	if err != nil || len(completed.Observations) != 2 || !slices.Equal(counts, []int{1, 2}) {
+		t.Fatalf("completed=%d checkpoints=%v err=%v", len(completed.Observations), counts, err)
+	}
+}
+
 func TestTestingAdapterModesAndFlagRestoration(t *testing.T) {
 	previous := flag.Lookup("test.benchtime").Value.String()
 	for _, mode := range []string{"1x", "7x", "1ms"} {
@@ -126,6 +198,15 @@ func TestTestingAdapterModesAndFlagRestoration(t *testing.T) {
 	}
 	if flag.Lookup("test.benchtime").Value.String() != previous {
 		t.Fatal("failure did not restore timing")
+	}
+}
+
+func TestTestingAdapterObservesCancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err := (Testing{}).MeasureContext(ctx, Prepared{Run: func() error { t.Fatal("cancelled benchmark ran"); return nil }, Output: []float32{0}}, "1x")
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v", err)
 	}
 }
 

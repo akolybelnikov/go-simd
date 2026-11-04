@@ -2,6 +2,7 @@
 package engine
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"math"
@@ -114,9 +115,35 @@ type Backend interface {
 	Measure(Prepared, string) (Sample, error)
 }
 
+// ContextBackend lets a backend stop setup or external work when cancellation is
+// requested. Timed kernel loops are not instrumented with context checks.
+type ContextBackend interface {
+	MeasureContext(context.Context, Prepared, string) (Sample, error)
+}
+
 // Execute retains successful samples on a later unexpected kernel/backend error.
 // Fixtures are reused per size; declared output digests are computed after samples.
 func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
+	return ExecuteContext(context.Background(), plan, run, backend)
+}
+
+// ExecuteContext checks cancellation between measurement repetitions and retains
+// every successfully completed sample. A cancellation during one in-process
+// testing.Benchmark takes effect after that sample; isolated workers can provide
+// hard cancellation without adding checks to timed kernel bodies.
+func ExecuteContext(ctx context.Context, plan Plan, run result.Run, backend Backend) (result.Run, error) {
+	return ExecuteObserved(ctx, plan, run, backend, nil)
+}
+
+// ExecuteObserved publishes an immutable snapshot after every completed
+// observation. Isolated workers use it to checkpoint recoverable progress.
+func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Backend, observe func(result.Run) error) (result.Run, error) {
+	if ctx == nil {
+		return run, fmt.Errorf("nil execution context")
+	}
+	if backend == nil {
+		return run, fmt.Errorf("nil measurement backend")
+	}
 	if len(plan.Cases) == 0 {
 		return run, fmt.Errorf("no benchmark measurements found")
 	}
@@ -127,6 +154,9 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 	previous := -1
 	fingerprint := ""
 	for _, c := range plan.Cases {
+		if err := ctx.Err(); err != nil {
+			return run, fmt.Errorf("before %s: %w", c.Name, err)
+		}
 		if c.Elements != previous {
 			a, b, out = input.MakeForOperation(c.Operation, c.Elements, plan.Input)
 			fingerprint = input.FingerprintFloat32(a, b)
@@ -230,7 +260,10 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 			key.Case.FMA = identity
 		}
 		for repetition := 1; repetition <= plan.Config.Count; repetition++ {
-			sample, err := backend.Measure(prepared, plan.Config.Benchtime)
+			if err := ctx.Err(); err != nil {
+				return run, fmt.Errorf("before %s repetition %d: %w", c.Name, repetition, err)
+			}
+			sample, err := measureContext(ctx, backend, prepared, plan.Config.Benchtime)
 			if err != nil {
 				return run, fmt.Errorf("%s repetition %d: %w", c.Name, repetition, err)
 			}
@@ -266,7 +299,24 @@ func Execute(plan Plan, run result.Run, backend Backend) (result.Run, error) {
 				bits := math.Float32bits(out[len(out)-1])
 				run.Observations[len(run.Observations)-1].ArrayResultLastBits = &bits
 			}
+			if observe != nil {
+				snapshot := run
+				snapshot.Observations = append([]result.Observation(nil), run.Observations...)
+				if err := observe(snapshot); err != nil {
+					return run, fmt.Errorf("record completed observation: %w", err)
+				}
+			}
+			if err := ctx.Err(); err != nil {
+				return run, fmt.Errorf("after %s repetition %d: %w", c.Name, repetition, err)
+			}
 		}
 	}
 	return run, nil
+}
+
+func measureContext(ctx context.Context, backend Backend, prepared Prepared, benchtime string) (Sample, error) {
+	if contextual, ok := backend.(ContextBackend); ok {
+		return contextual.MeasureContext(ctx, prepared, benchtime)
+	}
+	return backend.Measure(prepared, benchtime)
 }
