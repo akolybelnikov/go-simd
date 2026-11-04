@@ -272,8 +272,8 @@ func ResolveExperimentPlan(request PlanRequest, runtime RuntimeContext, policy P
 }
 
 func validateBenchtime(value string) (fixed bool, iterations uint64, duration time.Duration, err error) {
-	if strings.HasSuffix(value, "x") {
-		n, parseErr := strconv.ParseUint(strings.TrimSuffix(value, "x"), 10, 64)
+	if before, ok := strings.CutSuffix(value, "x"); ok {
+		n, parseErr := strconv.ParseUint(before, 10, 64)
 		if parseErr != nil || n < 1 {
 			return false, 0, 0, planError("invalid_benchtime", "benchtime", "invalid benchtime %q: use a positive duration or iteration count Nx", value)
 		}
