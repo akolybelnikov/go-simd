@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"math"
 	"slices"
 	"strings"
 	"testing"
@@ -39,6 +40,9 @@ func TestInterpretCaptureProducesTraceableFactsAndBoundaries(t *testing.T) {
 	if len(got.Series) != 2 || len(got.Comparisons) != 1 {
 		t.Fatalf("facts=%+v comparisons=%+v", got.Series, got.Comparisons)
 	}
+	if got.Series[0].MeanNS != 11 || !got.Series[0].SampleStdDev.Available || got.Series[0].SampleStdDev.Value != 1 || got.Series[0].IQR.Available {
+		t.Fatalf("descriptive statistics=%+v", got.Series[0])
+	}
 	comparison := got.Comparisons[0]
 	if comparison.TimeChangePercent != (6.0-11.0)/11.0*100 || comparison.SpeedupRatio != 11.0/6.0 {
 		t.Fatalf("comparison=%+v", comparison)
@@ -51,6 +55,23 @@ func TestInterpretCaptureProducesTraceableFactsAndBoundaries(t *testing.T) {
 	}
 	if !slices.ContainsFunc(got.Caveats, func(c Caveat) bool { return c.Code == "parallel_vs_serial" }) {
 		t.Fatalf("parallel caveat missing: %+v", got.Caveats)
+	}
+}
+
+func TestInterpretCaptureComputesIQRWithEnoughSamples(t *testing.T) {
+	key := result.MeasurementKey{RunID: "run", EnvironmentID: "env", BackendID: "backend", HarnessID: "harness", Case: result.Case{OperationID: catalog.Add, TypeID: catalog.Float32, StrategyID: catalog.Scalar, Elements: 8}}
+	observations := make([]result.Observation, 0, 4)
+	for index, value := range []float64{1, 2, 3, 4} {
+		observations = append(observations, result.Observation{Key: key, Label: "Scalar", Repetition: index + 1, NanosecondsPerOp: value, SourceBenchmark: "scalar"})
+	}
+	capture := evidence.Capture{Schema: evidence.Schema, Status: "complete", Group: "addition", Run: result.Run{ID: "run", Observations: observations}}
+	got, err := InterpretCapture(capture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	series := got.Series[0]
+	if series.MeanNS != 2.5 || !series.IQR.Available || series.IQR.Value != 2 || !series.SampleStdDev.Available || math.Abs(series.SampleStdDev.Value-math.Sqrt(5.0/3.0)) > 1e-12 {
+		t.Fatalf("series=%+v", series)
 	}
 }
 

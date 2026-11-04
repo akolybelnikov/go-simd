@@ -28,16 +28,25 @@ type EnvironmentFact struct {
 }
 
 type SeriesFact struct {
-	FactID        string  `json:"fact_id"`
-	OperationID   string  `json:"operation_id"`
-	StrategyID    string  `json:"strategy_id"`
-	Strategy      string  `json:"strategy"`
-	ExecutionMode string  `json:"execution_mode"`
-	Elements      int     `json:"elements"`
-	Samples       int     `json:"samples"`
-	MedianNS      float64 `json:"median_ns_per_op"`
-	MinimumNS     float64 `json:"minimum_ns_per_op"`
-	MaximumNS     float64 `json:"maximum_ns_per_op"`
+	FactID        string             `json:"fact_id"`
+	OperationID   string             `json:"operation_id"`
+	StrategyID    string             `json:"strategy_id"`
+	Strategy      string             `json:"strategy"`
+	ExecutionMode string             `json:"execution_mode"`
+	Elements      int                `json:"elements"`
+	Samples       int                `json:"samples"`
+	MedianNS      float64            `json:"median_ns_per_op"`
+	MeanNS        float64            `json:"mean_ns_per_op"`
+	MinimumNS     float64            `json:"minimum_ns_per_op"`
+	MaximumNS     float64            `json:"maximum_ns_per_op"`
+	SampleStdDev  OptionalFactMetric `json:"sample_standard_deviation_ns_per_op"`
+	IQR           OptionalFactMetric `json:"interquartile_range_ns_per_op"`
+}
+
+type OptionalFactMetric struct {
+	Value     float64 `json:"value,omitempty"`
+	Available bool    `json:"available"`
+	Reason    string  `json:"reason,omitempty"`
 }
 
 type ComparisonFact struct {
@@ -118,11 +127,13 @@ func InterpretCapture(capture evidence.Capture) (Interpretation, error) {
 		Claims:            ClaimPolicy{Allowed: slices.Clone(allowedClaims), Forbidden: slices.Clone(forbiddenClaims)},
 	}
 	for index, summary := range summaries {
-		minimum, maximum := seriesRange(capture.Run.Observations, summary.Key)
+		stats := describeSeries(capture.Run.Observations, summary.Key)
 		output.Series = append(output.Series, SeriesFact{
 			FactID: "series-" + strconv.Itoa(index+1), OperationID: summary.Key.Case.OperationID,
 			StrategyID: summary.Key.Case.StrategyID, Strategy: summary.Label, Elements: summary.Key.Case.Elements,
-			Samples: summary.Samples, MedianNS: summary.Median, MinimumNS: minimum, MaximumNS: maximum,
+			Samples: summary.Samples, MedianNS: summary.Median, MeanNS: stats.mean,
+			MinimumNS: stats.minimum, MaximumNS: stats.maximum,
+			SampleStdDev: stats.standardDeviation, IQR: stats.iqr,
 			ExecutionMode: summary.Key.Case.ExecutionMode,
 		})
 		if summary.Samples < 3 {
@@ -171,15 +182,51 @@ func InterpretCapture(capture evidence.Capture) (Interpretation, error) {
 	return output, nil
 }
 
-func seriesRange(observations []result.Observation, key result.MeasurementKey) (float64, float64) {
-	minimum, maximum := math.Inf(1), math.Inf(-1)
+type seriesStatistics struct {
+	mean, minimum, maximum float64
+	standardDeviation      OptionalFactMetric
+	iqr                    OptionalFactMetric
+}
+
+func describeSeries(observations []result.Observation, key result.MeasurementKey) seriesStatistics {
+	values := make([]float64, 0)
 	for _, observation := range observations {
 		if observation.Key == key {
-			minimum = min(minimum, observation.NanosecondsPerOp)
-			maximum = max(maximum, observation.NanosecondsPerOp)
+			values = append(values, observation.NanosecondsPerOp)
 		}
 	}
-	return minimum, maximum
+	slices.Sort(values)
+	stats := seriesStatistics{minimum: values[0], maximum: values[len(values)-1]}
+	for _, value := range values {
+		stats.mean += value
+	}
+	stats.mean /= float64(len(values))
+	if len(values) < 2 {
+		stats.standardDeviation.Reason = "at least two observations are required"
+	} else {
+		var squared float64
+		for _, value := range values {
+			difference := value - stats.mean
+			squared += difference * difference
+		}
+		stats.standardDeviation = OptionalFactMetric{Value: math.Sqrt(squared / float64(len(values)-1)), Available: true}
+	}
+	if len(values) < 4 {
+		stats.iqr.Reason = "at least four observations are required"
+	} else {
+		middle := len(values) / 2
+		lower, upper := values[:middle], values[(len(values)+1)/2:]
+		stats.iqr = OptionalFactMetric{Value: median(upper) - median(lower), Available: true}
+	}
+	return stats
+}
+
+func median(values []float64) float64 {
+	middle := len(values) / 2
+	if len(values)%2 == 1 {
+		return values[middle]
+	}
+	return (values[middle-1] + values[middle]) / 2
 }
 
 func metricFor(comparison result.Comparison, row result.Row, strategy string) result.Metric {
