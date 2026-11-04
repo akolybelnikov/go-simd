@@ -1,0 +1,62 @@
+package benchutil
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"simd"
+	"testing"
+
+	"github.com/akolybelnikov/go-simd/internal/catalog/kernels"
+	"github.com/akolybelnikov/go-simd/internal/input"
+)
+
+var sum8OutputSink []float32
+
+func benchmarkSum8(b *testing.B, op kernels.Operation) {
+	options := input.DefaultOptions()
+	if text, ok := os.LookupEnv(input.NativeOptionsEnv); ok {
+		if err := json.Unmarshal([]byte(text), &options); err != nil {
+			b.Fatal(err)
+		}
+	}
+	if err := options.ValidateFor(op.Descriptor); err != nil {
+		b.Fatal(err)
+	}
+	if b.Name() != op.Descriptor.BenchmarkName {
+		b.Fatal("native sum8 catalogue mismatch")
+	}
+	var vector simd.Float32s
+	for _, n := range OperationSizes(op.Descriptor, vector.Len()) {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			x, _, out := input.MakeForOperation(op.Descriptor, n, options)
+			bytes, err := op.Descriptor.LogicalBytes(n)
+			if err != nil {
+				b.Fatal(err)
+			}
+			for _, impl := range op.Implementations {
+				b.Run(impl.Descriptor.Label, func(b *testing.B) {
+					call := impl.BindUnary(x, out)
+					b.ReportAllocs()
+					b.SetBytes(bytes)
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						if err := call(); err != nil {
+							b.Fatal(err)
+						}
+					}
+					b.StopTimer()
+					sum8OutputSink = out
+					digest, _ := hex.DecodeString(input.FingerprintFloat32(out, nil))
+					for i := 0; i < 8; i++ {
+						b.ReportMetric(float64(binary.BigEndian.Uint32(digest[i*4:])), fmt.Sprintf("output-sha256-%d", i))
+					}
+					b.ReportMetric(float64(vector.Len()), "simd-lanes")
+					b.ReportMetric(float64(len(out)), "output-elements")
+				})
+			}
+		})
+	}
+}

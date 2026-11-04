@@ -77,6 +77,13 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone scalar result or fold identity lost")
 				}
 			}
+			if group == "sum8" {
+				count, _ := catalog.ByGroup("sum8")
+				n, _ := count.OutputElements(observation.Key.Case.Elements)
+				if observation.Key.Case.OutputElements.Value != n || len(observation.ArrayResultSHA256) != 64 {
+					t.Fatal("standalone projected output lost")
+				}
+			}
 			if group == "xorbits" {
 				if len(observation.ArrayResultSHA256) != 64 || observation.Key.Case.Vector.NativeLanes.Value != capture.Machine.Lanes {
 					t.Fatal("standalone XOR evidence lost")

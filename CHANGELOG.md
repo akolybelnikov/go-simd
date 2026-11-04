@@ -5,6 +5,18 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Fixed-block horizontal sum — 2026-11-04
+
+- Add sum8 Scalar/SIMDPartial with matched eight-input pair/fold order and +0
+  padding, independent of native width: 21 operations / 53 implementations.
+- Add projected blocks-of-8 output shape, exact physical extent in plans/captures,
+  full output digest and 4*n+4*ceil(n/8) logical traffic through every launcher.
+  Require native extent metrics and reject same-size comparison contradictions.
+- Cover independent rational rounding, tails, aliases, errors, allocation,
+  native/compiled/emulated/worker and standalone paths; add example, Wiki29,
+  retained captures, CI smoke and local implemented/future tracker updates.
+- Correct MulAdd's comparison baseline label to fused-software-reference/v1.
+
 ### F004 extension — XOR of opaque Float32 words — 2026-11-04
 
 - Add xorbits / xor-bits-f32 / BenchmarkXorBits with Scalar/SIMDPartial:

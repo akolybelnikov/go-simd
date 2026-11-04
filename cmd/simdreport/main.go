@@ -112,7 +112,7 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 		return err
 	}
 	op, _ := catalog.ByGroup(group)
-	configured := op.Parameterized() || op.ScalarResult() || op.ID == catalog.MulAdd
+	configured := op.Parameterized() || op.ScalarResult() || op.ID == catalog.MulAdd || op.ID == catalog.Sum8
 	scoped := configured
 	for _, sibling := range catalog.All() {
 		if sibling.ID != op.ID && sibling.NativePath() == op.NativePath() {

@@ -34,10 +34,10 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all twenty groups. Positional arguments are
+group. No explicit selection means all twenty-one groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact twenty-row operation table.
+`-list` prints runtime context and a compact twenty-one-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
@@ -324,6 +324,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `sum8` | `BenchmarkSum8` | `Scalar`, `SIMDPartial`; fixed eight-input pair/fold, +0 padding |
 | `xorbits` | `BenchmarkXorBits` | `Scalar`, `SIMDPartial`; exact XOR of opaque float32 words |
 | `bitroundtrip` | `BenchmarkBitRoundTrip` | `Scalar`, `SIMDPartial`; exact opaque bits, no numeric conversion |
 | `saturatingadd8` | `BenchmarkSaturatingAdd8` | `Scalar`, `SIMDPartial`; numeric uint8 saturation, not masks |
@@ -544,3 +545,8 @@ already running process and assume its initialized runtime/SIMD state changed.
 
 Next: [operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide)
 and [experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experiment-recipes).
+
+
+## Fixed-block sum8
+
+Use `-group sum8` with existing `-sum-input` recipes. Logical work is `4*n+4*ceil(n/8)` bytes; the output count is `ceil(n/8)`. [Examples and the exact order](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) apply equally to installed, Go and Make launchers.

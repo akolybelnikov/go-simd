@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: twenty operations and fifty-one scalar/SIMD
+An experimental Go SIMD laboratory: twenty-one operations and fifty-three scalar/SIMD
 implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -110,6 +110,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| sum8 | One specified-order float32 result per eight inputs, padded with +0 | Scalar, SIMDPartial |
 | xorbits | Exact XOR of two opaque float32 bit patterns | Scalar uint32 logic, SIMDPartial ToBits/Xor/BitsToFloat32 |
 | bitroundtrip | Exact Float32/Uint32/Float32 representation round trip | Scalar bitcast source, SIMDPartial ToBits/BitsToFloat32; all bits preserved |
 | saturatingadd8 | min(a+b,255) over true uint8 arrays | Scalar widened sum, SIMDPartial AddSaturated |
@@ -393,3 +394,6 @@ and [movement](internal/movement/README.md).
 Float32/Float64/Uint8 array-output kernels support disjoint output and exact in-place aliases;
 partial overlap is unsupported. Predicate export requires disjoint float32 input
 and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.
+
+
+Fixed-block horizontal sums use projected output `ceil(n/8)` and timed pair/fold work. See [sum8](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) and run `go run ./examples/sum8`.

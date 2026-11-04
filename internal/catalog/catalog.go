@@ -105,6 +105,11 @@ func (op Operation) LogicalBytes(elements int) (int64, error) {
 			count = int64(elements)
 		case ScalarValue:
 			count = 1
+		case Blocks8:
+			count = int64(elements / 8)
+			if elements%8 != 0 {
+				count++
+			}
 		case PackedBits:
 			if value.TypeID != Uint8 || value.ElementBytes != 1 {
 				return 0, fmt.Errorf("packed bits require uint8 storage")
@@ -147,7 +152,7 @@ var operations = append([]Operation{
 		Output:   Value{"out", Float32, Array, 4},
 		Variants: []Variant{{Scalar, "Scalar", 0, false, Serial}, {SIMDPartial, "SIMD", 1, true, Serial}},
 	},
-}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation(), dotFMAOperation(), predicateOperation(), packedPredicateOperation(), copyOperation(), clampOperation(), muladdOperation(), addition64Operation(), saturatingAdd8Operation(), bitRoundTripOperation(), xorBitsOperation())...)
+}, append(patternOperations(), sumOperation(), dotOperation(), fmaOperation(), dotFMAOperation(), predicateOperation(), packedPredicateOperation(), copyOperation(), clampOperation(), muladdOperation(), addition64Operation(), saturatingAdd8Operation(), bitRoundTripOperation(), xorBitsOperation(), sum8Operation())...)
 
 // All returns independent descriptors in the frozen legacy group/variant order.
 func All() []Operation {

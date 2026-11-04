@@ -132,16 +132,17 @@ type ResolvedInputOptions struct {
 }
 
 type PlannedCase struct {
-	Name          string               `json:"name"`
-	OperationID   string               `json:"operation_id"`
-	TypeID        string               `json:"type_id"`
-	ArithmeticID  string               `json:"arithmetic_id"`
-	StrategyID    string               `json:"strategy_id"`
-	StrategyLabel string               `json:"strategy_label"`
-	Elements      int                  `json:"elements"`
-	LogicalBytes  int64                `json:"logical_bytes"`
-	UsesSIMD      bool                 `json:"uses_simd"`
-	WorkerPolicy  catalog.WorkerPolicy `json:"worker_policy"`
+	OutputElements int                  `json:"output_elements,omitempty"`
+	Name           string               `json:"name"`
+	OperationID    string               `json:"operation_id"`
+	TypeID         string               `json:"type_id"`
+	ArithmeticID   string               `json:"arithmetic_id"`
+	StrategyID     string               `json:"strategy_id"`
+	StrategyLabel  string               `json:"strategy_label"`
+	Elements       int                  `json:"elements"`
+	LogicalBytes   int64                `json:"logical_bytes"`
+	UsesSIMD       bool                 `json:"uses_simd"`
+	WorkerPolicy   catalog.WorkerPolicy `json:"worker_policy"`
 }
 
 type PlanWarning struct {
@@ -240,13 +241,17 @@ func ResolveExperimentPlan(request PlanRequest, runtime RuntimeContext, policy P
 		if err != nil {
 			return ExperimentPlan{}, planError("invalid_size", "sizes", "%v", err)
 		}
+		outputElements := 0
+		if op.Output.Shape == catalog.Blocks8 {
+			outputElements, _ = op.OutputElements(size)
+		}
 		for _, variant := range variants {
 			plan.Cases = append(plan.Cases, PlannedCase{
 				Name:        fmt.Sprintf("%s/n=%d/%s", op.BenchmarkName, size, variant.Label),
 				OperationID: op.ID, TypeID: op.TypeID, ArithmeticID: op.ArithmeticID,
 				StrategyID: variant.ID, StrategyLabel: variant.Label, Elements: size,
 				LogicalBytes: logicalBytes, UsesSIMD: variant.UsesSIMD,
-				WorkerPolicy: variant.Workers,
+				WorkerPolicy: variant.Workers, OutputElements: outputElements,
 			})
 		}
 	}
@@ -389,7 +394,7 @@ func normalizeInputOptions(op catalog.Operation, requested input.Options) input.
 		resolved.Pattern, resolved.Seed = requested.Pattern, requested.Seed
 	}
 	switch op.ID {
-	case catalog.Sum:
+	case catalog.Sum, catalog.Sum8:
 		resolved.SumInput = requested.SumFixture()
 	case catalog.Dot, catalog.DotFMA:
 		resolved.DotInput = requested.DotFixture()

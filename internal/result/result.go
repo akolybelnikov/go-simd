@@ -29,6 +29,7 @@ type InputIdentity struct {
 
 // Case is a comparable logical identity, independent of display labels.
 type Case struct {
+	OutputElements                                OptionalInt       `json:",omitzero"`
 	Vector                                        VectorIdentity    `json:",omitzero"`
 	Clamp                                         ClampIdentity     `json:",omitzero"`
 	Copy                                          CopyIdentity      `json:",omitzero"`
@@ -181,6 +182,7 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 	columns := map[string]Column{}
 	bySize := map[int]map[string]Summary{}
 	fingerprints := map[int]string{}
+	outputExtents := map[int]OptionalInt{}
 	for _, s := range summaries {
 		if contextFor(s.Key) != context {
 			return Comparison{}, fmt.Errorf("incompatible measurement contexts in comparison")
@@ -189,6 +191,10 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 			return Comparison{}, fmt.Errorf("invalid summary for strategy %q", s.Key.Case.StrategyID)
 		}
 		c := s.Key.Case
+		if prior, ok := outputExtents[c.Elements]; ok && prior != c.OutputElements {
+			return Comparison{}, fmt.Errorf("incompatible output extents at size %d", c.Elements)
+		}
+		outputExtents[c.Elements] = c.OutputElements
 		column := Column{c.StrategyID, s.Label, c.StrategyID == catalog.Scalar}
 		if previous, ok := columns[c.StrategyID]; ok && previous != column {
 			return Comparison{}, fmt.Errorf("conflicting strategy labels")
@@ -212,8 +218,11 @@ func Compare(title string, summaries []Summary) (Comparison, error) {
 	if summaries[0].Key.Case.OperationID == catalog.DotFMA {
 		table.BaselinePolicy = "specified-fused-float32-dot-folds/v1"
 	}
-	if summaries[0].Key.Case.OperationID == catalog.AffineFMA {
+	if summaries[0].Key.Case.OperationID == catalog.AffineFMA || summaries[0].Key.Case.OperationID == catalog.MulAdd {
 		table.BaselinePolicy = "fused-software-reference/v1"
+	}
+	if summaries[0].Key.Case.OperationID == catalog.Sum8 {
+		table.BaselinePolicy = "specified-float32-block8-pair-fold/v1"
 	}
 	if summaries[0].Key.Case.OperationID == catalog.Sum {
 		table.BaselinePolicy = "specified-float32-folds/v1"

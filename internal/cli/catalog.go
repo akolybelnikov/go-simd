@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.Sum8 {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "output extent: ceil(n/8) float32 values; fixed (0+4,1+5,2+6,3+7), then left fold; pad+0; all work timed;4*n+4*ceil(n/8) logical bytes")
+		}
 		if op.ID == catalog.XorBits {
 			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
 			fmt.Fprintln(&out, "opaque32-bit XOR through Uint32s; no floating arithmetic or value conversion;12*n logical bytes")
@@ -168,6 +172,9 @@ func writeCatalog(w io.Writer, value string) error {
 }
 
 func describeValue(value catalog.Value) string {
+	if value.Shape == catalog.Blocks8 {
+		return value.Name + ":" + value.TypeID + "[ceil(n/8)]"
+	}
 	if value.Shape == catalog.PackedBits {
 		return value.Name + ":" + value.TypeID + "[ceil(n/8)]"
 	}

@@ -28,7 +28,7 @@ func (s *Selection) Register(flags *flag.FlagSet) {
 	flags.Var(float32Flag{&s.Input.Upper}, "upper", "float32 upper bound (rangefilter exclusive; clamp inclusive)")
 	flags.StringVar(&s.Input.Pattern, "pattern", s.Input.Pattern, "predicate/clamp fixture: none, all, alternating, clustered, shuffled")
 	flags.Uint64Var(&s.Input.Seed, "seed", s.Input.Seed, "deterministic shuffled predicate seed")
-	flags.StringVar(&s.Input.SumInput, "sum-input", s.Input.SumInput, "sum fixture: balanced, cancellation, mixed-magnitude")
+	flags.StringVar(&s.Input.SumInput, "sum-input", s.Input.SumInput, "sum/sum8 fixture: balanced, cancellation, mixed-magnitude")
 	flags.StringVar(&s.group, "group", "all", "operation group (use -list to see available groups)")
 	flags.StringVar(&s.legacy, "function", "", "deprecated alias: add, compute, or all")
 	flags.BoolVar(&s.addition, "addition", false, "alias for -group addition")

@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacySum8HarnessID = "legacy-report-sum8/v1"
 const LegacyXorBitsHarnessID = "legacy-report-xor-bits/v1"
 const LegacyBitRoundTripHarnessID = "legacy-report-bit-roundtrip/v1"
 const LegacySaturatingAdd8HarnessID = "legacy-report-saturating-add8/v1"
@@ -115,7 +116,7 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				metrics[unit] = Metric{value, true}
 			}
 			switch unit {
-			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits":
+			case "ns/op", "B/op", "allocs/op", "MB/s", "simd-lanes", "result-bits", "fma-path", "fma-vector", "last-result-bits", "output-elements":
 				value, err := strconv.ParseFloat(fields[i], 64)
 				if err != nil || !finite(value) || value < 0 {
 					return Run{}, fmt.Errorf("line %d: invalid %s measurement", lineNumber, unit)
@@ -167,6 +168,27 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.Sum8 {
+			harness = LegacySum8HarnessID
+			lanes, extent := metrics["simd-lanes"], metrics["output-elements"]
+			count, err := op.OutputElements(size)
+			if err != nil {
+				return Run{}, err
+			}
+			if !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value || !extent.Available || extent.Value != float64(count) {
+				return Run{}, fmt.Errorf("sum8 requires exact actual lanes and physical output extent")
+			}
+			identity, err := NewVectorIdentity(int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			c.Vector = identity
+			c.OutputElements = OptionalInt{Value: count, Known: true}
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, err
+			}
+		}
 		if knownOp && (op.ID == catalog.BitRoundTrip || op.ID == catalog.XorBits) {
 			harness = LegacyBitRoundTripHarnessID
 			if op.ID == catalog.XorBits {
@@ -360,7 +382,11 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
 			if !ok {
-				if op.ID == catalog.XorBits {
+				if op.ID == catalog.Sum8 {
+					if options.InputOptions != nil {
+						fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
+					}
+				} else if op.ID == catalog.XorBits {
 					fingerprint = input.FingerprintForOperation(op, size, input.DefaultOptions())
 				} else if op.ID == catalog.MulAdd {
 					if options.InputOptions != nil {
@@ -375,7 +401,11 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				}
 				fingerprints[cacheKey] = fingerprint
 			}
-			if op.ID == catalog.XorBits {
+			if op.ID == catalog.Sum8 {
+				if options.InputOptions != nil {
+					c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
+				}
+			} else if op.ID == catalog.XorBits {
 				c.Input = InputIdentity{input.XorBitsGeneratorID, fingerprint}
 			} else if op.ID == catalog.MulAdd {
 				if options.InputOptions != nil {
