@@ -76,6 +76,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.XorBits {
+			b, ok := xorBitsBindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing XOR binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, Run: b.run, Bind: b.bind})
+			continue
+		}
 		if descriptor.ID == catalog.BitRoundTrip {
 			bind, ok := bitRoundTripBindings[variant.ID]
 			if !ok {

@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all nineteen groups. Positional arguments are
+group. No explicit selection means all twenty groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact nineteen-row operation table.
+`-list` prints runtime context and a compact twenty-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+XOR bits uses `12*n`: two opaque float32 input arrays and one bitwise output.
 Bit roundtrip uses `8*n`: one float32 read/write with exact bits through reinterpretation.
 Uint8 saturation uses `3*n`: two byte reads and one write; actual Uint8 lanes retained.
 Float64 addition uses `24*n`: two float64 reads and one write, with actual Float64 lanes.
@@ -263,6 +264,24 @@ Installed simdreport accepts the same flags. Native BenchmarkBitRoundTrip is in
 ./internal/patterns. [The representation guide](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) explains exact NaN/zero
 payloads and why timing does not establish bitcast instruction emission.
 
+XOR bits uses a fixed raw-word/mask recipe, with no scalar broadcast or new flags.
+
+```powershell
+simdreport -list -group xorbits
+go run ./cmd/simdreport -group xorbits -bench '^BenchmarkXorBits$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/xorbits
+simdlab catalog -group xorbits
+```
+
+```bash
+make list ARGS="-group xorbits"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group xorbits -bench BenchmarkXorBits/n=64 -format md"
+make run ARGS="-group xorbits"
+```
+
+Installed simdreport uses the same flags. Native BenchmarkXorBits is in
+./internal/patterns. [The XOR guide](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) defines the exact word-bit result.
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -305,6 +324,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `xorbits` | `BenchmarkXorBits` | `Scalar`, `SIMDPartial`; exact XOR of opaque float32 words |
 | `bitroundtrip` | `BenchmarkBitRoundTrip` | `Scalar`, `SIMDPartial`; exact opaque bits, no numeric conversion |
 | `saturatingadd8` | `BenchmarkSaturatingAdd8` | `Scalar`, `SIMDPartial`; numeric uint8 saturation, not masks |
 | `addition64` | `BenchmarkAddition64` | `Scalar`, `SIMDPartial`; true binary64 arrays and actual-width boundaries |

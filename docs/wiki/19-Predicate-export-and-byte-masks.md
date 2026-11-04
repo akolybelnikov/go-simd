@@ -1,7 +1,7 @@
 # 19 — Export predicates as byte masks
 
 Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has nineteen operations/forty-nine
+original F004 closure. The current catalogue has twenty operations/fifty-one
 implementations; future/stop statements below describe this earlier checkpoint.
 
 The predicate group creates a usable uint8 array: one byte per input element,

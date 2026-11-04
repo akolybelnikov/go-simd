@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.XorBits {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "opaque32-bit XOR through Uint32s; no floating arithmetic or value conversion;12*n logical bytes")
+		}
 		if op.ID == catalog.BitRoundTrip {
 			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
 			fmt.Fprintln(&out, "exact opaque bits through Uint32s reinterpretation; not numeric conversion; compiler may eliminate bitcasts; 8*n logical bytes")

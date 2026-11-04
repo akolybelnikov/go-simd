@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.XorBits {
+		return XorBitsGeneratorID
+	}
 	if op.ID == catalog.BitRoundTrip {
 		return "generated-bit-roundtrip-float32-v1"
 	}
@@ -268,6 +271,9 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 // when required. Scalar returns and byte outputs have no float32 output slice;
 // callers allocate the typed byte output separately outside measurement.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if op.ID == catalog.XorBits {
+		return MakeXorBits(n)
+	}
 	if op.TypeID != catalog.Float32 {
 		panic("float32 fixture helper requires float32 input type")
 	}
@@ -320,6 +326,9 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ID == catalog.XorBits {
+		return fingerprintGenerated(n, true, xorBitsPair)
+	}
 	if op.ID == catalog.SaturatingAdd8 {
 		return SaturatingAdd8Fingerprint(n)
 	}

@@ -8,6 +8,7 @@ capabilities, not a promise to deliver every possible extension.
 | Capability | Current state |
 | --- | --- |
 | Input types | float32 operations, true float64 addition and uint8 saturation; no imported-file type inference |
+| Opaque word XOR | Implemented xorbits Scalar/SIMDPartial; two float32 bit-pattern arrays, Uint32s XOR, 12*n work/full output evidence |
 | Exact bit reinterpretation | Implemented bitroundtrip Scalar/SIMDPartial; exact Float32/Uint32/Float32 bits, 8*n work; numeric conversions remain future |
 | Uint8 saturation | Implemented saturatingadd8 Scalar/SIMDPartial; true byte inputs, min(a+b,255), 3*n work and full numeric output evidence |
 | Float64 addition | Implemented addition64 Scalar/SIMDPartial; true binary64 fixtures, 24*n work and actual Float64-width/full-output evidence |
@@ -31,7 +32,7 @@ capabilities, not a promise to deliver every possible extension.
 | Multiple vector accumulators | Implemented SIMDStriped2/4 for sum, unfused dot and fused dot; explicit round-robin assignment and left-to-right merge |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Nineteen operations / forty-nine implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
+| Shared runtime catalogue | Twenty operations / fifty-one implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
 | Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -50,8 +51,8 @@ capabilities, not a promise to deliver every possible extension.
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M0-M3 and the original F004 scope are complete. MulAdd, Float64 addition, uint8 saturation and bit roundtrip extend the current
-catalogue to nineteen operations and forty-nine implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
+M0-M3 and the original F004 scope are complete. MulAdd, Float64 addition, uint8 saturation, bit roundtrip and XOR extend the current
+catalogue to twenty operations and fifty-one implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
 and [complete baseline API ledger](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-api-coverage.md).
 Reordering, numeric conversions and additional typed operations are
 optional extensions, rather than unfinished slices in this checkpoint.

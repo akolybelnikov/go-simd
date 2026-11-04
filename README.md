@@ -1,6 +1,6 @@
 # go-simd
 
-An experimental Go SIMD laboratory: nineteen operations and forty-nine scalar/SIMD
+An experimental Go SIMD laboratory: twenty operations and fifty-one scalar/SIMD
 implementations over generated `float32`, `float64` and `uint8` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
@@ -110,6 +110,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| xorbits | Exact XOR of two opaque float32 bit patterns | Scalar uint32 logic, SIMDPartial ToBits/Xor/BitsToFloat32 |
 | bitroundtrip | Exact Float32/Uint32/Float32 representation round trip | Scalar bitcast source, SIMDPartial ToBits/BitsToFloat32; all bits preserved |
 | saturatingadd8 | min(a+b,255) over true uint8 arrays | Scalar widened sum, SIMDPartial AddSaturated |
 | addition64 | Binary64 a+b, true float64 arrays | Scalar, SIMDPartial; actual Float64 lanes |
@@ -233,6 +234,15 @@ latency. See [bit representation](https://github.com/akolybelnikov/go-simd/wiki/
 ```powershell
 go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/bitroundtrip
+```
+
+Xorbits applies word logic to two opaque float32 representations, such as a
+sign-bit mask. It performs no floating arithmetic; logical traffic is 12*n and
+all input/output bits survive in evidence. See [XOR bits](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns).
+
+```powershell
+go run ./cmd/simdreport -group xorbits -bench '^BenchmarkXorBits$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/xorbits
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;

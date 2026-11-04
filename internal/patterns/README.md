@@ -134,3 +134,13 @@ Validation, width setup, bounded loads, reinterpretation path and stores are tim
 with 8*n logical bytes; complete output hashing follows timing. Compilers may
 eliminate representational steps. Run `go run ./examples/bitroundtrip`; see
 [the contract](../../docs/features/F004-bit-roundtrip.md).
+
+
+## Opaque Float32 word XOR
+
+XorBitsScalar/XorBitsSIMD accept (a,b,out []float32) error and apply exact
+uint32 XOR to both representations. No floating arithmetic occurs. Length errors
+precede writes; empty/disjoint/exact aliases succeed, partial overlap is excluded.
+Validation, width setup, bounded loads, bitwise path and stores are timed with
+12*n logical bytes; full input/output hashing is outside timing. Use
+`go run ./examples/xorbits`; see [the contract](../../docs/features/F004-xor-bits.md).
