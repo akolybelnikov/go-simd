@@ -1,5 +1,9 @@
 # 22 — Clamp and numerical contracts
 
+Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
+original F004 closure. The current catalogue has sixteen operations/forty-three
+implementations; future/stop statements below describe this earlier checkpoint.
+
 Clamp is F004's final slice. The current catalogue has **fifteen operations and
 forty-one implementations**. It asks how branching, SIMD selection and Min/Max
 compare when every strategy must return the same float32 bits.

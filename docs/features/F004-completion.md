@@ -52,7 +52,13 @@ for new experiments, rather than unfinished acceptance work in this checkpoint.
 Retained tiny fixed-iteration [captures](evidence/README.md) verify evidence
 plumbing; they establish no cross-machine speedup or accuracy ranking.
 
-## Optional work after this stopping point
+## Subsequent extensions
+
+[Three-array MulAdd](F004-muladd.md) subsequently shipped under explicit user
+authorization, bringing the current catalogue to sixteen operations/forty-three
+implementations. This audit preserves the original fifteen/forty-one closure.
+
+## Optional work after this stopping point (historical)
 
 Three-array element-wise MulAdd needs its own arity/16*n traffic contract.
 Float64/integer inputs need typed fixture/binding/result policies. Standalone

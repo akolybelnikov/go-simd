@@ -393,7 +393,7 @@ func normalizeInputOptions(op catalog.Operation, requested input.Options) input.
 		resolved.SumInput = requested.SumFixture()
 	case catalog.Dot, catalog.DotFMA:
 		resolved.DotInput = requested.DotFixture()
-	case catalog.AffineFMA:
+	case catalog.AffineFMA, catalog.MulAdd:
 		resolved.FMAInput = requested.FMAFixture()
 	}
 	return resolved

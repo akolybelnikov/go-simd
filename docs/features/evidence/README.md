@@ -1,5 +1,25 @@
 # F004 smoke evidence
 
+## Three-array MulAdd extension — 2026-11-04
+
+Normal/emulated muladd captures each retain four observations, n=64, rounding
+recipe, count2, 3x. All complete output digests agree. Windows/amd64, Go1.27.3
+with GOEXPERIMENT=simd, GOMAXPROCS16; normal 256-bit/8-lane vector gate, emulated
+128-bit/4-lane software gate. Base was 0534a7d plus uncommitted MulAdd changes;
+missing embedded VCS facts remain unknown. Numeric data/run IDs/timestamps are
+unchanged; only LF/trailing whitespace is normalized. These are plumbing checks.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/muladd-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/muladd-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+See [the MulAdd contract](../F004-muladd.md).
+
+
 ## Final clamp checkpoint — 2026-11-04
 
 Normal-SDK clamp-vector.measurements.json and SDK-emulated

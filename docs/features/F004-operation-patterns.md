@@ -18,6 +18,13 @@ movement baseline with Go's built-in control. [Clamp](F004-clamp.md) completes t
 scope with branch, selection and repaired Min/Max strategies. Three-array MulAdd,
 reordering, conversions and other input types are optional follow-on work.
 
+## Shipped extensions after baseline closure
+
+[Three-array MulAdd](F004-muladd.md) adds two implementations after clamp,
+bringing the current catalogue to sixteen operations/forty-three implementations.
+The plan/history below describes the original baseline; references to planned
+MulAdd are superseded by its shipped extension record.
+
 ## Purpose and evidence
 
 Grow the lab through experiments that demonstrate different SIMD behavior,

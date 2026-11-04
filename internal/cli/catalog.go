@@ -70,6 +70,10 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.MulAdd {
+			fmt.Fprintln(&out, "fixture: "+options.Generator(op))
+			fmt.Fprintln(&out, "three streamed arrays; no broadcasts/reduction; software scalar control; logical traffic 16*n; complete output digest after timing")
+		}
 		if op.ID == catalog.Clamp {
 			fmt.Fprintln(&out, "clamp pattern: ordered clipped positions; remaining values include endpoints, zeros and unchanged NaN payloads")
 			fmt.Fprintln(&out, "SIMDMinMax includes outside-bound/tie/NaN repairs in timing; logical traffic 8*n bytes/call")
@@ -119,7 +123,7 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 					mode = "Go builtin (compiler/runtime)"
 				}
 			}
-			if op.ID == catalog.AffineFMA {
+			if op.ID == catalog.AffineFMA || op.ID == catalog.MulAdd {
 				mode = "software FMA32"
 				if variant.UsesSIMD {
 					switch machine.FMA32Path {

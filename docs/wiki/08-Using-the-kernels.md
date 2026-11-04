@@ -181,3 +181,10 @@ timed inner loop when your objective is kernel-only timing.
 ## Ordered clamp
 
 `patterns.ClampScalar`, `ClampSIMD` and `ClampSIMDMinMax` accept `(x,out []float32,lower,upper float32) error`. Handle `patterns.ErrLengthMismatch` first and `patterns.ErrInvalidBounds` for reversed/NaN bounds, including empty slices. Failures precede writes; disjoint/exact aliases are supported. Run `go run ./examples/clamp` and follow [its exact bit contract](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
+
+
+## Three-array kernel calls
+
+The [MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) covers three real operand arrays, a full output digest,
+16*n traffic, actual FMA gate/path/width and matched timed work. Use
+`go run ./examples/muladd` for the module-local four-slice API.

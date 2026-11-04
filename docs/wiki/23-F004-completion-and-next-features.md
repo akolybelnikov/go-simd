@@ -1,5 +1,9 @@
 # 23 — F004 completion and future extensions
 
+Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
+original F004 closure. The current catalogue has sixteen operations/forty-three
+implementations; future/stop statements below describe this earlier checkpoint.
+
 **F004 is complete for the agreed current scope, 2026-11-04.** Clamp is the final
 slice. The shared catalogue contains fifteen operations / forty-one implementations.
 No additional slice is needed for this checkpoint.
@@ -21,7 +25,7 @@ available SDK method into an implemented lab command. Use -list for commands.
 
 | Extension | Why it is separate |
 | --- | --- |
-| Three-array element-wise MulAdd | Different operands and 16*n traffic from affine constants or dot accumulators |
+| Three-array element-wise MulAdd | Subsequently implemented; see chapter 24 for its distinct 16*n operand/traffic contract |
 | Float64 or integer inputs | New typed fixtures, numerical policies and bindings |
 | Standalone conversion, bit reinterpretation, saturation | Different correctness and representation questions |
 | Fixed-width permutations / horizontal primitives | Architecture/width/capability gates and partial-block rules |

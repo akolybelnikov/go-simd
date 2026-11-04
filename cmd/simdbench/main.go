@@ -209,7 +209,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			return nil, err
 		}
 		x, y, resultOut := a, b, out
-		if descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
+		var third []float32
+		if descriptor.ID == catalog.MulAdd {
+			x, y, third, resultOut = input.MakeMulAdd(size, options)
+		} else if descriptor.ID == catalog.Copy || descriptor.Parameterized() || descriptor.ScalarResult() {
 			x, y, resultOut = input.MakeForOperation(descriptor, size, options)
 		} else if out == nil {
 			a, b, out = benchutil.MakeBenchmarkSlices(size)
@@ -220,7 +223,7 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			item.copyOutput = true
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; disjoint buffers; GoCopy uses Go compiler/runtime copy"
 		}
-		if descriptor.ID == catalog.Clamp {
+		if descriptor.ID == catalog.Clamp || descriptor.ID == catalog.MulAdd {
 			item.copyOutput = true
 		}
 		if descriptor.ByteResult() {
@@ -237,13 +240,20 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		if descriptor.Parameterized() {
 			item.name += "\n" + cli.InputSummary(options.Identity(descriptor), options.Generator(descriptor))
 		}
-		if descriptor.ID == catalog.AffineFMA {
+		if descriptor.ID == catalog.AffineFMA || descriptor.ID == catalog.MulAdd {
 			item.name += "\nFMA32 SIMD path: " + platform.Current().FMA32Path
 		}
 		if descriptor.ID == catalog.DotFMA {
 			item.name += "\nFMA32 vector gate: " + platform.Current().FMA32Path + "; scalar tails use software FMA32"
 		}
+		if descriptor.ID == catalog.MulAdd {
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; three streamed arrays, logical traffic 16*n"
+		}
 		for _, implementation := range operation.Implementations {
+			if implementation.BindTernary != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindTernary(x, y, third, resultOut)})
+				continue
+			}
 			if implementation.BindUnary != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUnary(x, resultOut)})
 				continue

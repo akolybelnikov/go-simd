@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / F004 complete for current scope, reviewed 2026-11-04.
+**Guide baseline:** architecture M3 / completed F004 baseline plus MulAdd extension, reviewed 2026-11-04.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -35,6 +35,7 @@ explicitly. This guide grows alongside each delivered feature.
 | Compare moving exact bits with Go's built-in copy and explicit SIMD | [21 — Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) |
 | Clip values while keeping NaN payloads and signed-zero ties | [22 — Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts) |
 | Check F004 acceptance and the optional backlog | [23 — F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features) |
+| Stream three operand arrays through fused multiply-add | [24 — Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) |
 
 ## What you can do today
 
@@ -107,6 +108,8 @@ useful repeated measurement.
 | 2026-11-04 | F004 copy: four movement controls, exact float32 bits, typed unary buffers, complete output digest, 8*n work and compiler/runtime interpretation; fourteen operations/thirty-eight implementations |
 
 | 2026-11-04 | F004 clamp and closure: ordered bounds, branches/selection/repaired MinMax, exact output bits, acceptance audit and complete baseline SDK ledger; fifteen operations/forty-one implementations |
+
+| 2026-11-04 | F004 three-array MulAdd extension: ternary inputs/bindings, fused policy/gate, 16*n work, full evidence, agent plan/worker propagation; sixteen operations/forty-three implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),

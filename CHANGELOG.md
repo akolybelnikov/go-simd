@@ -5,6 +5,27 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Three-array fused multiply-add — 2026-11-04
+
+- Add muladd-f32 / muladd / BenchmarkMulAdd with Scalar software FMA32 and
+  verified SIMDPartial vector/software paths: sixteen operations/forty-three
+  implementations. Preserve one-rounding binary32 semantics, length errors before
+  writes, valid empty input and exact aliases; NaN payloads remain unspecified.
+- Extend typed bindings with a real third array; generate balanced/rounding/mixed
+  triples and stream fingerprints across all operands. Keep older recipes/timing
+  callbacks intact and explicitly reject ternary use of the two-input helper.
+- Include validation/dispatch/loads/FMA/stores in timing, account for 16*n work,
+  and retain complete output SHA-256 after timing with dedicated harnesses and
+  existing FMA policy/gate/path/width identity. Strict native import preserves
+  unknown historical input and rejects incomplete or conflicting metrics.
+- Propagate fixture configuration through both backends, both quick/report CLIs,
+  agent catalogue/plans and isolated workers. Update help, README, Wiki chapter24,
+  kernel examples, feature/evidence records and local status/navigation trackers.
+- Verify independent rational oracles, special/random bits, tails, exact aliases,
+  canaries, errors and allocations; test all-input fingerprints, every fixture's
+  native/compiled/emulated parity, worker propagation and no-Go standalone runs.
+  Extend CI native/emulation coverage; keep follow-on operations separate.
+
 ### F004 slice 8 and closure — Ordered clamp — 2026-11-04
 
 - Added clamp / clamp-f32 / BenchmarkClamp with Scalar branches, SIMDPartial

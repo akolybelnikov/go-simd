@@ -25,6 +25,7 @@ const LegacyPredicateHarnessID = "legacy-report-predicate-export/v1"
 const LegacyPackedPredicateHarnessID = "legacy-report-packed-predicate/v1"
 const LegacyCopyHarnessID = "legacy-report-copy/v1"
 const LegacyClampHarnessID = "legacy-report-clamp/v1"
+const LegacyMulAddHarnessID = "legacy-report-muladd-fma/v1"
 
 type LegacyOptions struct {
 	InputOptions *input.Options
@@ -162,6 +163,33 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 		var arrayBits *uint32
 		byteDigest := ""
 		arrayDigest := ""
+		if knownOp && op.ID == catalog.MulAdd {
+			harness = LegacyMulAddHarnessID
+			vector, path, lanes := metrics["fma-vector"], metrics["fma-path"], metrics["simd-lanes"]
+			if !vector.Available || !path.Available || vector.Value != 0 && vector.Value != 1 || path.Value != 0 && path.Value != 1 || !lanes.Available || lanes.Value < 1 || lanes.Value >= float64(int(^uint(0)>>1)) || math.Trunc(lanes.Value) != lanes.Value {
+				return Run{}, fmt.Errorf("muladd requires exact gate/path/width metrics")
+			}
+			vectorPath := fma32.SoftwarePath
+			if vector.Value == 1 {
+				vectorPath = fma32.VectorPath
+			}
+			identity, err := NewFMAIdentity(c.StrategyID, vectorPath, int(lanes.Value))
+			if err != nil {
+				return Run{}, err
+			}
+			expectedPath := float64(0)
+			if identity.PathID == fma32.VectorPath {
+				expectedPath = 1
+			}
+			if path.Value != expectedPath {
+				return Run{}, fmt.Errorf("conflicting muladd strategy/path metrics")
+			}
+			c.FMA = identity
+			arrayDigest, err = outputDigest(metrics)
+			if err != nil {
+				return Run{}, fmt.Errorf("muladd %w", err)
+			}
+		}
 		if knownOp && op.ID == catalog.Clamp {
 			harness = LegacyClampHarnessID
 			lanes := metrics["simd-lanes"]
@@ -271,7 +299,11 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 			cacheKey := fmt.Sprintf("%s/%d", c.OperationID, size)
 			fingerprint, ok := fingerprints[cacheKey]
 			if !ok {
-				if op.ID == catalog.Copy {
+				if op.ID == catalog.MulAdd {
+					if options.InputOptions != nil {
+						fingerprint = input.FingerprintForOperation(op, size, *options.InputOptions)
+					}
+				} else if op.ID == catalog.Copy {
 					fingerprint = input.FingerprintForOperation(op, size, input.DefaultOptions())
 				} else if !op.Parameterized() && !op.ScalarResult() {
 					fingerprint = input.GeneratedFloat32Fingerprint(size)
@@ -280,7 +312,11 @@ func ReadLegacy(reader io.Reader, options LegacyOptions) (Run, error) {
 				}
 				fingerprints[cacheKey] = fingerprint
 			}
-			if op.ID == catalog.Copy {
+			if op.ID == catalog.MulAdd {
+				if options.InputOptions != nil {
+					c.Input = InputIdentity{options.InputOptions.Generator(op), fingerprint}
+				}
+			} else if op.ID == catalog.Copy {
 				c.Input = InputIdentity{input.CopyGeneratorID, fingerprint}
 			} else if !op.Parameterized() && !op.ScalarResult() {
 				c.Input = InputIdentity{input.GeneratedFloat32ID, fingerprint}

@@ -13,7 +13,7 @@ func TestFrozenOperationIdentities(t *testing.T) {
 	}
 	var got [][]string
 	for _, op := range All() {
-		if op.ID == Copy || op.Parameterized() || op.ScalarResult() {
+		if op.ID == MulAdd || op.ID == Copy || op.Parameterized() || op.ScalarResult() {
 			continue
 		}
 		row := []string{op.ID, op.Group, op.BenchmarkName, op.TypeID, op.ArithmeticID}

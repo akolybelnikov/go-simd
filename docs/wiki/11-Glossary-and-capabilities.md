@@ -18,7 +18,7 @@ capabilities, not a promise to deliver every possible extension.
 | Other numeric types / comprehensive operation catalog | Not implemented |
 | Fused affine | Implemented affinefma Scalar/SIMDPartial; one-rounding reference, gated vector MulAdd and recorded software path |
 | Fused dot | Implemented dotfma Scalar/SIMDStriped/2/4; one-rounding updates, ordinary merge/fold additions, actual vector/software/tail paths |
-| Three-array MulAdd | Pending separate operand/traffic contract |
+| Three-array MulAdd | Implemented Scalar/SIMDPartial; real ternary bindings/fixtures, one-rounding FMA, 16*n work and full output digest |
 | Broadcast scale/affine kernels | Implemented, Scalar/SIMDPartial, exact float32 scalar parameters; broadcasts per call |
 | Predicate/mask/selection kernels | Implemented threshold, selection and rangefilter; strict comparisons, bit-preserving selection, Masked/IfElse/And; clamp also composes Or |
 | Predicate byte export | Implemented predicate Scalar/SIMDPartial; canonical uint8 0/1, conversion/extraction/stores timed, output digest retained |
@@ -28,7 +28,7 @@ capabilities, not a promise to deliver every possible extension.
 | Multiple vector accumulators | Implemented SIMDStriped2/4 for sum, unfused dot and fused dot; explicit round-robin assignment and left-to-right merge |
 | Permutation/horizontal primitive studies | Separate, gated `archsimd` extension; not portable methods assumed by the lab |
 | Quick comparison | Fixed 1,048,576 elements; no saved report |
-| Shared runtime catalogue | Fifteen operations / forty-one implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
+| Shared runtime catalogue | Sixteen operations / forty-three implementations; typed float32/uint8 arrays and unchecked/checked scalar-result bindings |
 | Runtime listing | Both CLIs share compact `-list`, detailed `-list -group`, aliases/help and parameter controls; no fixtures/benchmarks |
 | Multi-size report | Powers of two and vector-boundary sizes; configurable selection/count/benchtime |
 | Saved summaries | TXT, Markdown, CSV; terminal stays readable text |
@@ -47,10 +47,10 @@ capabilities, not a promise to deliver every possible extension.
 | Cloud provisioning / automatic spend | Not implemented |
 | Offline saved-run analysis or re-render command | Not implemented |
 
-M0-M3 and F004 are complete for the agreed current scope: fifteen operations and
-forty-one implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
+M0-M3 and the original F004 scope are complete. MulAdd extends the current
+catalogue to sixteen operations and forty-three implementations. See the [closure and extension boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
 and [complete baseline API ledger](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-api-coverage.md).
-Three-array MulAdd, reordering, standalone conversions and other input types are
+Reordering, standalone conversions and other input types are
 optional extensions, rather than unfinished slices in this checkpoint.
 Worker isolation, cancellation recovery and advanced manifests remain deferred. Broader
 workers/resources/frontends remain conditional on observed laboratory needs.

@@ -27,4 +27,6 @@
 - [22 · Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
 - [23 · F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
 
+- [24 · Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

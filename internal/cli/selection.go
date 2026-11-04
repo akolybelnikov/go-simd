@@ -19,7 +19,7 @@ type Selection struct {
 
 func (s *Selection) Register(flags *flag.FlagSet) {
 	s.Input = input.DefaultOptions()
-	flags.StringVar(&s.Input.FMAInput, "fma-input", s.Input.FMAInput, "fused affine fixture: balanced, rounding, mixed-magnitude")
+	flags.StringVar(&s.Input.FMAInput, "fma-input", s.Input.FMAInput, "fused affine/muladd fixture: balanced, rounding, mixed-magnitude")
 	flags.StringVar(&s.Input.DotInput, "dot-input", s.Input.DotInput, "dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive")
 	flags.Var(float32Flag{&s.Input.Alpha}, "alpha", "float32 scale/affine multiplier (broadcast per call)")
 	flags.Var(float32Flag{&s.Input.Beta}, "beta", "float32 affine offset (group defines fusion)")

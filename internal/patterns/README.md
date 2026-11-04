@@ -111,3 +111,14 @@ See the [contract](../../docs/features/F004-clamp.md) and
 [F004 closure audit](../../docs/features/F004-completion.md). This closes the
 agreed scope at fifteen operations / forty-one implementations; broader families
 are optional follow-on work.
+
+
+## Three-array fused multiply-add
+
+MulAddScalar/MulAddSIMD accept (a,b,c,out []float32) error, with equal lengths
+checked before writes. Each output is one-rounding binary32 a*b+c. Scalar uses
+corrected software FMA32; SIMDPartial uses the verified vector gate or recorded
+software path. Valid empty input and exact aliases are supported; partial
+overlap is outside the contract. All validation/dispatch/loads/FMA/stores are
+timed, with 16*n logical bytes. Fixtures and full output digest are outside timing.
+Run `go run ./examples/muladd`; see [the contract](../../docs/features/F004-muladd.md).

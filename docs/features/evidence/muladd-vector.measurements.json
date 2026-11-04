@@ -1,0 +1,328 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "muladd",
+  "config": {
+    "input": {
+      "FMAInput": "rounding",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkMulAdd$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-152911-751384452",
+    "Environment": {
+      "ID": "benchmark-20261104-152911-751384452/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-muladd-fma/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T15:29:11Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-muladd-fma/v1\ngroup: muladd\nselection: \"^BenchmarkMulAdd$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-muladd-float32-v1/rounding\nthree streamed input arrays; full ArrayResultSHA256 after timing; logical traffic 16*n\nnumerics: IEEE binary32 round-to-nearest ties-to-even once, including subnormals, overflow and signed zero; NaN payloads unspecified. Scalar uses corrected software FMA32; SIMDPartial uses verified vector MulAdd or recorded software fallback. Three streamed arrays, no broadcasts/reduction. Equal lengths required before writes; valid empty/nil succeeds. Disjoint/exact aliases supported; partial overlap unsupported. Validation, dispatch, loads, FMA and stores timed. Logical bytes 16*n; complete output digest after timing.\nFMA32 SIMD path: vector-fma32/v1\nnumerics: IEEE binary32 round-to-nearest ties-to-even once, including subnormals, overflow and signed zero; NaN payloads unspecified. Scalar uses corrected software FMA32; SIMDPartial uses verified vector MulAdd or recorded software fallback. Three streamed arrays, no broadcasts/reduction. Equal lengths required before writes; valid empty/nil succeeds. Disjoint/exact aliases supported; partial overlap unsupported. Validation, dispatch, loads, FMA and stores timed. Logical bytes 16*n; complete output digest after timing.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "10a2f59c04b460c983403ab5003448c2325714529bf7f83e9d839f7a0a629949",
+        "Key": {
+          "RunID": "benchmark-20261104-152911-751384452",
+          "EnvironmentID": "benchmark-20261104-152911-751384452/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-muladd-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "ieee754-binary32-rne-once/v1",
+              "PathID": "software-fma32/v1",
+              "VectorPathID": "vector-fma32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "muladd-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-muladd-fused-rne-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-muladd-float32-v1/rounding",
+              "SHA256": "20a15b3fb90bbfa98a3b4343d2f7da9a567dc95b40f1fff4baadbc9712297995"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 366.6666666666667,
+        "DurationNS": 1100,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2792.7272727272725,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkMulAdd/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "10a2f59c04b460c983403ab5003448c2325714529bf7f83e9d839f7a0a629949",
+        "Key": {
+          "RunID": "benchmark-20261104-152911-751384452",
+          "EnvironmentID": "benchmark-20261104-152911-751384452/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-muladd-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "ieee754-binary32-rne-once/v1",
+              "PathID": "software-fma32/v1",
+              "VectorPathID": "vector-fma32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "muladd-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-muladd-fused-rne-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-muladd-float32-v1/rounding",
+              "SHA256": "20a15b3fb90bbfa98a3b4343d2f7da9a567dc95b40f1fff4baadbc9712297995"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 400,
+        "DurationNS": 1200,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 2560,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkMulAdd/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "10a2f59c04b460c983403ab5003448c2325714529bf7f83e9d839f7a0a629949",
+        "Key": {
+          "RunID": "benchmark-20261104-152911-751384452",
+          "EnvironmentID": "benchmark-20261104-152911-751384452/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-muladd-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "ieee754-binary32-rne-once/v1",
+              "PathID": "vector-fma32/v1",
+              "VectorPathID": "vector-fma32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "muladd-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-muladd-fused-rne-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-muladd-float32-v1/rounding",
+              "SHA256": "20a15b3fb90bbfa98a3b4343d2f7da9a567dc95b40f1fff4baadbc9712297995"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 7680,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkMulAdd/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "10a2f59c04b460c983403ab5003448c2325714529bf7f83e9d839f7a0a629949",
+        "Key": {
+          "RunID": "benchmark-20261104-152911-751384452",
+          "EnvironmentID": "benchmark-20261104-152911-751384452/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-muladd-fma/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "FMA": {
+              "RoundingID": "ieee754-binary32-rne-once/v1",
+              "PathID": "vector-fma32/v1",
+              "VectorPathID": "vector-fma32/v1",
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "muladd-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-muladd-fused-rne-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-muladd-float32-v1/rounding",
+              "SHA256": "20a15b3fb90bbfa98a3b4343d2f7da9a567dc95b40f1fff4baadbc9712297995"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 10240,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkMulAdd/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

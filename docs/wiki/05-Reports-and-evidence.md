@@ -228,3 +228,10 @@ it need not equal the input hash. The default standalone-clamp/v1 and developer
 legacy-report-clamp/v1 boundaries include all validation/broadcasts/repairs/stores.
 Native import requires positive integral child lanes and eight complete digest
 words. Different policies/widths cannot pool silently. See [clamp](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
+
+
+## MulAdd evidence
+
+The [MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) covers three real operand arrays, a full output digest,
+16*n traffic, actual FMA gate/path/width and matched timed work. Use
+`go run ./examples/muladd` for the module-local four-slice API.
