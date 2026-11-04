@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"sync"
@@ -16,6 +17,20 @@ var sink float32
 var byteSink []uint8
 
 func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
+	return (Testing{}).MeasureContext(context.Background(), p, benchtime)
+}
+
+// MeasureContext observes cancellation before and after acquiring the shared
+// testing configuration lock. It intentionally does not add context checks to
+// the timed benchmark loop; ExecuteContext observes cancellation after a
+// completed sample, while an isolated worker can be terminated for a hard stop.
+func (Testing) MeasureContext(ctx context.Context, p Prepared, benchtime string) (Sample, error) {
+	if ctx == nil {
+		return Sample{}, fmt.Errorf("nil measurement context")
+	}
+	if err := ctx.Err(); err != nil {
+		return Sample{}, err
+	}
 	if err := (Config{Count: 1, Benchtime: benchtime}).Validate(); err != nil {
 		return Sample{}, err
 	}
@@ -29,6 +44,9 @@ func (Testing) Measure(p Prepared, benchtime string) (Sample, error) {
 	}
 	benchmarkMu.Lock()
 	defer benchmarkMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return Sample{}, err
+	}
 	testing.Init()
 	timing := flag.Lookup("test.benchtime")
 	previous := timing.Value.String()
