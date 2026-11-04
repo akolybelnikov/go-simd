@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if operation.Descriptor.ID == catalog.Copy64 {
+		benchmarkCopy64(b, operation)
+		return
+	}
 	if operation.Descriptor.ID == catalog.Clmul64 {
 		benchmarkClmul64(b, operation)
 		return

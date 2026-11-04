@@ -1,46 +1,12 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
-Current extension: [sum8](F004-sum8.md), 21 operations / 53 implementations. Original acceptance counts below remain historical.
-
-Current extension: [opaque XOR](F004-xor-bits.md) brings the catalogue to
-twenty operations/fifty-one implementations. Earlier counts below remain historical.
-
-Current extension: [exact bit roundtrip](F004-bit-roundtrip.md) brings the
-catalogue to nineteen operations/forty-nine implementations. Earlier counts
-below remain historical.
-
-Current extension: [uint8 saturation](F004-saturating-add8.md) brings the
-catalogue to eighteen operations/forty-seven implementations. Original baseline
-and earlier extension counts below remain historical.
-
-Current extension: [Float64 addition](F004-addition64.md) follows MulAdd and
-brings the current catalogue to seventeen operations/forty-five implementations.
-Original baseline and earlier extension counts below remain historical.
-
-Status: **Complete for the agreed current scope**, 2026-11-04.
-See the [acceptance/closure record](F004-completion.md), [clamp contract](F004-clamp.md) and
-[complete baseline API coverage ledger](F004-api-coverage.md).
-Architecture M0-M3 are complete. F004 adds scale, affine, threshold, selection,
-rangefilter, sum, dot, fused affine, fused dot, byte/packed predicate export and copy, then ordered clamp. The catalogue totals fifteen operations/forty-one implementations.
-See the [broadcast/predicate record](F004-broadcast-predicates.md) and
-[sum record](F004-sum.md) and [dot implementation/acceptance record](F004-dot.md).
-[Accumulator comparison record](F004-accumulators.md) adds two/four-vector
-strategies. The [fused-affine record](F004-fma.md) adds one-rounding binary32
-arithmetic with corrected software and gated vector paths. The [fused-dot record](F004-fused-dot.md)
-adds FMA updates with ordinary merge/fold additions and actual per-case paths.
-[Predicate export](F004-predicate-export.md) adds canonical uint8 output with conversion/storage timed.
-[Packed export](F004-packed-predicate.md) adds LSB-first bits, normalized padding,
-physical output extents and timed packing. [Copy](F004-copy.md) adds an exact-bit
-movement baseline with Go's built-in control. [Clamp](F004-clamp.md) completes the current
-scope with branch, selection and repaired Min/Max strategies. Three-array MulAdd,
-reordering, conversions and other input types are optional follow-on work.
-
-## Shipped extensions after baseline closure
-
-[Three-array MulAdd](F004-muladd.md) adds two implementations after clamp,
-bringing the current catalogue to sixteen operations/forty-three implementations.
-The plan/history below describes the original baseline; references to planned
-MulAdd are superseded by its shipped extension record.
+Current catalogue: **23 operations / 58 implementations**. The agreed original
+15/41 scope and the bounded eight-operation continuation are delivered. See the
+[completion audit and current contract index](F004-completion.md),
+[SDK source-use ledger](F004-api-coverage.md) and individual extension contracts.
+The proposal history below explains the baseline design; historical future/stop
+statements do not override the delivered catalogue. Additional operations require
+a new selected contract; complete SDK/ISA coverage is still optional.
 
 ## Purpose and evidence
 

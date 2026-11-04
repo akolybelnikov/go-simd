@@ -4,7 +4,7 @@ Learn to run, understand, and extend a small Go SIMD experiment laboratory.
 Start with a smoke measurement, learn the comparison boundaries, then design a
 repeatable experiment on your own toolchain and machine.
 
-**Guide baseline:** architecture M3 / completed F004 baseline plus MulAdd/Float64/Uint8/representation extensions, reviewed 2026-11-04.
+**Guide baseline:** architecture M3 / F004 baseline plus eight delivered extensions, 23 operations / 58 implementations, reviewed 2026-11-04.
 Command names and examples describe implemented behavior. Future work is marked
 explicitly. This guide grows alongside each delivered feature.
 
@@ -40,6 +40,9 @@ explicitly. This guide grows alongside each delivered feature.
 | Add uint8 values with saturation instead of wraparound | [26 — Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) |
 | Preserve every float32 bit through integer reinterpretation | [27 — Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) |
 | Apply exact word XOR to float32 sign/exponent/payload bits | [28 — XOR of float32 bit patterns](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) |
+| Fold fixed blocks of eight values with matched ordering | [29 — Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) |
+| Multiply binary polynomials modulo x^64 | [30 — Carryless multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) |
+| Move exact binary64 representations | [31 — Exact Float64 copy](https://github.com/akolybelnikov/go-simd/wiki/31-Exact-Float64-copy) |
 
 ## What you can do today
 
@@ -121,15 +124,9 @@ useful repeated measurement.
 
 | 2026-11-04 | F004 bit roundtrip: exact Float32/Uint32 reinterpretation, all NaN/zero bits, full output evidence and instruction-selection interpretation; nineteen operations/forty-nine implementations |
 
-| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty-two operations/fifty-five implementations |
+| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty-three operations/fifty-eight implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),
 [migration checkpoints](https://github.com/akolybelnikov/go-simd/blob/main/docs/migration/README.md),
 [issues](https://github.com/akolybelnikov/go-simd/issues).
-
-
-- [29 · Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum)
-
-
-- [30 · Carryless polynomial multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication)

@@ -4,6 +4,11 @@ Baseline: M3 / F004 complete for current scope, reviewed 2026-11-04. Installed b
 Go/Make examples run from the checkout with `GOEXPERIMENT=simd`. The same CLI
 flags work through every launcher.
 
+Jump to [launchers](#pick-a-task), [shared flags and operation table](#shared-options-both-commands),
+[fixture options](#fixture-and-parameter-options-both-commands),
+[reports](#repeated-reports-simdreport), [install/remote](#build-install-and-run-remotely)
+or [Make targets](#complete-make-catalogue).
+
 ## Pick a task
 
 | Task | Installed / on PATH | Go from checkout | Make from checkout |
@@ -34,10 +39,10 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all twenty-two groups. Positional arguments are
+group. No explicit selection means all twenty-three groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact twenty-two-row operation table.
+`-list` prints runtime context and a compact twenty-three-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
@@ -79,7 +84,7 @@ text, not a versioned machine-data export.
 | `-lower`, `-upper` | `-1`, `1` | Exclusive rangefilter bounds; inclusive clamp bounds |
 | `-pattern` | `alternating` | none/all/alternating/clustered/shuffled predicate or clipped-position arrangement |
 | `-seed` | `42` | Deterministic shuffled pattern seed |
-| `-sum-input` | `balanced` | Sum fixture: balanced, cancellation, mixed-magnitude |
+| `-sum-input` | `balanced` | Sum/sum8 fixture: balanced, cancellation, mixed-magnitude |
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
 | `-fma-input` | `balanced` | Fused affine/muladd fixture: balanced, rounding, mixed-magnitude |
 
@@ -97,7 +102,7 @@ approximately 50%. NaNs remain unchanged and count as unclipped. Reversed/NaN
 bounds fail before artifacts; [-Inf,+Inf] requires `-pattern none`. SIMDMinMax
 includes all signed-zero/tie/NaN repairs in timing. See [clamp examples](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
 
-Sum uses only `-sum-input`; other fixture/parameter settings do not alter its
+Sum and sum8 use only `-sum-input`; other fixture/parameter settings do not alter its
 input identity. See [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 for exact fold orders, cancellation examples and retained scalar-result bits.
 
@@ -324,6 +329,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `copy64` | `BenchmarkCopy64` | `Scalar`, `GoCopy`, `SIMDPartial`; exact binary64 bits, 16*n logical bytes |
 | `clmul64` | `BenchmarkClmul64` | `Scalar`, `SIMDPartial`; low64 GF(2) product, SDK capability retained |
 | `sum8` | `BenchmarkSum8` | `Scalar`, `SIMDPartial`; fixed eight-input pair/fold, +0 padding |
 | `xorbits` | `BenchmarkXorBits` | `Scalar`, `SIMDPartial`; exact XOR of opaque float32 words |
@@ -554,3 +560,8 @@ Use `-group sum8` with existing `-sum-input` recipes. Logical work is `4*n+4*cei
 
 
 Carryless multiplication uses `-group clmul64`, true uint64 arrays and `24*n` logical bytes. [The carryless guide](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) explains the result, lane extraction and capability evidence. Identical flags work with installed, Go and Make launchers; use `go run ./examples/clmul64` for 3 times 3 = 5.
+
+
+## Exact Float64 copy
+
+Use `-group copy64` with no new flags. `16*n` logical bytes cover one binary64 read/write; raw payload bits are preserved. [The copy64 guide](https://github.com/akolybelnikov/go-simd/wiki/31-Exact-Float64-copy) gives identical installed/Go/Make examples, contracts and evidence.

@@ -26,8 +26,8 @@ SDK baseline; another Go version or target must be inventoried independently.
 | Infrastructure used | 7 | Live sizing/runtime metadata, rather than arithmetic experiments. |
 | Utility outside scope | 20 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
 
-Float32, float64, uint8 and uint64 are CLI input types; the latter two initially support
-addition, saturating addition and low64 carryless products respectively. Int32s is used solely for predicate export
+Float32, float64, uint8 and uint64 are CLI input types; Float64 supports addition/copy,
+uint8 supports saturation and uint64 supports low64 carryless products. Int32s is used solely for predicate export
 scratch, Uint32s is an internal bit-reinterpretation/logic vector, and Mask32s is
 internal comparison state. Uint8s saturation now uses real byte inputs; predicate export remains distinct. FMA availability remains gated by its verified
 reference and actual path; SDK emulation is recorded separately.

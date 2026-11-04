@@ -155,6 +155,9 @@ func (o Options) Generator(op catalog.Operation) string {
 	if op.ID == catalog.Clmul64 {
 		return Clmul64GeneratorID
 	}
+	if op.ID == catalog.Copy64 {
+		return Copy64GeneratorID
+	}
 	if op.ID == catalog.Add64 {
 		return Addition64GeneratorID
 	}
@@ -354,6 +357,9 @@ func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
 	}
 	if op.ID == catalog.Clmul64 {
 		return Clmul64Fingerprint(n)
+	}
+	if op.ID == catalog.Copy64 {
+		return Copy64Fingerprint(n)
 	}
 	if op.ID == catalog.Add64 {
 		return Addition64Fingerprint(n)

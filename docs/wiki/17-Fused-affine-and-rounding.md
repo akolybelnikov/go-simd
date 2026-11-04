@@ -1,8 +1,8 @@
 # 17 — Fused affine and float32 rounding
 
-Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has twenty-two operations/fifty-one
-implementations; future/stop statements below describe this earlier checkpoint.
+Current catalogue: **23 operations / 58 implementations**. Counts and stop
+statements below describe this chapter’s historical delivery checkpoint. See
+[the current contract index](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-completion.md).
 
 The affinefma group computes alpha*x+beta with one final float32 rounding.
 Existing affine still rounds its product before addition; dot remains unfused.

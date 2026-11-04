@@ -2,7 +2,7 @@
 
 bitroundtrip adds an exact Float32→Uint32→Float32 representation path. The
 roundtrip checkpoint brought the catalogue to **nineteen operations and forty-nine
-implementations**. [XOR bits](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) now brings it to twenty/fifty-one.
+implementations**. The current catalogue is 23 operations /58 implementations; earlier counts describe delivery checkpoints.
 This is bit reinterpretation, not numeric conversion: the result retains the
 same 32-bit representation, including NaN payloads and signed zero.
 

@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
 **Status:** F004 complete for the agreed current scope, including clamp; reviewed 2026-11-04.
-The lab has twenty-two operations/fifty-five implementations. The
+The lab has twenty-three operations/fifty-eight implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -23,15 +23,15 @@ The small numerical sketches below are our own planning examples.
 
 | Pattern | Current lab coverage | Useful proposed experiment |
 | --- | --- | --- |
-| Contiguous loads/stores and partial/scalar tails | Implemented exact copy with source loop, Go built-in and partial/tail SIMD controls | Compare explicit movement with compiler/runtime copy across working sets; 8*n logical bytes |
+| Contiguous loads/stores and partial/scalar tails | Implemented exact copy with source loop, Go built-in and partial/tail SIMD controls | Float32 copy uses 8*n and Float64 copy64 uses 16*n logical bytes |
 | Broadcast constants | Scale/affine implemented | Compare per-call broadcasts and matched scalar controls |
 | Comparisons and mask logic | Threshold/selection/rangefilter plus canonical byte and packed predicate export implemented | Distribution/seed controls, range-mask And, clamp Or and timed normalization/extraction/packing/stores |
 | Masking and conditional selection | Masked/IfElse outputs implemented | Threshold-to-zero and bit-preserving two-array selection |
 | Min/max clamp | Implemented clamp Scalar/SIMDPartial/SIMDMinMax | Ordered inclusive bounds with timed repairs for exact NaN/tie/signed-zero bits |
 | Streaming accumulation | Sum, unfused dot and fused dot with 1/2/4 independent accumulators and explicit merge/fold implemented | Keep fusion, order, width and count as distinct numerical identities |
 | Explicit FMA | Fused affine and dotfma implemented with corrected binary32 updates and actual vector/software/tail paths | Existing affine/dot stay unfused; three-array MulAdd now has its own implemented contract |
-| Permutes, horizontal folds, extraction | Sum includes portable store/fold cost; no isolated lane-rearrangement study | An explicitly scoped architecture-specific experiment |
-| Conversion, bit representation, saturation | Predicate export includes 0/1 conversion/narrowing; standalone value/bit/saturation studies pending | Keep canonical byte output distinct from packed bits and raw mask storage |
+| Permutes, horizontal folds, extraction | Sum and sum8 include portable store/fold cost; fixed-eight output order is explicit | An explicitly scoped architecture-specific experiment |
+| Conversion, bit representation, saturation | Predicate export includes 0/1 conversion/narrowing; exact bit roundtrip/XOR and true uint8 saturation implemented; numeric value conversion pending | Keep canonical byte output distinct from packed bits and raw mask storage |
 
 The agreed behavioral scope is complete. Future extensions can be chosen by
 workload or learning value; complete SDK coverage remains optional. See the [tracked F004 plan](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/F004-operation-patterns.md)

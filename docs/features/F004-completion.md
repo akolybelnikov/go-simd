@@ -1,24 +1,24 @@
 # F004 completion — Agreed experimental scope
 
-Current extension: [sum8](F004-sum8.md), 21 operations / 53 implementations. Original acceptance counts below remain historical.
+Current catalogue: **23 operations / 58 implementations**, after eight separately
+delivered extensions. The original 15/41 acceptance audit below remains historical;
+only unimplemented operations remain in the local future F004 tracker.
 
-Current extension: [opaque XOR](F004-xor-bits.md) brings the catalogue to
-twenty operations/fifty-one implementations. Earlier counts below remain historical.
+| Group | Implementations | Contract |
+| --- | --- | --- |
+| `muladd` | 2 | [Three-array fused multiply-add](F004-muladd.md) |
+| `addition64` | 2 | [Float64 addition](F004-addition64.md) |
+| `saturatingadd8` | 2 | [Uint8 saturating addition](F004-saturating-add8.md) |
+| `bitroundtrip` | 2 | [Exact bit reinterpretation](F004-bit-roundtrip.md) |
+| `xorbits` | 2 | [Opaque Float32 word XOR](F004-xor-bits.md) |
+| `sum8` | 2 | [Fixed-eight-input horizontal sum](F004-sum8.md) |
+| `clmul64` | 2 | [Low64 carryless polynomial multiplication](F004-clmul64.md) |
+| `copy64` | 3 | [Exact Float64 copy](F004-copy64.md) |
 
-Current extension: [exact bit roundtrip](F004-bit-roundtrip.md) brings the
-catalogue to nineteen operations/forty-nine implementations. Earlier counts
-below remain historical.
-
-Current extension: [uint8 saturation](F004-saturating-add8.md) brings the
-catalogue to eighteen operations/forty-seven implementations. Original baseline
-and earlier extension counts below remain historical.
-
-Current extension: [Float64 addition](F004-addition64.md) follows MulAdd and
-brings the current catalogue to seventeen operations/forty-five implementations.
-Original baseline and earlier extension counts below remain historical.
+## Original 15/41 acceptance checkpoint
 
 **Complete for the agreed current scope, 2026-11-04.** Final slice 8 is ordered
-clamp. The catalogue contains **15 operations / 41 implementations**. No further
+clamp. The catalogue at this checkpoint contained **15 operations / 41 implementations**. No further
 slice is required to close this checkpoint. Complete SDK/ISA coverage remains
 a future vision, with every selected baseline declaration accounted for in the
 [API coverage ledger](F004-api-coverage.md).
@@ -68,12 +68,6 @@ The reusable checklist in the [plan](F004-operation-patterns.md) remains a templ
 for new experiments, rather than unfinished acceptance work in this checkpoint.
 Retained tiny fixed-iteration [captures](evidence/README.md) verify evidence
 plumbing; they establish no cross-machine speedup or accuracy ranking.
-
-## Subsequent extensions
-
-[Three-array MulAdd](F004-muladd.md) subsequently shipped under explicit user
-authorization, bringing the current catalogue to sixteen operations/forty-three
-implementations. This audit preserves the original fifteen/forty-one closure.
 
 ## Optional work after this stopping point (historical)
 

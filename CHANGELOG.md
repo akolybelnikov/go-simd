@@ -5,6 +5,23 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Exact Float64 copy and continuation closure — 2026-11-04
+
+- Add copy64 Scalar/GoCopy/SIMDPartial: true unary binary64 movement preserving
+  every bit, including signaling NaN payloads. Catalogue: 23 operations /
+  58 implementations. Time validation and actual-width movement with 16*n bytes.
+- Add a unary Float64 binding, dedicated native/compiled harnesses and complete
+  input/output digests, reusing the typed retained adapter. Reject missing
+  native/capture width/output facts; use source-loop comparison baseline.
+- Test raw special/random words, tails, aliases/canaries/errors/allocations,
+  input preservation, quick/plan/worker integration, native/compiled/emulated
+  parity and all-group standalone execution. Add CI smoke, example, Wiki31 and
+  normal/emulated captures. Preserve original kernels/timed callbacks.
+- Consolidate README/Wiki catalogue counts and navigation, retain article credit
+  and historical baseline acceptance, and close the bounded eight-operation
+  continuation. Move completed local plans into implemented, refresh links and
+  leave only unimplemented operation variants in future F004.
+
 ### F004 extension — Low64 carryless multiplication — 2026-11-04
 
 - Add clmul64 Scalar/SIMDPartial on true uint64 arrays: exact GF(2) product

@@ -117,6 +117,12 @@ func validateObservations(capture Capture) error {
 		if key.Case.OperationID == "" || key.Case.TypeID == "" || key.Case.StrategyID == "" || key.Case.Elements < 1 || key.Case.Input.GeneratorID == "" {
 			return readError("invalid_observation", "observation %d case identity is incomplete", index)
 		}
+		if key.Case.OperationID == catalog.Copy64 {
+			v := key.Case.Vector
+			if !v.NativeLanes.Known || v.NativeLanes.Value < 1 || observation.ArrayResultSHA256 == "" {
+				return readError("invalid_copy64_evidence", "observation %d copy64 width/output is incomplete", index)
+			}
+		}
 		if key.Case.OperationID == catalog.Clmul64 {
 			v := key.Case.Vector
 			n := v.NativeLanes.Value

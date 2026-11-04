@@ -226,6 +226,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 		} else if descriptor.ID == catalog.SaturatingAdd8 {
 			byteA, byteB, byteOut = input.MakeSaturatingAdd8(size)
 			resultOut = nil
+		} else if descriptor.ID == catalog.Copy64 {
+			doubleA, doubleOut = input.MakeCopy64(size)
+			resultOut = nil
 		} else if descriptor.ID == catalog.Add64 {
 			doubleA, doubleB, doubleOut = input.MakeAddition64(size)
 			resultOut = nil
@@ -238,6 +241,9 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			x, y, resultOut = a, b, out
 		}
 		item := benchmarkGroup{name: descriptor.Title, logicalBytes: bytes, output: resultOut, typeID: descriptor.TypeID, uint64Output: wordOut, float64Output: doubleOut, byteOutput: byteOut}
+		if descriptor.ID == catalog.Copy64 {
+			item.name += "\nfixture: " + options.Generator(descriptor) + "; true unary float64; exact bits; GoCopy compiler/runtime control; logical traffic 16*n"
+		}
 		if descriptor.ID == catalog.Add64 {
 			item.name += "\nfixture: " + options.Generator(descriptor) + "; actual float64 lanes; logical traffic 24*n"
 		}
@@ -290,6 +296,10 @@ func benchmarkGroupsForSize(group string, size int, a, b, out []float32, options
 			}
 			if implementation.BindUint64 != nil {
 				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUint64(wordA, wordB, wordOut)})
+				continue
+			}
+			if implementation.BindUnaryFloat64 != nil {
+				item.variants = append(item.variants, variant{name: implementation.Descriptor.Label, run: implementation.BindUnaryFloat64(doubleA, doubleOut)})
 				continue
 			}
 			if implementation.BindFloat64 != nil {

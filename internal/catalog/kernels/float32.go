@@ -16,6 +16,7 @@ type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
+	BindUnaryFloat64  func(x, out []float64) func() error
 	BindUint64        func(a, b, out []uint64) func() error
 	BindByteArrays    func(a, b, out []uint8) func() error
 	BindFloat64       func(a, b, out []float64) func() error
@@ -77,6 +78,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.Copy64 {
+			bind, ok := copy64Bindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing copy64 binding")
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUnaryFloat64: bind})
+			continue
+		}
 		if descriptor.ID == catalog.Clmul64 {
 			bind, ok := clmul64Bindings[variant.ID]
 			if !ok {

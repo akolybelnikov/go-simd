@@ -1,16 +1,17 @@
 # 04 — Operation and kernel guide
 
-The lab contains twenty-two operations and fifty-five implementations: eighteen operations on `float32`
-inputs, one float64 addition and one uint8 saturation operation. Float32 inputs provide twelve arithmetic/selection/clipping/representation float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
-one, two or three declared inputs, scalar parameters where needed and a caller-provided
-output slice of their declared type. Predicate export writes canonical uint8 0/1.
-Sum accepts one input and returns one float32; dot/dotfma accept two
-inputs and returns a float32 plus a length-validation error.
+The catalogue has **23 operations / 58 implementations**: nineteen operations
+take float32 inputs, two take float64 (addition/copy), one takes uint8
+(saturating addition) and one takes uint64 (carryless low64 products). Outputs
+include full arrays, ceil(n/8) fixed-block sums, canonical/packed predicate bytes
+and scalar sum/dot results. Each operation declares its arity, output shape,
+numerical policy and logical traffic in `-list -group <name>`.
 
 ## Complete kernel reference
 
 | Package | Function | Benchmark label | What it does |
 | --- | --- | --- | --- |
+| `internal/movement` | `Copy64Scalar` / `Copy64Go` / `Copy64SIMD(x,out []float64) error` | Scalar / GoCopy / SIMDPartial | Exact binary64 payload bits, 16*n logical bytes |
 | `internal/integer` | `SaturatingAdd8Scalar` / `SaturatingAdd8SIMD(a,b,out []uint8) error` | Scalar / SIMDPartial | min(a+b,255), true byte arrays and full numeric output |
 | `internal/addition` | `Add64Scalar` / `Add64SIMD(a,b,out []float64) error` | Scalar / SIMDPartial | Binary64 addition, true arrays, bounded actual-width loads/stores |
 | `internal/addition` | `AddScalar(a, b, out []float32) error` | `Scalar` | Ordinary loop computing `a[i] + b[i]` |

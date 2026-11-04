@@ -374,3 +374,14 @@ uncommitted carryless changes. All full output digests agree. Samples/timestamps
 retained; no speed claim. Reproduce with `go run ./cmd/simdreport -group clmul64
 -bench '^BenchmarkClmul64$/^n=64$' -count 2 -benchtime 3x -format md`, then repeat
 with `GODEBUG=simd=0`.
+
+
+## Exact Float64 copy
+
+[Normal](copy64-vector.measurements.json) and [SDK-emulated](copy64-sdk-emulated.measurements.json)
+retain six observations each, n=64, count 2, 3x, three strategies. All complete
+output/input hashes agree. Windows/amd64 Go1.27.3-X:simd, source base 8b92395 plus
+uncommitted copy64 changes. Original samples/IDs/timestamps retained; no speed
+claim. Reproduce with `go run ./cmd/simdreport -group copy64 -bench
+'^BenchmarkCopy64$/^n=64$' -count 2 -benchtime 3x -format md`, and repeat with
+`GODEBUG=simd=0`.

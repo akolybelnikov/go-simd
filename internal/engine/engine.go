@@ -168,6 +168,10 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			} else if c.Operation.ID == catalog.SaturatingAdd8 {
 				byteA, byteB, byteOut = input.MakeSaturatingAdd8(c.Elements)
 				fingerprint = input.FingerprintUint8(byteA, byteB)
+			} else if c.Operation.ID == catalog.Copy64 {
+				doubleA, doubleOut = input.MakeCopy64(c.Elements)
+				doubleB = nil
+				fingerprint = input.FingerprintFloat64(doubleA, nil)
 			} else if c.Operation.ID == catalog.Add64 {
 				doubleA, doubleB, doubleOut = input.MakeAddition64(c.Elements)
 				fingerprint = input.FingerprintFloat64(doubleA, doubleB)
@@ -199,6 +203,11 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			prepared.Run = c.Implementation.BindByteArrays(byteA, byteB, byteOut)
 			prepared.Output = nil
 			prepared.ByteOutput = byteOut
+		} else if c.Operation.ID == catalog.Copy64 {
+			prepared.Run = c.Implementation.BindUnaryFloat64(doubleA, doubleOut)
+			prepared.Output = nil
+			prepared.Float64Output = doubleOut
+			prepared.RetainOutputAfterTiming = true
 		} else if c.Operation.ID == catalog.Add64 {
 			prepared.Run = c.Implementation.BindFloat64(doubleA, doubleB, doubleOut)
 			prepared.Output = nil
@@ -290,7 +299,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			identity.CarrylessCapabilityID = result.CarrylessCapability(simd.HasHardwareCarrylessMultiply())
 			key.Case.Vector = identity
 		}
-		if c.Operation.ID == catalog.Add64 {
+		if c.Operation.TypeID == catalog.Float64 {
 			var vector simd.Float64s
 			identity, err := result.NewVectorIdentity(vector.Len())
 			if err != nil {
@@ -373,7 +382,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			if c.Operation.ID == catalog.Clmul64 {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintUint64(wordOut, nil)
 			}
-			if c.Operation.ID == catalog.Add64 {
+			if c.Operation.TypeID == catalog.Float64 {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat64(doubleOut, nil)
 			}
 			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp || c.Operation.ID == catalog.MulAdd || c.Operation.ID == catalog.BitRoundTrip || c.Operation.ID == catalog.XorBits || c.Operation.ID == catalog.Sum8 {
