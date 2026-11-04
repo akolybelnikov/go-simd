@@ -1,7 +1,8 @@
 # 24 — Three-array fused multiply-add
 
-The muladd group extends the completed F004 baseline. The current catalogue has
-**sixteen operations and forty-three implementations**. This experiment streams
+The muladd group extends the completed F004 baseline. That extension brought the catalogue to
+**sixteen operations and forty-three implementations**. [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition)
+now brings the current catalogue to seventeen/forty-five. This experiment streams
 three float32 input arrays and computes out[i]=round32(a[i]*b[i]+c[i]) with one
 rounding. There are no broadcast coefficients and no reduction fold.
 

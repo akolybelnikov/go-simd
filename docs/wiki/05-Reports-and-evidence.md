@@ -235,3 +235,11 @@ words. Different policies/widths cannot pool silently. See [clamp](https://githu
 The [MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) covers three real operand arrays, a full output digest,
 16*n traffic, actual FMA gate/path/width and matched timed work. Use
 `go run ./examples/muladd` for the module-local four-slice API.
+
+
+## Float64 addition
+
+[Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) uses true []float64 inputs/output and retains complete
+little-endian binary64 fingerprints/digests. Case.Vector.NativeLanes is the actual
+Float64 width; the machine float32_lanes field retains its separate meaning.
+Use `go run ./examples/addition64`; logical work is 24*n.

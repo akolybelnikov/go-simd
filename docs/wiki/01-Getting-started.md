@@ -81,7 +81,7 @@ The test suite includes short real report exports; it is not only kernel tests.
 `-list` shows this process's Go/platform, vector width/lanes, emulation flag and
 GOMAXPROCS, followed by the implemented operations and strategies. It allocates
 no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Sixteen operations/forty-three implementations
+or any group in the compact catalogue. Seventeen operations/forty-five implementations
 are registered. Use `-list -group <name>` for parameters and full details.
 
 Use `go test -race ./...` where the host C toolchain supports race builds. Linux
@@ -90,7 +90,8 @@ that can occur before the project's tests execute; see troubleshooting.
 
 ## 5. Run the small code example
 
-The current catalogue contains sixteen operations and forty-three implementations.
+The current catalogue contains seventeen operations and forty-five implementations.
+Use -group addition64 for true float64 inputs; see [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition).
 F004 is complete for the agreed current scope; run `go run ./examples/clamp` for
 ordered clipping and see [the closure boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features).
 Run `go run ./examples/copy` for exact-bit copies and the Go built-in control;

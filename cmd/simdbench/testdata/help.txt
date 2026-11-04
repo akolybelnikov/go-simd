@@ -1,6 +1,6 @@
 Usage: simdbench [flags]
 
-Quick comparison on 1,048,576 float32 elements; -list inspects without measuring.
+Quick comparison on 1,048,576 elements; -list inspects without measuring.
 
 Options:
   -addition

@@ -1,7 +1,7 @@
 # 04 — Operation and kernel guide
 
-The lab contains sixteen operations and forty-three implementations on `float32`
-inputs: ten arithmetic/selection/clipping float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
+The lab contains seventeen operations and forty-five implementations: sixteen operations on `float32`
+inputs and one float64 addition operation. Float32 inputs provide ten arithmetic/selection/clipping float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
 one, two or three declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.
 Sum accepts one input and returns one float32; dot/dotfma accept two
@@ -11,6 +11,7 @@ inputs and returns a float32 plus a length-validation error.
 
 | Package | Function | Benchmark label | What it does |
 | --- | --- | --- | --- |
+| `internal/addition` | `Add64Scalar` / `Add64SIMD(a,b,out []float64) error` | Scalar / SIMDPartial | Binary64 addition, true arrays, bounded actual-width loads/stores |
 | `internal/addition` | `AddScalar(a, b, out []float32) error` | `Scalar` | Ordinary loop computing `a[i] + b[i]` |
 | `internal/addition` | `AddSIMD(a, b, out []float32) error` | `SIMDPartial` | Partial-vector loads/stores throughout the slice |
 | `internal/addition` | `AddSIMDVectorTail(a, b, out []float32) error` | `SIMDTail` | Full SIMD vectors followed by a scalar remainder |

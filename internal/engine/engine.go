@@ -97,6 +97,7 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 }
 
 type Prepared struct {
+	Float64Output           []float64
 	RetainOutputAfterTiming bool
 	ByteOutput              []uint8
 	ReduceChecked           func() (float32, error)
@@ -149,6 +150,7 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 	}
 	procs := runtime.GOMAXPROCS(0)
 	var a, b, third, out []float32
+	var doubleA, doubleB, doubleOut []float64
 	var byteOut []uint8
 	var scalar float32
 	previous := -1
@@ -158,7 +160,10 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			return run, fmt.Errorf("before %s: %w", c.Name, err)
 		}
 		if c.Elements != previous {
-			if c.Operation.ID == catalog.MulAdd {
+			if c.Operation.ID == catalog.Add64 {
+				doubleA, doubleB, doubleOut = input.MakeAddition64(c.Elements)
+				fingerprint = input.FingerprintFloat64(doubleA, doubleB)
+			} else if c.Operation.ID == catalog.MulAdd {
 				a, b, third, out = input.MakeMulAdd(c.Elements, plan.Input)
 				fingerprint = input.FingerprintTernaryFloat32(a, b, third)
 			} else {
@@ -177,7 +182,12 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 		// Original native benchmarks retain the same callback -> typed function
 		// pointer shape. The standalone harness has its own versioned identity.
 		prepared := Prepared{Run: func() error { return c.Implementation.Run(a, b, out) }, Output: out, Bytes: c.Bytes}
-		if c.Operation.ID == catalog.MulAdd {
+		if c.Operation.ID == catalog.Add64 {
+			prepared.Run = c.Implementation.BindFloat64(doubleA, doubleB, doubleOut)
+			prepared.Output = nil
+			prepared.Float64Output = doubleOut
+			prepared.RetainOutputAfterTiming = true
+		} else if c.Operation.ID == catalog.MulAdd {
 			prepared.Run = c.Implementation.BindTernary(a, b, third, out)
 			prepared.RetainOutputAfterTiming = true
 		} else if c.Operation.ID == catalog.Copy {
@@ -234,6 +244,14 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 				return run, err
 			}
 			key.Case.Predicate = identity
+		}
+		if c.Operation.ID == catalog.Add64 {
+			var vector simd.Float64s
+			identity, err := result.NewVectorIdentity(vector.Len())
+			if err != nil {
+				return run, err
+			}
+			key.Case.Vector = identity
 		}
 		if c.Operation.ID == catalog.Copy {
 			var vector simd.Float32s
@@ -299,6 +317,9 @@ func ExecuteObserved(ctx context.Context, plan Plan, run result.Run, backend Bac
 			if c.Operation.ByteResult() {
 				digest := sha256.Sum256(byteOut)
 				run.Observations[len(run.Observations)-1].ByteResultSHA256 = fmt.Sprintf("%x", digest)
+			}
+			if c.Operation.ID == catalog.Add64 {
+				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat64(doubleOut, nil)
 			}
 			if c.Operation.ID == catalog.Copy || c.Operation.ID == catalog.Clamp || c.Operation.ID == catalog.MulAdd {
 				run.Observations[len(run.Observations)-1].ArrayResultSHA256 = input.FingerprintFloat32(out, nil)

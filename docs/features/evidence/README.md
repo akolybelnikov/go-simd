@@ -1,5 +1,26 @@
 # F004 smoke evidence
 
+## Float64 addition extension — 2026-11-04
+
+The addition64 normal/emulated captures each retain four observations, n=64,
+count2, 3x, fixed generated-addition-float64-v1 inputs. Full output digests agree.
+Windows/amd64, Go1.27.3-X:simd, GOMAXPROCS16; normal 256 bits with four Float64
+lanes, emulated 128 bits with two. Base 8a59a63 plus uncommitted Float64 changes;
+missing embedded VCS facts remain unknown. Original samples/run IDs/timestamps
+are retained; LF/trailing whitespace normalized. These are plumbing checks.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/float64-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/float64-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+See [the binary64 contract](../F004-addition64.md) and its bounded SDK partial-load
+workaround. Machine float32_lanes and per-case Float64 lanes are distinct facts.
+
+
 ## Three-array MulAdd extension — 2026-11-04
 
 Normal/emulated muladd captures each retain four observations, n=64, rounding

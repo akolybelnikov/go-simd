@@ -1,5 +1,9 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
+Current extension: [Float64 addition](F004-addition64.md) follows MulAdd and
+brings the current catalogue to seventeen operations/forty-five implementations.
+Original baseline and earlier extension counts below remain historical.
+
 Status: **Complete for the agreed current scope**, 2026-11-04.
 See the [acceptance/closure record](F004-completion.md), [clamp contract](F004-clamp.md) and
 [complete baseline API coverage ledger](F004-api-coverage.md).

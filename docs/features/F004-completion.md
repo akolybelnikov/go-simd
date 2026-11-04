@@ -1,5 +1,9 @@
 # F004 completion — Agreed experimental scope
 
+Current extension: [Float64 addition](F004-addition64.md) follows MulAdd and
+brings the current catalogue to seventeen operations/forty-five implementations.
+Original baseline and earlier extension counts below remain historical.
+
 **Complete for the agreed current scope, 2026-11-04.** Final slice 8 is ordered
 clamp. The catalogue contains **15 operations / 41 implementations**. No further
 slice is required to close this checkpoint. Complete SDK/ISA coverage remains

@@ -29,4 +29,6 @@
 
 - [24 · Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add)
 
+- [25 · Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition)
+
 [Source](https://github.com/akolybelnikov/go-simd) · [Issues](https://github.com/akolybelnikov/go-simd/issues)

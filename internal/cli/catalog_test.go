@@ -15,7 +15,7 @@ func TestCompactCatalogue(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, op := range catalog.All() {
-		if !strings.Contains(out.String(), op.Group) || !strings.Contains(out.String(), "["+op.ID+"/float32]") {
+		if !strings.Contains(out.String(), op.Group) || !strings.Contains(out.String(), "["+op.ID+"/"+op.TypeID+"]") {
 			t.Fatal("missing compact operation")
 		}
 	}

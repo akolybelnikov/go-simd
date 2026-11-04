@@ -19,14 +19,14 @@ SDK baseline; another Go version or target must be inventoried independently.
 | Status | Declarations | Meaning |
 | --- | --- | --- |
 | Deferred bridge | 28 | To/from architecture vectors; optional gated extension. |
-| Deferred member | 292 | Separate experiment needs an explicit contract. |
-| Deferred type | 11 | No input/output kernel for that vector type. |
-| Exercised member | 20 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
-| Exercised type | 3 | Vector type used by current kernels; not a separate command. |
-| Infrastructure used | 3 | Live sizing/runtime metadata, rather than arithmetic experiments. |
-| Utility outside scope | 24 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
+| Deferred member | 289 | Separate experiment needs an explicit contract. |
+| Deferred type | 10 | No input/output kernel for that vector type. |
+| Exercised member | 23 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
+| Exercised type | 4 | Vector type used by current kernels; not a separate command. |
+| Infrastructure used | 4 | Live sizing/runtime metadata, rather than arithmetic experiments. |
+| Utility outside scope | 23 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
 
-Only float32 is a CLI input type. Int32s is used solely for predicate export
+Float32 and float64 are CLI input types, with Float64 initially limited to addition. Int32s is used solely for predicate export
 scratch, and Mask32s is internal comparison state. A uint8 output slice does not
 establish Uint8s SIMD kernels. FMA availability remains gated by its verified
 reference and actual path; SDK emulation is recorded separately.
@@ -57,7 +57,7 @@ This is source-use coverage, not proof that every SDK instruction is accelerated
 on every machine, or that all argument combinations of a method are tested.
 Deferred families include subtraction/division/sqrt, broader conversions and
 bit reinterpretation, integer shifts/saturation/carryless multiplication and
-other numeric input types. No new commands are implied by this ledger.
+further typed operations and integer input types. No new commands are implied by this ledger.
 
 ## Package types and functions
 
@@ -76,7 +76,7 @@ other numeric input types. No new commands are implied by this ledger.
 | `Emulated` | Infrastructure used | Runtime metadata in internal/platform; no throughput comparison. |
 | `Float32s` | Exercised type | Primary generated input/output and arithmetic vector. |
 | `Float32sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
-| `Float64s` | Deferred type | No admitted input/output kernel for this SDK vector type; no implicit cast advertised. |
+| `Float64s` | Exercised type | True float64 addition input/output vector; no implicit float32 widening. |
 | `Float64sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
 | `HasHardwareCarrylessMultiply` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
 | `Int16s` | Deferred type | No admitted input/output kernel for this SDK vector type; no implicit cast advertised. |
@@ -90,7 +90,7 @@ other numeric input types. No new commands are implied by this ledger.
 | `LoadFloat32s` | Exercised member | Loads or per-call broadcasts inside admitted float32 kernels. |
 | `LoadFloat32sPart` | Exercised member | Loads or per-call broadcasts inside admitted float32 kernels. |
 | `LoadFloat64s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `LoadFloat64sPart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `LoadFloat64sPart` | Exercised member | Timed bounded Float64 loads; emulated count workaround included in kernel. |
 | `LoadInt16s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `LoadInt16sPart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `LoadInt32s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
@@ -160,13 +160,13 @@ other numeric input types. No new commands are implied by this ledger.
 | Symbol | Status | Reason |
 | --- | --- | --- |
 | `Float64s.Abs` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Float64s.Add` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `Float64s.Add` | Exercised member | Timed binary64 addition in addition64. |
 | `Float64s.Div` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.Equal` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.Greater` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.GreaterEqual` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.IfElse` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Float64s.Len` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
+| `Float64s.Len` | Infrastructure used | Actual Float64 lanes for bounded kernel loads/stores and evidence. |
 | `Float64s.Less` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.LessEqual` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.Masked` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
@@ -178,7 +178,7 @@ other numeric input types. No new commands are implied by this ledger.
 | `Float64s.NotEqual` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.Sqrt` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.Store` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Float64s.StorePart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `Float64s.StorePart` | Exercised member | Timed bounded Float64 output stores in addition64. |
 | `Float64s.String` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
 | `Float64s.Sub` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Float64s.ToArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |

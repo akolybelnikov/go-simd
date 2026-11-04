@@ -1,7 +1,7 @@
 # go-simd
 
-An experimental Go SIMD laboratory: sixteen operations and forty-three scalar/SIMD
-implementations over generated `float32` slices, including addition, a compute
+An experimental Go SIMD laboratory: seventeen operations and forty-five scalar/SIMD
+implementations over generated `float32` and `float64` slices, including addition, a compute
 expression, broadcast scale/affine, predicate-based masking/selection, canonical byte-mask export, packed masks, copy, clamp, sum and dot. Run a quick
 comparison or save repeated measurements as TXT, Markdown, or CSV. Results depend
 on hardware, toolchain, size and background load; SIMD can be slower.
@@ -17,6 +17,9 @@ and explicitly deferred extensions.
 
 Three-array [fused multiply-add](docs/features/F004-muladd.md) extends that baseline
 with three real streamed operands and full output evidence.
+
+Float64 [addition](docs/features/F004-addition64.md) adds true typed arrays,
+actual-width boundaries and binary64 evidence after MulAdd.
 
 ## Start here
 
@@ -101,6 +104,7 @@ and strategy details. Existing aliases remain for addition/computation.
 
 | Group | Operation | Implementations |
 | --- | --- | --- |
+| addition64 | Binary64 a+b, true float64 arrays | Scalar, SIMDPartial; actual Float64 lanes |
 | addition | `a+b` | Scalar, SIMDPartial, SIMDTail, SIMDParallel |
 | computation | `a*a+b*b+a*b` | Scalar, SIMD |
 | scale | `alpha*x` | Scalar, SIMDPartial |
@@ -193,6 +197,15 @@ FMA32, while SIMDPartial records its verified vector/software path. See [MulAdd]
 ```powershell
 go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 3 -benchtime 100ms -format md
 go run ./examples/muladd
+```
+
+Float64 addition uses -group addition64 and true binary64 fixtures. It accounts
+for 24*n logical bytes, with half as many lanes at a fixed vector width. Case.Vector
+retains actual Float64 lanes. Existing addition remains float32. See [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition).
+
+```powershell
+go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/addition64
 ```
 
 Sum returns a scalar through a typed reduction path. Scalar folds left to right;
@@ -332,7 +345,7 @@ and [migration record](docs/migration/README.md). F004's
 [ordered sum](docs/features/F004-sum.md) and [unfused dot](docs/features/F004-dot.md)
 checkpoints and [accumulator comparisons](docs/features/F004-accumulators.md)
 and [fused affine](docs/features/F004-fma.md) and [fused dot](docs/features/F004-fused-dot.md), plus [byte predicate export](docs/features/F004-predicate-export.md) and [packed predicates](docs/features/F004-packed-predicate.md), plus [copy](docs/features/F004-copy.md) and [clamp](docs/features/F004-clamp.md), complete the original F004 scope. [Three-array MulAdd](docs/features/F004-muladd.md) now extends it. Reordering, standalone conversions
-and new input types remain optional extensions; M4 and HTML are separate roadmap work.
+and additional typed operations remain optional extensions; M4 and HTML are separate roadmap work.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.
@@ -340,6 +353,6 @@ Kernels remain in [addition](internal/addition/README.md) and
 [computation](internal/computation/README.md), with new kernels in
 [patterns](internal/patterns/README.md), [reductions](internal/reduction/README.md)
 and [movement](internal/movement/README.md).
-Float32 array-output kernels support disjoint output and exact in-place aliases;
+Float32/Float64 array-output kernels support disjoint output and exact in-place aliases;
 partial overlap is unsupported. Predicate export requires disjoint float32 input
 and uint8 output storage. Length errors leave output unchanged. These internal packages are not a stable public API.

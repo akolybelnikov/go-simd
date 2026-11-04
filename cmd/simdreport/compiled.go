@@ -50,6 +50,9 @@ func measureCompiledReport(group string, plan engine.Plan, machine platform.Info
 	if op.ID == catalog.Clamp {
 		run.Metadata += "output: ordered clamp preserves input ties/NaN bits and exact clipping-bound bits; full ArrayResultSHA256 retained after timing\nlogical traffic: 8*n bytes/call\nnumerics: " + op.NumericalPolicy + "\n"
 	}
+	if op.ID == catalog.Add64 {
+		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nfloat64 input/output; full binary64 output digest after timing; logical traffic 24*n\nnumerics: " + op.NumericalPolicy + "\n"
+	}
 	if op.ID == catalog.MulAdd {
 		run.Metadata += "fixture: " + plan.Input.Generator(op) + "\nthree streamed input arrays; full ArrayResultSHA256 after timing; logical traffic 16*n\nnumerics: " + op.NumericalPolicy + "\n"
 	}

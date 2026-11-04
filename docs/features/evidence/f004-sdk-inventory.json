@@ -107,8 +107,8 @@
       "name": "Float64s",
       "kind": "type",
       "source": "simd_types.go",
-      "status": "Deferred type",
-      "reason": "No admitted input/output kernel for this SDK vector type; no implicit cast advertised."
+      "status": "Exercised type",
+      "reason": "True float64 addition input/output vector; no implicit float32 widening."
     },
     {
       "name": "Float64sFromArch",
@@ -205,8 +205,8 @@
       "name": "LoadFloat64sPart",
       "kind": "function",
       "source": "simd_stubs.go",
-      "status": "Deferred member",
-      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+      "status": "Exercised member",
+      "reason": "Timed bounded Float64 loads; emulated count workaround included in kernel."
     },
     {
       "name": "LoadInt16s",
@@ -652,8 +652,8 @@
       "receiver": "Float64s",
       "kind": "method",
       "source": "simd_stubs.go",
-      "status": "Deferred member",
-      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+      "status": "Exercised member",
+      "reason": "Timed binary64 addition in addition64."
     },
     {
       "name": "Div",
@@ -700,8 +700,8 @@
       "receiver": "Float64s",
       "kind": "method",
       "source": "simd_stubs.go",
-      "status": "Utility outside scope",
-      "reason": "SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation."
+      "status": "Infrastructure used",
+      "reason": "Actual Float64 lanes for bounded kernel loads/stores and evidence."
     },
     {
       "name": "Less",
@@ -796,8 +796,8 @@
       "receiver": "Float64s",
       "kind": "method",
       "source": "simd_stubs.go",
-      "status": "Deferred member",
-      "reason": "No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel."
+      "status": "Exercised member",
+      "reason": "Timed bounded Float64 output stores in addition64."
     },
     {
       "name": "String",

@@ -5,6 +5,29 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — True Float64 addition — 2026-11-04
+
+- Add addition64 / add-f64 / BenchmarkAddition64 with Scalar/SIMDPartial:
+  seventeen operations/forty-five implementations. Keep existing float32
+  addition identities, fixtures and timed callbacks unchanged.
+- Add real []float64 inputs/output and typed bindings, directly generated
+  binary64 fixtures, all-input fingerprints and complete little-endian output
+  digests. Include validation, width setup, bounded loads/addition/stores in
+  timing with 24*n logical bytes; retain actual Float64 lanes in Case.Vector.
+- Bound partial vectors to actual lanes to avoid the selected SDK's emulated
+  Float64 loader over-reporting slice length. Test that mode explicitly and
+  keep all bounding work timed. Preserve IEEE zero/subnormal/overflow behavior;
+  NaN payloads remain unspecified.
+- Make native registration resolve the descriptor's actual type, retain strict
+  native width/digest evidence and worker policy for all known types, and carry
+  true arrays/bytes/widths through quick/compiled/native/plan/worker paths.
+- Test independent exact-rational/special/random bits, tails/canaries/aliases,
+  errors/allocations, low binary64 fingerprint bits, adapter flag restoration,
+  compiled/native/emulated/worker parity and no-Go standalone operation.
+- Update README/registry, Wiki chapter25, example, contract, retained captures,
+  SDK member/type status ledger, CI checks and local tracker status/navigation.
+  Other Float64 operations, integer families and imported datasets remain separate.
+
 ### F004 extension — Three-array fused multiply-add — 2026-11-04
 
 - Add muladd-f32 / muladd / BenchmarkMulAdd with Scalar software FMA32 and
