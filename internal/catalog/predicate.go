@@ -34,7 +34,7 @@ func (op Operation) OutputElements(elements int) (int, error) {
 		return elements, nil
 	case ScalarValue:
 		return 1, nil
-	case PackedBits:
+	case PackedBits, Blocks8:
 		n := elements / 8
 		if elements%8 != 0 {
 			n++

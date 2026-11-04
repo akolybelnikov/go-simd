@@ -1,6 +1,6 @@
 # 04 — Operation and kernel guide
 
-The lab contains twenty operations and fifty-one implementations: eighteen operations on `float32`
+The lab contains twenty-one operations and fifty-three implementations: eighteen operations on `float32`
 inputs, one float64 addition and one uint8 saturation operation. Float32 inputs provide twelve arithmetic/selection/clipping/representation float32 outputs, one exact-copy output, two uint8 predicate representations and three reductions. Array kernels have
 one, two or three declared inputs, scalar parameters where needed and a caller-provided
 output slice of their declared type. Predicate export writes canonical uint8 0/1.

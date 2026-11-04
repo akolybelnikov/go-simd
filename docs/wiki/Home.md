@@ -121,9 +121,12 @@ useful repeated measurement.
 
 | 2026-11-04 | F004 bit roundtrip: exact Float32/Uint32 reinterpretation, all NaN/zero bits, full output evidence and instruction-selection interpretation; nineteen operations/forty-nine implementations |
 
-| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty operations/fifty-one implementations |
+| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty-one operations/fifty-three implementations |
 
 Project links: [source](https://github.com/akolybelnikov/go-simd),
 [changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),
 [migration checkpoints](https://github.com/akolybelnikov/go-simd/blob/main/docs/migration/README.md),
 [issues](https://github.com/akolybelnikov/go-simd/issues).
+
+
+- [29 · Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum)

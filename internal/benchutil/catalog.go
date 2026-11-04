@@ -21,6 +21,10 @@ func BenchmarkOperation(b *testing.B, operationID string) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if operation.Descriptor.ID == catalog.Sum8 {
+		benchmarkSum8(b, operation)
+		return
+	}
 	if operation.Descriptor.ID == catalog.XorBits {
 		benchmarkXorBits(b, operation)
 		return

@@ -60,6 +60,12 @@ func Compile(plan labapi.ExperimentPlan, machine platform.Info, policy labapi.Pl
 			c.Elements != requested.Elements || c.Bytes != requested.LogicalBytes {
 			return engine.Plan{}, fmt.Errorf("confirmed case %q is unavailable or inconsistent", requested.Name)
 		}
+		if c.Operation.Output.Shape == catalog.Blocks8 {
+			count, _ := c.Operation.OutputElements(c.Elements)
+			if requested.OutputElements != count {
+				return engine.Plan{}, fmt.Errorf("confirmed output extent is inconsistent")
+			}
+		}
 		compiled.Cases = append(compiled.Cases, c)
 	}
 	return compiled, nil

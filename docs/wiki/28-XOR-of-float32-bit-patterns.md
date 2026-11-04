@@ -1,7 +1,7 @@
 # 28 — XOR of Float32 bit patterns
 
 xorbits applies uint32 XOR to two opaque float32 representations. The
-catalogue now has **twenty operations and fifty-one implementations**.
+catalogue now has **twenty-one operations and fifty-three implementations**.
 This is a representation-level operation; it performs no floating arithmetic
 or numeric conversion and does not claim direct uint32 CLI input support.
 

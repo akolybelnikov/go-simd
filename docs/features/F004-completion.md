@@ -1,5 +1,7 @@
 # F004 completion — Agreed experimental scope
 
+Current extension: [sum8](F004-sum8.md), 21 operations / 53 implementations. Original acceptance counts below remain historical.
+
 Current extension: [opaque XOR](F004-xor-bits.md) brings the catalogue to
 twenty operations/fifty-one implementations. Earlier counts below remain historical.
 

@@ -76,6 +76,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.Sum8 {
+			bind, ok := sum8Bindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing sum8 binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindUnary: bind})
+			continue
+		}
 		if descriptor.ID == catalog.XorBits {
 			b, ok := xorBitsBindings[variant.ID]
 			if !ok {

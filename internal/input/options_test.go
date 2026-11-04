@@ -20,7 +20,7 @@ func TestPatternFixturesAndFingerprints(t *testing.T) {
 					t.Fatal(err)
 				}
 				a, b, out := MakeForOperation(op, n, o)
-				wantOutput := n
+				wantOutput, _ := op.OutputElements(n)
 				if op.ScalarResult() || op.ByteResult() {
 					wantOutput = 0
 				}

@@ -117,6 +117,13 @@ func validateObservations(capture Capture) error {
 		if key.Case.OperationID == "" || key.Case.TypeID == "" || key.Case.StrategyID == "" || key.Case.Elements < 1 || key.Case.Input.GeneratorID == "" {
 			return readError("invalid_observation", "observation %d case identity is incomplete", index)
 		}
+		if key.Case.OperationID == catalog.Sum8 {
+			op, _ := catalog.ByGroup("sum8")
+			count, err := op.OutputElements(key.Case.Elements)
+			if err != nil || !key.Case.OutputElements.Known || key.Case.OutputElements.Value != count || observation.ArrayResultSHA256 == "" {
+				return readError("invalid_output_extent", "observation %d sum8 output evidence is incomplete", index)
+			}
+		}
 		if observation.Repetition < 1 || observation.Repetition > capture.Config.Count || observation.Iterations < 1 || observation.DurationNS == nil || *observation.DurationNS < 0 || !finiteNonnegative(observation.NanosecondsPerOp) || observation.SourceBenchmark == "" {
 			return readError("invalid_observation", "observation %d timing or repetition is invalid", index)
 		}

@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.Sum8 {
+		return "generated-sum8-float32-v1/" + o.SumFixture()
+	}
 	if op.ID == catalog.XorBits {
 		return XorBitsGeneratorID
 	}
@@ -173,7 +176,7 @@ func (o Options) Generator(op catalog.Operation) string {
 	if op.ID == catalog.DotFMA {
 		return "generated-dot-fma-float32-v1/" + o.DotFixture()
 	}
-	if op.ID == catalog.Sum {
+	if op.ID == catalog.Sum || op.ID == catalog.Sum8 {
 		return "generated-sum-float32-v1/" + o.SumFixture()
 	}
 	if !op.Parameterized() {
@@ -235,7 +238,7 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 			return float32(i%33-16) / 4, float32(i%17-8) / 8
 		}
 	}
-	if op.ID == catalog.Sum {
+	if op.ID == catalog.Sum || op.ID == catalog.Sum8 {
 		switch o.SumFixture() {
 		case "cancellation":
 			switch i % 64 {
@@ -271,6 +274,17 @@ func (o Options) pair(op catalog.Operation, i, n int) (float32, float32) {
 // when required. Scalar returns and byte outputs have no float32 output slice;
 // callers allocate the typed byte output separately outside measurement.
 func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float32) {
+	if op.ID == catalog.Sum8 {
+		count, err := op.OutputElements(n)
+		if err != nil {
+			panic(err)
+		}
+		a, out = make([]float32, n), make([]float32, count)
+		for i := range a {
+			a[i], _ = o.pair(op, i, n)
+		}
+		return
+	}
 	if op.ID == catalog.XorBits {
 		return MakeXorBits(n)
 	}
@@ -326,6 +340,9 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ID == catalog.Sum8 {
+		return fingerprintGenerated(n, false, func(i int) (float32, float32) { return o.pair(op, i, n) })
+	}
 	if op.ID == catalog.XorBits {
 		return fingerprintGenerated(n, true, xorBitsPair)
 	}

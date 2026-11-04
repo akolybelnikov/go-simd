@@ -1,0 +1,332 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "sum8",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "cancellation",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkSum8$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-170729-3775341371",
+    "Environment": {
+      "ID": "benchmark-20261104-170729-3775341371/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-sum8/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T17:07:29Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-sum8/v1\ngroup: sum8\nselection: \"^BenchmarkSum8$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-sum8-float32-v1/cancellation\nfixed8 pair/fold; pad+0; output ceil(n/8); full output digest; logical traffic 4*n+4*ceil(n/8)\nnumerics: Fixed8-input blocks, pad incomplete block with +0; round four float32 pairs (0+4,1+5,2+6,3+7), then left fold the four pairs. Same order for scalar/SIMD and all native widths. NaN payloads unspecified; signed zeros follow this exact padded order. Output length ceil(n/8), errors before writes, valid empty/nil, disjoint/same-start output-prefix alias; other overlap unsupported. Validation, block padding/copying, loads, pair addition, stores and final fold timed. Logical bytes4*n+4*ceil(n/8), full reduced-array digest/extent after timing. Composed portable algorithm, not isolated ISA horizontal primitive.\n",
+    "Observations": [
+      {
+        "ArrayResultSHA256": "d5245e44117b4b629fa8691a595f7358d9d638bd8efd823715458dc7c4b86d36",
+        "Key": {
+          "RunID": "benchmark-20261104-170729-3775341371",
+          "EnvironmentID": "benchmark-20261104-170729-3775341371/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-sum8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OutputElements": {
+              "Value": 8,
+              "Known": true
+            },
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "sum8-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-sum8-pairs04-leftfold-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum8-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 600,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1440,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum8/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "d5245e44117b4b629fa8691a595f7358d9d638bd8efd823715458dc7c4b86d36",
+        "Key": {
+          "RunID": "benchmark-20261104-170729-3775341371",
+          "EnvironmentID": "benchmark-20261104-170729-3775341371/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-sum8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OutputElements": {
+              "Value": 8,
+              "Known": true
+            },
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "sum8-f32",
+            "TypeID": "float32",
+            "StrategyID": "scalar",
+            "ArithmeticID": "float32-sum8-pairs04-leftfold-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum8-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 200,
+        "DurationNS": 600,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1440,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum8/n=64/Scalar-16"
+      },
+      {
+        "ArrayResultSHA256": "d5245e44117b4b629fa8691a595f7358d9d638bd8efd823715458dc7c4b86d36",
+        "Key": {
+          "RunID": "benchmark-20261104-170729-3775341371",
+          "EnvironmentID": "benchmark-20261104-170729-3775341371/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-sum8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OutputElements": {
+              "Value": 8,
+              "Known": true
+            },
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "sum8-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-sum8-pairs04-leftfold-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum8-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 833.3333333333334,
+        "DurationNS": 2500,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 345.6,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum8/n=64/SIMDPartial-16"
+      },
+      {
+        "ArrayResultSHA256": "d5245e44117b4b629fa8691a595f7358d9d638bd8efd823715458dc7c4b86d36",
+        "Key": {
+          "RunID": "benchmark-20261104-170729-3775341371",
+          "EnvironmentID": "benchmark-20261104-170729-3775341371/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-sum8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "OutputElements": {
+              "Value": 8,
+              "Known": true
+            },
+            "Vector": {
+              "NativeLanes": {
+                "Value": 8,
+                "Known": true
+              }
+            },
+            "OperationID": "sum8-f32",
+            "TypeID": "float32",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "float32-sum8-pairs04-leftfold-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-sum8-float32-v1/cancellation",
+              "SHA256": "c991bc2b64487b62372807e7d132088ebda8612dbd95e3b1433c383c10ec4f9a"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 800,
+        "DurationNS": 2400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 360,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSum8/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

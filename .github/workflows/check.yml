@@ -41,6 +41,7 @@ jobs:
           go test ./cmd/simdreport -run='^TestSaturatingAdd8ResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestBitRoundTripResultsAndBackendIdentity$' -count=1
           go test ./cmd/simdreport -run='^TestXorBitsResultsAndBackendIdentity$' -count=1
+          go test ./cmd/simdreport -run='^TestSum8ResultsAndBackendIdentity$' -count=1
       - name: Check races
         if: runner.os == 'Linux'
         run: go test -race ./...
@@ -76,3 +77,6 @@ jobs:
 
       - name: Check opaque bitwise XOR
         run: go test ./internal/patterns -run='^$' -bench='^BenchmarkXorBits$/^n=(1|8|16)$' -benchtime=1x
+
+      - name: Check fixed-block horizontal sums
+        run: go test ./internal/reduction -run='^$' -bench='^BenchmarkSum8$/^n=(7|8|9|15|16|17)$' -benchtime=1x

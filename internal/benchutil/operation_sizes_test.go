@@ -23,6 +23,14 @@ func TestPackedBoundarySweepAndPreservedSizes(t *testing.T) {
 				}
 				continue
 			}
+			if op.Output.Shape == catalog.Blocks8 {
+				for _, n := range []int{7, 8, 9, 15, 16, 17, w - 1, w, w + 1} {
+					if !slices.Contains(sizes, n) {
+						t.Fatal("missing block/native boundary", w, n)
+					}
+				}
+				continue
+			}
 			if op.ID != catalog.PredicateGTPacked {
 				if !slices.Equal(sizes, BenchmarkSizes(w)) {
 					t.Fatal("original sweep changed")

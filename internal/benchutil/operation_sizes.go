@@ -22,5 +22,10 @@ func OperationSizes(op catalog.Operation, width int) []int {
 		slices.Sort(sizes)
 		sizes = slices.Compact(sizes)
 	}
+	if op.Output.Shape == catalog.Blocks8 {
+		sizes = append(sizes, 7, 9, 15, 17)
+		slices.Sort(sizes)
+		sizes = slices.Compact(sizes)
+	}
 	return sizes
 }
