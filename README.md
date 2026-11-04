@@ -44,6 +44,26 @@ any working directory.
 | Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |
 | Quick help | `simdbench -h` | `go run ./cmd/simdbench -h` | `make run ARGS="-h"` |
 
+### Deterministic agent foundation preview
+
+`simdlab` currently exposes model-free JSON commands used by the future agent
+and website. They do not contact a model provider. `catalog` and `plan` do not
+run benchmarks; `inspect` reads an existing bounded evidence file.
+
+```powershell
+go run ./cmd/simdlab catalog -group addition
+'{"group":"addition","variants":["scalar","simd-partial"],"sizes":[8,1024],"count":3,"benchtime":"100ms"}' |
+  go run ./cmd/simdlab plan
+go run ./cmd/simdlab inspect artifacts/addition/<capture>.measurements.json
+```
+
+The catalogue reports exact supported sizes and the measuring-process identity.
+Plans require explicit sizes and strategy IDs and are bounded by the local
+policy. Inspection rejects oversized, malformed, future-schema and inconsistent
+captures before calculating descriptive facts and caveats. There is no public
+agent chat or direct `simdlab run` command yet; execution remains behind the
+separate confirmed-plan authority boundary.
+
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:
 
@@ -241,13 +261,14 @@ shell is optional. A compatible target binary needs neither Go nor the
 
 ```powershell
 $env:GOEXPERIMENT = 'simd'
-go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport
-go install ./cmd/simdbench ./cmd/simdreport
+go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport ./cmd/simdlab
+go install ./cmd/simdbench ./cmd/simdreport ./cmd/simdlab
 ```
 
 Make equivalents: `make build` and `make install`. Installation uses `GOBIN`,
 or the Go workspace's `bin` directory when unset; add it to PATH. Windows builds
-produce `bin/simdbench.exe` and `bin/simdreport.exe`; POSIX builds omit `.exe`.
+produce `bin/simdbench.exe`, `bin/simdreport.exe` and `bin/simdlab.exe`; POSIX
+builds omit `.exe`.
 Copy compatible binaries to a server or invoke them by absolute path. A prebuilt
 release download/package-manager installer is not supplied yet.
 
