@@ -113,8 +113,15 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	}
 	op, _ := catalog.ByGroup(group)
 	configured := op.Parameterized() || op.ScalarResult() || op.ID == catalog.MulAdd
+	scoped := configured
+	for _, sibling := range catalog.All() {
+		if sibling.ID != op.ID && sibling.NativePath() == op.NativePath() {
+			scoped = true
+			break
+		}
+	}
 	requested := bench
-	if configured {
+	if scoped {
 		bench = plan.NativeSelection()
 	}
 	args := []string{"test", op.NativePath(), "-run=^$", "-bench=" + bench, "-benchmem", "-benchtime=" + benchtime, "-count=" + strconv.Itoa(count)}
@@ -127,8 +134,11 @@ func measureLegacyReport(group, bench, benchtime string, count int, output strin
 	}
 	metadata += "toolchain environment: " + string(envOutput) + "\n"
 	optionBytes, _ := json.Marshal(plan.Input)
+	if scoped {
+		metadata += "requested selection: " + requested + "\n"
+	}
 	if configured {
-		metadata += "requested selection: " + requested + "\ninput configuration: " + string(optionBytes) + "\n"
+		metadata += "input configuration: " + string(optionBytes) + "\n"
 	}
 	if _, err := io.WriteString(raw, metadata); err != nil {
 		raw.Close()

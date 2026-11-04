@@ -5,6 +5,14 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### Native shared-package group isolation — 2026-11-04
+
+- Resolve broad native selectors to the selected group's registered leaves when
+  multiple operations share a Go benchmark package. Keep the original selector
+  in raw metadata and retain configured fixture propagation separately.
+- Verify that addition/addition64 developer reports each contain only the chosen
+  operation under a broad Benchmark.* selector. Kernel timing callbacks are unchanged.
+
 ### F004 extension — Uint8 saturating addition — 2026-11-04
 
 - Add saturatingadd8 / add-sat-u8 / BenchmarkSaturatingAdd8 with Scalar and
