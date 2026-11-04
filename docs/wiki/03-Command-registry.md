@@ -34,15 +34,16 @@ and examples. Listing is identical through either executable.
 
 Explicit selectors must agree. `-group addition -function add` is accepted;
 `-group all -addition` is rejected. False boolean aliases do not select a
-group. No explicit selection means all seventeen groups. Positional arguments are
+group. No explicit selection means all eighteen groups. Positional arguments are
 rejected. Repeating a flag uses Go's normal last-value rule.
 
-`-list` prints runtime context and a compact seventeen-row operation table.
+`-list` prints runtime context and a compact eighteen-row operation table.
 Add `-group <name>` for expression/semantics, operands, scalar values/bits,
 fixture identity, strategy labels/IDs and worker policy.
 Logical traffic is 8 bytes per element for unary float32-output patterns and 12 for addition, computation and two-array selection.
 Predicate byte export uses `5*n`: one float32 input array and one uint8 output array.
 Packed predicates use `4*n+ceil(n/8)`: float32 input plus packed-byte output.
+Uint8 saturation uses `3*n`: two byte reads and one write; actual Uint8 lanes retained.
 Float64 addition uses `24*n`: two float64 reads and one write, with actual Float64 lanes.
 MulAdd uses `16*n`: three float32 input arrays and one output, without broadcasts/reduction.
 Clamp uses `8*n`, with bounds validation, broadcasts and semantic repairs timed.
@@ -224,6 +225,24 @@ Installed simdreport accepts the same flags. Native BenchmarkAddition64 is in
 ./internal/addition. See [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) for binary64 precision,
 actual-width evidence and the selected-SDK bounded partial-load workaround.
 
+Uint8 saturation uses a fixed boundary-rich byte recipe and no operation-specific flags.
+
+```powershell
+simdreport -list -group saturatingadd8
+go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 3 -benchtime 100ms -format md
+go run ./examples/saturatingadd8
+simdlab catalog -group saturatingadd8
+```
+
+```bash
+make list ARGS="-group saturatingadd8"
+make report COUNT=3 BENCHTIME=100ms ARGS="-group saturatingadd8 -bench BenchmarkSaturatingAdd8/n=64 -format md"
+make run ARGS="-group saturatingadd8"
+```
+
+Installed simdreport uses the same flags. Native BenchmarkSaturatingAdd8 is in
+./internal/integer. See [saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) for exact bytes, aliases and evidence.
+
 Native BenchmarkCopy lives in ./internal/movement. Select GoCopy explicitly in
 variant regex when filtering, such as `^(Scalar|GoCopy|SIMD.*)$`. The default
 selection includes all four controls. Percentages stay relative to Scalar.
@@ -266,6 +285,7 @@ The outer `go run` process can also print `exit status 1`.
 
 | Group | Top-level benchmark | Variant component |
 | --- | --- | --- |
+| `saturatingadd8` | `BenchmarkSaturatingAdd8` | `Scalar`, `SIMDPartial`; numeric uint8 saturation, not masks |
 | `addition64` | `BenchmarkAddition64` | `Scalar`, `SIMDPartial`; true binary64 arrays and actual-width boundaries |
 | `addition` | `BenchmarkAddition` | `Scalar`, `SIMDPartial`, `SIMDTail`, `SIMDParallel` |
 | `computation` | `BenchmarkComputation` | `Scalar`, `SIMD` |

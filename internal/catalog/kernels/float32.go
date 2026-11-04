@@ -16,6 +16,7 @@ type Float32Kernel func(a, b, out []float32) error
 type Float32Binder func(a, b, out []float32) func() error
 
 type Implementation struct {
+	BindByteArrays    func(a, b, out []uint8) func() error
 	BindFloat64       func(a, b, out []float64) func() error
 	BindTernary       func(a, b, c, out []float32) func() error
 	BindUnary         func(x, out []float32) func() error
@@ -66,7 +67,7 @@ var bindings = map[bindingKey]binding{
 // Lookup rejects unavailable operation/type combinations without casts/fallbacks.
 // Resolution and buffer binding happen outside measured loops.
 func Lookup(id, typeID string) (Operation, error) {
-	if typeID != catalog.Float32 && typeID != catalog.Float64 {
+	if typeID != catalog.Float32 && typeID != catalog.Float64 && typeID != catalog.Uint8 {
 		return Operation{}, fmt.Errorf("unavailable float32 binding for %q/%q", id, typeID)
 	}
 	descriptor, ok := catalog.Lookup(id, typeID)
@@ -75,6 +76,14 @@ func Lookup(id, typeID string) (Operation, error) {
 	}
 	operation := Operation{Descriptor: descriptor}
 	for _, variant := range descriptor.Variants {
+		if descriptor.ID == catalog.SaturatingAdd8 {
+			bind, ok := uint8Bindings[variant.ID]
+			if !ok {
+				return Operation{}, fmt.Errorf("missing uint8 binding for %s", variant.ID)
+			}
+			operation.Implementations = append(operation.Implementations, Implementation{Descriptor: variant, BindByteArrays: bind})
+			continue
+		}
 		if descriptor.ID == catalog.Add64 {
 			bind, ok := float64Bindings[variant.ID]
 			if !ok {

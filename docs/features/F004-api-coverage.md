@@ -19,16 +19,16 @@ SDK baseline; another Go version or target must be inventoried independently.
 | Status | Declarations | Meaning |
 | --- | --- | --- |
 | Deferred bridge | 28 | To/from architecture vectors; optional gated extension. |
-| Deferred member | 289 | Separate experiment needs an explicit contract. |
-| Deferred type | 10 | No input/output kernel for that vector type. |
-| Exercised member | 23 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
-| Exercised type | 4 | Vector type used by current kernels; not a separate command. |
-| Infrastructure used | 4 | Live sizing/runtime metadata, rather than arithmetic experiments. |
-| Utility outside scope | 23 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
+| Deferred member | 286 | Separate experiment needs an explicit contract. |
+| Deferred type | 9 | No input/output kernel for that vector type. |
+| Exercised member | 26 | Used in admitted kernels, without claiming isolated primitive benchmarks. |
+| Exercised type | 5 | Vector type used by current kernels; not a separate command. |
+| Infrastructure used | 5 | Live sizing/runtime metadata, rather than arithmetic experiments. |
+| Utility outside scope | 22 | SDK sizing/formatting/capability utility unused in delivered lab paths. |
 
-Float32 and float64 are CLI input types, with Float64 initially limited to addition. Int32s is used solely for predicate export
-scratch, and Mask32s is internal comparison state. A uint8 output slice does not
-establish Uint8s SIMD kernels. FMA availability remains gated by its verified
+Float32, float64 and uint8 are CLI input types; the latter two initially support
+addition and saturating addition respectively. Int32s is used solely for predicate export
+scratch, and Mask32s is internal comparison state. Uint8s saturation now uses real byte inputs; predicate export remains distinct. FMA availability remains gated by its verified
 reference and actual path; SDK emulation is recorded separately.
 
 ## Source snapshot
@@ -106,7 +106,7 @@ further typed operations and integer input types. No new commands are implied by
 | `LoadUint64s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `LoadUint64sPart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `LoadUint8s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `LoadUint8sPart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `LoadUint8sPart` | Exercised member | Timed bounded true byte-input loads. |
 | `Mask16s` | Deferred type | No admitted input/output kernel for this SDK vector type; no implicit cast advertised. |
 | `Mask16sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
 | `Mask32s` | Exercised type | Internal comparison/composition/selection only; no raw mask representation exported. |
@@ -121,7 +121,7 @@ further typed operations and integer input types. No new commands are implied by
 | `Uint32sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
 | `Uint64s` | Deferred type | No admitted input/output kernel for this SDK vector type; no implicit cast advertised. |
 | `Uint64sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
-| `Uint8s` | Deferred type | No admitted input/output kernel for this SDK vector type; no implicit cast advertised. |
+| `Uint8s` | Exercised type | Real uint8 input/output vectors in saturatingadd8. |
 | `Uint8sFromArch` | Deferred bridge | Architecture bridge; a separately gated fixed-width experiment is outside current scope. |
 | `VectorBitSize` | Infrastructure used | Runtime metadata in internal/platform; no throughput comparison. |
 
@@ -488,7 +488,7 @@ further typed operations and integer input types. No new commands are implied by
 | Symbol | Status | Reason |
 | --- | --- | --- |
 | `Uint8s.Add` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Uint8s.AddSaturated` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `Uint8s.AddSaturated` | Exercised member | Timed byte saturating addition, distinct from wrapping. |
 | `Uint8s.And` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.AndNot` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.Average` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
@@ -496,7 +496,7 @@ further typed operations and integer input types. No new commands are implied by
 | `Uint8s.ConvertToInt8` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.Equal` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.IfElse` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Uint8s.Len` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
+| `Uint8s.Len` | Infrastructure used | Actual Uint8 lanes for bounded kernels and evidence. |
 | `Uint8s.Masked` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.Max` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.Min` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
@@ -508,7 +508,7 @@ further typed operations and integer input types. No new commands are implied by
 | `Uint8s.ReshapeToUint32s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.ReshapeToUint64s` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.Store` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
-| `Uint8s.StorePart` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
+| `Uint8s.StorePart` | Exercised member | Timed bounded numeric byte-output stores. |
 | `Uint8s.String` | Utility outside scope | SDK utility accounted for; unused in delivered lab paths, not an arithmetic throughput operation. |
 | `Uint8s.Sub` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |
 | `Uint8s.SubSaturated` | Deferred member | No admitted standalone experiment; choose numerical/representation/type contract before adding a kernel. |

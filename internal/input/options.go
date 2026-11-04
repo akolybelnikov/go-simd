@@ -140,6 +140,9 @@ func (o Options) trueAt(i, n int) bool {
 }
 
 func (o Options) Generator(op catalog.Operation) string {
+	if op.ID == catalog.SaturatingAdd8 {
+		return SaturatingAdd8GeneratorID
+	}
 	if op.ID == catalog.Add64 {
 		return Addition64GeneratorID
 	}
@@ -314,6 +317,9 @@ func MakeForOperation(op catalog.Operation, n int, o Options) (a, b, out []float
 }
 
 func FingerprintForOperation(op catalog.Operation, n int, o Options) string {
+	if op.ID == catalog.SaturatingAdd8 {
+		return SaturatingAdd8Fingerprint(n)
+	}
 	if op.ID == catalog.Add64 {
 		return Addition64Fingerprint(n)
 	}

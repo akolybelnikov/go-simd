@@ -1,7 +1,7 @@
 # 12 — SIMD pattern gaps and further reading
 
 **Status:** F004 complete for the agreed current scope, including clamp; reviewed 2026-11-04.
-The lab has seventeen operations/forty-five implementations. The
+The lab has eighteen operations/forty-seven implementations. The
 [worked broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
 and [sum guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order)
 plus [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
@@ -38,8 +38,8 @@ workload or learning value; complete SDK coverage remains optional. See the [tra
 for proposed identities, contracts, accounting, and acceptance criteria.
 
 Float64 addition is now the first typed extension: [chapter25](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition).
-It uses true binary64 arrays and explicit actual-width evidence. Additional
-Float64 operations and integer families remain future experiments.
+It uses true binary64 arrays and explicit actual-width evidence. [Uint8 saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) adds the first real byte-input experiment. Additional
+Float64/integer operations remain future experiments.
 
 ## Portable methods and architecture-specific methods differ
 

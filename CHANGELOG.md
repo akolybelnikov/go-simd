@@ -5,6 +5,25 @@ product roadmap phases; M0 is the architecture behavior-freeze milestone.
 
 ## Unreleased
 
+### F004 extension — Uint8 saturating addition — 2026-11-04
+
+- Add saturatingadd8 / add-sat-u8 / BenchmarkSaturatingAdd8 with Scalar and
+  SIMDPartial: eighteen operations/forty-seven implementations. Compute the
+  widened sum clipped at 255, with no modulo wrapping or fabricated float input.
+- Add true byte-array bindings/fixtures/fingerprints through quick/compiled/
+  native/agent/worker paths. Time validation, width setup, bounded loads,
+  AddSaturated and stores with 3*n logical bytes; retain every output byte and
+  actual Uint8 lanes. Keep Case.Predicate absent for numeric output.
+- Import strict native width/digest facts under dedicated saturation harnesses;
+  retain known generated input and preserve unknown historical contexts.
+- Exhaust all 65,536 input pairs in normal/emulated modes. Test native-width tails,
+  aliases/canaries/unchanged inputs, errors/allocations, typed bindings/hashes,
+  backend/worker parity, no-Go standalone use and testing/report compatibility.
+- Update SDK coverage, README/registry, Wiki chapter26, example, contract,
+  retained normal/emulated observations, CI and local status/navigation trackers.
+  Other widths, wrapping, conversion and additional integer operations remain
+  separately scoped; each continuation operation has its own signed commit.
+
 ### F004 extension — True Float64 addition — 2026-11-04
 
 - Add addition64 / add-f64 / BenchmarkAddition64 with Scalar/SIMDPartial:

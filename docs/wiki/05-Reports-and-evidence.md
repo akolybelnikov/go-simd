@@ -243,3 +243,10 @@ The [MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-
 little-endian binary64 fingerprints/digests. Case.Vector.NativeLanes is the actual
 Float64 width; the machine float32_lanes field retains its separate meaning.
 Use `go run ./examples/addition64`; logical work is 24*n.
+
+
+## Numeric uint8 saturation
+
+[Saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) uses real []uint8 operands/output, 3*n work and
+actual byte-lane identity. ByteResultSHA256 covers the numeric output, while
+Case.Predicate is absent. Run `go run ./examples/saturatingadd8`.

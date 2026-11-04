@@ -70,6 +70,9 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.NumericalPolicy != "" && !op.ScalarResult() {
 			fmt.Fprintln(&out, "numerics: "+op.NumericalPolicy)
 		}
+		if op.ID == catalog.SaturatingAdd8 {
+			fmt.Fprintf(&out, "fixture: %s\nSIMD uint8 lanes: %d\nlogical traffic: 3*n bytes/call; full numeric byte output, not predicate bits\n", options.Generator(op), machine.Bits/8)
+		}
 		if op.ID == catalog.Add64 {
 			fmt.Fprintf(&out, "fixture: %s\nSIMD float64 lanes: %d\nlogical traffic: 24*n bytes/call; complete binary64 output digest after timing\n", options.Generator(op), machine.Bits/64)
 		}
@@ -93,7 +96,7 @@ func PrintCatalogWithOptions(w io.Writer, group string, machine platform.Info, o
 		if op.ID == catalog.PredicateGTPacked {
 			fmt.Fprintln(&out, "logical traffic model: 4*n+ceil(n/8) bytes/call; packed LSB-first output")
 			fmt.Fprintln(&out, "SIMD boundary: partial load, compare, select 0/1, convert/extract, pack valid bits, byte writes; all timed")
-		} else if op.ByteResult() {
+		} else if op.ByteResult() && op.TypeID == catalog.Float32 {
 			fmt.Fprintln(&out, "logical traffic model: 5*n bytes/call; uint8 0/1 output")
 			fmt.Fprintln(&out, "SIMD boundary: partial load, compare, select 0/1, convert/extract, valid byte writes; all timed")
 		}

@@ -77,6 +77,11 @@ func TestStandaloneBinaryWithoutGoOrSource(t *testing.T) {
 					t.Fatal("standalone scalar result or fold identity lost")
 				}
 			}
+			if group == "saturatingadd8" {
+				if len(observation.ByteResultSHA256) != 64 || observation.Key.Case.Vector.NativeLanes.Value*8 != capture.Machine.Bits || observation.Key.Case.Predicate != (result.PredicateIdentity{}) {
+					t.Fatal("standalone numeric byte evidence lost")
+				}
+			}
 			if group == "addition64" {
 				if len(observation.ArrayResultSHA256) != 64 || !observation.Key.Case.Vector.NativeLanes.Known || observation.Key.Case.Vector.NativeLanes.Value*64 != capture.Machine.Bits {
 					t.Fatal("standalone binary64 identity lost")

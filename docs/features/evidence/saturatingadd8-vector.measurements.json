@@ -1,0 +1,316 @@
+{
+  "schema": "go-simd.measurements/v1",
+  "status": "complete",
+  "group": "saturatingadd8",
+  "config": {
+    "input": {
+      "FMAInput": "balanced",
+      "DotInput": "balanced",
+      "SumInput": "balanced",
+      "Alpha": 1069547520,
+      "Beta": 3204448256,
+      "Threshold": 0,
+      "Lower": 3212836864,
+      "Upper": 1065353216,
+      "Pattern": "alternating",
+      "Seed": 42
+    },
+    "count": 2,
+    "benchtime": "3x",
+    "bench": "^BenchmarkSaturatingAdd8$/^n=64$"
+  },
+  "machine": {
+    "fma32_path": "vector-fma32/v1",
+    "go_version": "go1.27.3-X:simd",
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "unknown",
+    "vector_bits": 256,
+    "float32_lanes": 8,
+    "gomaxprocs": 16,
+    "emulated": false,
+    "source_revision": "unknown",
+    "source_modified": "unknown",
+    "build": {
+      "GoVersion": "go1.27.3-X:simd",
+      "Path": "github.com/akolybelnikov/go-simd/cmd/simdreport",
+      "Main": {
+        "Path": "github.com/akolybelnikov/go-simd",
+        "Version": "(devel)"
+      },
+      "Settings": [
+        {
+          "Key": "-buildmode",
+          "Value": "exe"
+        },
+        {
+          "Key": "-compiler",
+          "Value": "gc"
+        },
+        {
+          "Key": "CGO_ENABLED",
+          "Value": "1"
+        },
+        {
+          "Key": "CGO_CFLAGS"
+        },
+        {
+          "Key": "CGO_CPPFLAGS"
+        },
+        {
+          "Key": "CGO_CXXFLAGS"
+        },
+        {
+          "Key": "CGO_LDFLAGS"
+        },
+        {
+          "Key": "GOARCH",
+          "Value": "amd64"
+        },
+        {
+          "Key": "GOEXPERIMENT",
+          "Value": "simd"
+        },
+        {
+          "Key": "GOOS",
+          "Value": "windows"
+        },
+        {
+          "Key": "GOAMD64",
+          "Value": "v1"
+        }
+      ]
+    }
+  },
+  "run": {
+    "ID": "benchmark-20261104-160643-435612640",
+    "Environment": {
+      "ID": "benchmark-20261104-160643-435612640/environment",
+      "GOOS": "windows",
+      "GOARCH": "amd64",
+      "CPU": "unknown"
+    },
+    "BackendID": "testing-benchmark/v1",
+    "HarnessID": "standalone-saturating-add8/v1",
+    "SourceFormat": "go-simd.measurements/v1",
+    "Metadata": "date: 2026-11-04T16:06:43Z\ngo: go1.27.3-X:simd\nplatform: windows/amd64\ncpu: unknown\nGOMAXPROCS: 16\nSIMD bits: 256\nSIMD float32 lanes: 8\nemulated: false\nsource revision: unknown\nsource modified: unknown\nbackend: testing-benchmark/v1\nharness: standalone-saturating-add8/v1\ngroup: saturatingadd8\nselection: \"^BenchmarkSaturatingAdd8$/^n=64$\"\n-count=2\n-benchtime=3x\nbuild information: {\"GoVersion\":\"go1.27.3-X:simd\",\"Path\":\"github.com/akolybelnikov/go-simd/cmd/simdreport\",\"Main\":{\"Path\":\"github.com/akolybelnikov/go-simd\",\"Version\":\"(devel)\"},\"Settings\":[{\"Key\":\"-buildmode\",\"Value\":\"exe\"},{\"Key\":\"-compiler\",\"Value\":\"gc\"},{\"Key\":\"CGO_ENABLED\",\"Value\":\"1\"},{\"Key\":\"CGO_CFLAGS\"},{\"Key\":\"CGO_CPPFLAGS\"},{\"Key\":\"CGO_CXXFLAGS\"},{\"Key\":\"CGO_LDFLAGS\"},{\"Key\":\"GOARCH\",\"Value\":\"amd64\"},{\"Key\":\"GOEXPERIMENT\",\"Value\":\"simd\"},{\"Key\":\"GOOS\",\"Value\":\"windows\"},{\"Key\":\"GOAMD64\",\"Value\":\"v1\"}]}\nfixture: generated-saturating-add-uint8-v1\ntrue uint8 arrays; saturation at 255; full output ByteResultSHA256; logical traffic 3*n\nnumerics: Unsigned byte saturating sum, not wrapping. True uint8 arrays; no float32 conversion or predicate encoding. Equal lengths before writes; valid empty/nil, disjoint/exact aliases, partial overlap unsupported. Validation, width setup, bounded loads, AddSaturated and stores timed; 3*n logical bytes. Full output byte digest and actual Uint8 lanes retained after timing.\noutput: uint8-zero-one/v1; full ByteResultSHA256 retained after timing\nlogical traffic: 5*n bytes/call\nnumerics: Unsigned byte saturating sum, not wrapping. True uint8 arrays; no float32 conversion or predicate encoding. Equal lengths before writes; valid empty/nil, disjoint/exact aliases, partial overlap unsupported. Validation, width setup, bounded loads, AddSaturated and stores timed; 3*n logical bytes. Full output byte digest and actual Uint8 lanes retained after timing.\n",
+    "Observations": [
+      {
+        "ByteResultSHA256": "d4d4b7aa4eaff068cd38d87de45f90e807cde709e4eb814c2b4a2eb8b22fbb9e",
+        "Key": {
+          "RunID": "benchmark-20261104-160643-435612640",
+          "EnvironmentID": "benchmark-20261104-160643-435612640/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-saturating-add8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 32,
+                "Known": true
+              }
+            },
+            "OperationID": "add-sat-u8",
+            "TypeID": "uint8",
+            "StrategyID": "scalar",
+            "ArithmeticID": "uint8-add-saturate-255-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-saturating-add-uint8-v1",
+              "SHA256": "2150525ef465b60f65d966e2710437b2c70f348f31511ebe9b6909641ada8ff1"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1440,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSaturatingAdd8/n=64/Scalar-16"
+      },
+      {
+        "ByteResultSHA256": "d4d4b7aa4eaff068cd38d87de45f90e807cde709e4eb814c2b4a2eb8b22fbb9e",
+        "Key": {
+          "RunID": "benchmark-20261104-160643-435612640",
+          "EnvironmentID": "benchmark-20261104-160643-435612640/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-saturating-add8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 32,
+                "Known": true
+              }
+            },
+            "OperationID": "add-sat-u8",
+            "TypeID": "uint8",
+            "StrategyID": "scalar",
+            "ArithmeticID": "uint8-add-saturate-255-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-saturating-add-uint8-v1",
+              "SHA256": "2150525ef465b60f65d966e2710437b2c70f348f31511ebe9b6909641ada8ff1"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "Scalar",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 100,
+        "DurationNS": 300,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1920,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSaturatingAdd8/n=64/Scalar-16"
+      },
+      {
+        "ByteResultSHA256": "d4d4b7aa4eaff068cd38d87de45f90e807cde709e4eb814c2b4a2eb8b22fbb9e",
+        "Key": {
+          "RunID": "benchmark-20261104-160643-435612640",
+          "EnvironmentID": "benchmark-20261104-160643-435612640/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-saturating-add8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 32,
+                "Known": true
+              }
+            },
+            "OperationID": "add-sat-u8",
+            "TypeID": "uint8",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "uint8-add-saturate-255-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-saturating-add-uint8-v1",
+              "SHA256": "2150525ef465b60f65d966e2710437b2c70f348f31511ebe9b6909641ada8ff1"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 1,
+        "Iterations": 3,
+        "NanosecondsPerOp": 133.33333333333334,
+        "DurationNS": 400,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1440,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSaturatingAdd8/n=64/SIMDPartial-16"
+      },
+      {
+        "ByteResultSHA256": "d4d4b7aa4eaff068cd38d87de45f90e807cde709e4eb814c2b4a2eb8b22fbb9e",
+        "Key": {
+          "RunID": "benchmark-20261104-160643-435612640",
+          "EnvironmentID": "benchmark-20261104-160643-435612640/environment",
+          "BackendID": "testing-benchmark/v1",
+          "HarnessID": "standalone-saturating-add8/v1",
+          "GOMAXPROCS": {
+            "Value": 16,
+            "Known": true
+          },
+          "Case": {
+            "Vector": {
+              "NativeLanes": {
+                "Value": 32,
+                "Known": true
+              }
+            },
+            "OperationID": "add-sat-u8",
+            "TypeID": "uint8",
+            "StrategyID": "simd-partial",
+            "ArithmeticID": "uint8-add-saturate-255-v1",
+            "Parameters": "",
+            "Elements": 64,
+            "Input": {
+              "GeneratorID": "generated-saturating-add-uint8-v1",
+              "SHA256": "2150525ef465b60f65d966e2710437b2c70f348f31511ebe9b6909641ada8ff1"
+            },
+            "Workers": {
+              "Value": 1,
+              "Known": true
+            },
+            "ExecutionMode": "kernel-only"
+          }
+        },
+        "Label": "SIMDPartial",
+        "Repetition": 2,
+        "Iterations": 3,
+        "NanosecondsPerOp": 166.66666666666666,
+        "DurationNS": 500,
+        "BytesPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "AllocsPerOp": {
+          "Value": 0,
+          "Available": true
+        },
+        "MegabytesPerSec": {
+          "Value": 1152,
+          "Available": true
+        },
+        "SourceBenchmark": "BenchmarkSaturatingAdd8/n=64/SIMDPartial-16"
+      }
+    ]
+  }
+}

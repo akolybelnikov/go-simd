@@ -1,5 +1,9 @@
 # F004 — SIMD operation and experiment-pattern catalogue
 
+Current extension: [uint8 saturation](F004-saturating-add8.md) brings the
+catalogue to eighteen operations/forty-seven implementations. Original baseline
+and earlier extension counts below remain historical.
+
 Current extension: [Float64 addition](F004-addition64.md) follows MulAdd and
 brings the current catalogue to seventeen operations/forty-five implementations.
 Original baseline and earlier extension counts below remain historical.

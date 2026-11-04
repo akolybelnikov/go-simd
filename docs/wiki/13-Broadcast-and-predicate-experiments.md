@@ -1,7 +1,7 @@
 # 13 — Broadcast and predicate experiments
 
 Checkpoint history: [three-array MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) is now implemented after the
-original F004 closure. The current catalogue has seventeen operations/forty-five
+original F004 closure. The current catalogue has eighteen operations/forty-seven
 implementations; future/stop statements below describe this earlier checkpoint.
 
 F004's first slice adds five operations with matching Scalar/SIMDPartial controls.

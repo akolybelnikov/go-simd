@@ -11,6 +11,12 @@ func TestPackedBoundarySweepAndPreservedSizes(t *testing.T) {
 	for _, op := range catalog.All() {
 		for _, w := range []int{4, 8, 16} {
 			sizes := OperationSizes(op, w)
+			if op.TypeID == catalog.Uint8 {
+				if !slices.Equal(sizes, BenchmarkSizes(w*4)) {
+					t.Fatal("uint8 sweep uses wrong width")
+				}
+				continue
+			}
 			if op.TypeID == catalog.Float64 {
 				if !slices.Equal(sizes, BenchmarkSizes(w/2)) {
 					t.Fatal("float64 sweep uses wrong width")

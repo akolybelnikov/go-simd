@@ -1,5 +1,26 @@
 # F004 smoke evidence
 
+## Uint8 saturating addition — 2026-11-04
+
+Normal/emulated saturatingadd8 captures retain four observations each, n=64,
+count2, 3x, fixed boundary-rich byte recipe. Every full output digest agrees.
+Windows/amd64, Go1.27.3-X:simd, GOMAXPROCS16; normal 256 bits/32 byte lanes,
+emulated 128 bits/16 byte lanes. Base 18c9f68 plus uncommitted saturation changes;
+missing embedded VCS facts remain unknown. Original samples/run IDs/timestamps
+are preserved, with LF/trailing whitespace normalized. No timing ranking claimed.
+
+```powershell
+$env:GOEXPERIMENT = 'simd'
+go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/uint8-checkpoint
+$env:GODEBUG = 'simd=0'
+go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 2 -benchtime 3x -format md -output artifacts/uint8-checkpoint-emulated
+Remove-Item Env:GODEBUG
+```
+
+See [the saturation contract](../F004-saturating-add8.md). Numeric byte output is
+identified separately from predicate masks; actual Uint8 lanes are retained.
+
+
 ## Float64 addition extension — 2026-11-04
 
 The addition64 normal/emulated captures each retain four observations, n=64,
