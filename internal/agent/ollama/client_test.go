@@ -5,10 +5,13 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/akolybelnikov/go-simd/internal/agent"
 	"github.com/akolybelnikov/go-simd/internal/agent/ollama"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var _ agent.ModelClient = (*ollama.Client)(nil)
 
 func TestNewClient(t *testing.T) {
 	baseURL, err := url.Parse("http://127.0.0.1:11434")

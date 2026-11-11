@@ -16,10 +16,6 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid model request: %w", err)
 	}
-	if len(req.Tools) > 0 {
-		return nil, fmt.Errorf("tools are not supported yet")
-	}
-
 	msgs := make([]chatMessage, 0, len(req.Messages)+1)
 	msgs = append(msgs, chatMessage{
 		Role:    systemRole,
@@ -46,10 +42,23 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 		}
 	}
 
+	tools := make([]chatTool, 0, len(req.Tools))
+	for _, tool := range req.Tools {
+		tools = append(tools, chatTool{
+			Type: "function",
+			Function: chatToolFunction{
+				Name:        tool.Name,
+				Description: tool.Description,
+				Parameters:  tool.InputSchema,
+			},
+		})
+	}
+
 	return &chatRequest{
 		Model:    c.modelName,
 		Messages: msgs,
 		Stream:   true,
-		Think:    false,
+		Think:    true,
+		Tools:    tools,
 	}, nil
 }
