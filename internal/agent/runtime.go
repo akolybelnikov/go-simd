@@ -36,6 +36,15 @@ func (r *Runtime) modelRequest(msgs []Message) (ModelRequest, error) {
 	return req, nil
 }
 
+func (r *Runtime) isToolRegistered(name string) bool {
+	for _, tool := range r.tools {
+		if tool.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // RunModelStep consumes one stream interaction with an LLM.
 func (r *Runtime) RunModelStep(ctx context.Context, msgs []Message) (Message, error) {
 	mRequest, err := r.modelRequest(msgs)
@@ -80,6 +89,9 @@ func (r *Runtime) RunModelStep(ctx context.Context, msgs []Message) (Message, er
 			_, _ = bd.WriteString(event.Text)
 		case EventToolCall:
 			tc := (*event.ToolCall)
+			if !r.isToolRegistered(tc.Name) {
+				return Message{}, fmt.Errorf("received an unregistered tool call: %q", tc.Name)
+			}
 			tc.Arguments = bytes.Clone(event.ToolCall.Arguments)
 			toolCalls = append(toolCalls, tc)
 		default:
