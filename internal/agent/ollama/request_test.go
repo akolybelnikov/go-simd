@@ -22,11 +22,39 @@ func Test_BuildChatRequest(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, client.modelName, req.Model)
 	assert.True(t, req.Stream)
-	assert.False(t, req.Think)
+	assert.True(t, req.Think)
 
 	require.Len(t, req.Messages, 2)
 	assert.Equal(t, systemRole, req.Messages[0].Role)
 	assert.Equal(t, mRequest.Instructions, req.Messages[0].Content)
 	assert.Equal(t, userRole, req.Messages[1].Role)
 	assert.Equal(t, "Hello", req.Messages[1].Content)
+}
+
+func Test_BuildChatRequest_Tool(t *testing.T) {
+	var client = Client{
+		modelName: "qwen3:4b",
+	}
+
+	var mRequest = agent.ModelRequest{
+		Instructions: "Answer briefly",
+		Messages:     []agent.Message{{Role: agent.RoleUser, Content: "Hello"}},
+		Tools: []agent.ToolDefinition{
+			{
+				Name:        "search_lab_docs",
+				Description: "look throught eh catalogue of operations",
+				InputSchema: []byte(`{"type": "object", "properties": {"op_name": {"type": "string"}}}`),
+			},
+		},
+	}
+
+	req, err := client.buildChatRequest(mRequest)
+	require.NoError(t, err)
+	assert.Equal(t, client.modelName, req.Model)
+	require.Len(t, req.Tools, 1)
+	assert.Equal(t, "function", req.Tools[0].Type)
+	assert.Equal(t, mRequest.Tools[0].Name, req.Tools[0].Function.Name)
+	assert.Equal(t, mRequest.Tools[0].Description, req.Tools[0].Function.Description)
+	assert.JSONEq(t, string(mRequest.Tools[0].InputSchema), string(req.Tools[0].Function.Parameters))
+
 }
