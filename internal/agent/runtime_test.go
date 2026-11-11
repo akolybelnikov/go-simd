@@ -262,3 +262,40 @@ func TestRuntime_RunModelStep_RejectsEmptyResponse(t *testing.T) {
 	require.Error(t, err)
 	assert.Zero(t, msg)
 }
+
+func TestRuntime_RunModelStep_RejectsUnregisteredTool(t *testing.T) {
+	client := &fakeModelClient{
+		events: []agent.ModelEvent{
+			{
+				Kind: agent.EventToolCall,
+				ToolCall: &agent.ToolCall{
+					ID:        "666",
+					Name:      "delete_everything",
+					Arguments: []byte(`{}`),
+				},
+			},
+			{
+				Kind: agent.EventCompleted,
+			},
+		},
+	}
+
+	runTime, err := agent.NewRuntime(client, "Use the lab functions instead of the memory.", []agent.ToolDefinition{
+		{
+			Name:        "explore_catalog",
+			Description: "List the operations and their implementaions",
+			InputSchema: []byte(`{"type": "object", "properties": {"group": {"type": "string"}}}`),
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, runTime)
+
+	msg, err := runTime.RunModelStep(context.Background(), []agent.Message{
+		{
+			Role:    agent.RoleUser,
+			Content: "What ops exist in the lab?",
+		},
+	})
+	require.Error(t, err)
+	assert.Zero(t, msg)
+}
