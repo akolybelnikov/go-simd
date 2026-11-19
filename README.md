@@ -64,9 +64,24 @@ go run ./cmd/simdlab inspect artifacts/addition/<capture>.measurements.json
 The catalogue reports exact supported sizes and the measuring-process identity.
 Plans require explicit sizes and strategy IDs and are bounded by the local
 policy. Inspection rejects oversized, malformed, future-schema and inconsistent
-captures before calculating descriptive facts and caveats. There is no public
-agent chat or direct `simdlab run` command yet; execution remains behind the
-separate confirmed-plan authority boundary.
+captures before calculating descriptive facts and caveats. Experiment execution
+remains behind the separate confirmed-plan authority boundary.
+
+### Local Explore preview
+
+With Ollama running locally and `qwen3:4b` installed, try the read-only catalog
+assistant from a SIMD-enabled checkout or an installed binary:
+
+```powershell
+go run ./cmd/simdlab ask -preview 'Which addition implementations are available?'
+```
+
+`ask` takes one question as an argument or from stdin, and prints the final
+answer. Use `ask -h` for endpoint, model, timeout and thinking options. Ctrl+C
+cancels a running turn. If you select a remote endpoint, it receives the
+question and the catalog results used to answer it. The default endpoint is
+local and requires no credentials. The preview's prose is model-generated;
+use `simdlab catalog` for authoritative strategy and supported-size lists.
 
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:

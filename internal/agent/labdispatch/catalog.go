@@ -14,6 +14,17 @@ type catalogArguments struct {
 	Group string `json:"group"`
 }
 
+const catalogToolName = "explore_catalog"
+
+// CatalogTool returns the model-facing definition for the read-only catalog tool.
+func CatalogTool() agent.ToolDefinition {
+	return agent.ToolDefinition{
+		Name:        catalogToolName,
+		Description: "List registered SIMD lab operations, strategies, supported sizes, and measuring-process capabilities. Use an exact group name or all.",
+		InputSchema: []byte(`{"type":"object","properties":{"group":{"type":"string","minLength":1}},"required":["group"],"additionalProperties":false}`),
+	}
+}
+
 func decodeCatalogArguments(arguments []byte) (catalogArguments, error) {
 	decoder := json.NewDecoder(bytes.NewReader(arguments))
 	decoder.DisallowUnknownFields()

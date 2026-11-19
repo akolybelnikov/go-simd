@@ -24,7 +24,7 @@ func (d *Dispatcher) Dispatch(ctx context.Context, toolcall agent.ToolCall) (age
 	}
 
 	switch toolcall.Name {
-	case "explore_catalog":
+	case catalogToolName:
 		return d.exploreCatalog(toolcall)
 	default:
 		return agent.Message{}, fmt.Errorf("unsupported tool call name %q", toolcall.Name)

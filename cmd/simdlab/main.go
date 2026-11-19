@@ -1,4 +1,4 @@
-// simdlab is the shared deterministic laboratory and future agent entry point.
+// simdlab is the entry point for the deterministic laboratory and Explore preview.
 // The _worker command is private: parent processes provide its bounded request.
 package main
 
@@ -47,6 +47,8 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 1
 	}
 	switch args[0] {
+	case "ask":
+		return runAsk(service, args[1:], stdin, stdout, stderr)
 	case "catalog":
 		return runCatalog(service, args[1:], stdout, stderr)
 	case "plan":
@@ -150,4 +152,5 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  catalog [-group group]     print structured capabilities")
 	fmt.Fprintln(writer, "  plan                       read a JSON plan request from stdin")
 	fmt.Fprintln(writer, "  inspect <measurements.json> validate and inspect saved evidence")
+	fmt.Fprintln(writer, "  ask -preview [question]    try the local Ollama catalog assistant")
 }
