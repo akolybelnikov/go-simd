@@ -26,28 +26,31 @@ func CatalogTool() agent.ToolDefinition {
 }
 
 func decodeCatalogArguments(arguments []byte) (catalogArguments, error) {
-	decoder := json.NewDecoder(bytes.NewReader(arguments))
-	decoder.DisallowUnknownFields()
-
-	val := catalogArguments{}
-	if err := decoder.Decode(&val); err != nil {
-		return catalogArguments{}, fmt.Errorf("failed to decode the arguments: %w", err)
+	var args catalogArguments
+	if err := decodeArguments(arguments, &args); err != nil {
+		return catalogArguments{}, err
 	}
-
-	if val.Group == "" {
+	if args.Group == "" {
 		return catalogArguments{}, fmt.Errorf("group cannot be missing in the arguments")
 	}
+	return args, nil
+}
 
-	trail := json.RawMessage{}
-	if err := decoder.Decode(&trail); err == nil {
-		return catalogArguments{}, fmt.Errorf("invalid trailing data")
-	} else {
-		if !errors.Is(err, io.EOF) {
-			return catalogArguments{}, fmt.Errorf("error decoding trailing data: %w", err)
-		}
+func decodeArguments(arguments []byte, destination any) error {
+	decoder := json.NewDecoder(bytes.NewReader(arguments))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(destination); err != nil {
+		return fmt.Errorf("failed to decode the arguments: %w", err)
 	}
-
-	return val, nil
+	var trail json.RawMessage
+	err := decoder.Decode(&trail)
+	if err == nil {
+		return fmt.Errorf("invalid trailing data")
+	}
+	if !errors.Is(err, io.EOF) {
+		return fmt.Errorf("error decoding trailing data: %w", err)
+	}
+	return nil
 }
 
 func (d *Dispatcher) exploreCatalog(tc agent.ToolCall) (agent.Message, error) {

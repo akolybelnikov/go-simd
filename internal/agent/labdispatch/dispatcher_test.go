@@ -6,6 +6,7 @@ import (
 
 	"github.com/akolybelnikov/go-simd/internal/agent"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
+	"github.com/akolybelnikov/go-simd/internal/labdocs"
 	"github.com/akolybelnikov/go-simd/internal/labservice"
 	"github.com/akolybelnikov/go-simd/internal/platform"
 	"github.com/stretchr/testify/assert"
@@ -94,4 +95,24 @@ func TestDispatcher_RealCatalog(t *testing.T) {
 	for _, operation := range response.Operations {
 		assert.Equal(t, "addition", operation.Group)
 	}
+}
+
+func TestDispatcher_SearchesApprovedDocumentation(t *testing.T) {
+	explorer := &fakeCatalogExplorer{}
+	dispatcher, err := NewDispatcher(explorer)
+	require.NoError(t, err)
+	call := agent.ToolCall{ID: "docs-1", Name: DocsTool().Name, Arguments: []byte(`{"query":"latency bandwidth timing"}`)}
+	result, err := dispatcher.Dispatch(t.Context(), call)
+	require.NoError(t, err)
+	require.NoError(t, result.Validate())
+	require.Equal(t, call.ID, result.ToolCallID)
+	var notes []labdocs.Result
+	require.NoError(t, json.Unmarshal([]byte(result.Content), &notes))
+	require.NotEmpty(t, notes)
+	require.Equal(t, "Read each number correctly", notes[0].Section)
+	require.Zero(t, explorer.calls)
+
+	call.Arguments = []byte(`{"query":"timing","path":"../private.md"}`)
+	_, err = dispatcher.Dispatch(t.Context(), call)
+	require.ErrorContains(t, err, "unknown field")
 }
