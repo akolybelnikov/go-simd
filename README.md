@@ -82,6 +82,7 @@ cancels a running turn. If you select a remote endpoint, it receives the
 question and the catalog results used to answer it. The default endpoint is
 local and requires no credentials. The preview's prose is model-generated;
 use `simdlab catalog` for authoritative strategy and supported-size lists.
+See [Explore preview and release checks](docs/agent-preview.md) for verification.
 
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:
