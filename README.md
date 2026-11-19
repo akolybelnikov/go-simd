@@ -98,6 +98,18 @@ checkpoint progress and prints a JSON manifest with the evidence path when a
 capture is available. Pass that path to `simdlab inspect` to inspect the capture.
 Use `-artifacts` to choose where the local job directories are written.
 
+### Local Interpret preview
+
+```powershell
+go run ./cmd/simdlab interpret -preview path/to/measurements.json 'How did SIMD compare with scalar?'
+```
+
+Go validates the capture and computes the facts. Ollama sees a bounded summary
+and selects fact IDs or reports insufficient evidence. Go renders the referenced
+values, the measuring-host notice, and caveats as JSON. Use `-model` to try another
+installed model, and `inspect` for the model-free summary. For comparison results
+and reproduction commands, see [Interpret evaluation](docs/interpret-evaluation.md).
+
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:
 

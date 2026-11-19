@@ -79,6 +79,20 @@ func TestExperimentCLI(t *testing.T) {
 			require.FileExists(t, result.Evidence)
 			stdout.Reset()
 			require.Zero(t, run([]string{"inspect", result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
+
+			interpretServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				body, err := io.ReadAll(r.Body)
+				if err != nil || !bytes.Contains(body, []byte("series-1")) || bytes.Contains(body, []byte("measurements.json")) {
+					http.Error(w, "expected evidence facts without file paths", http.StatusBadRequest)
+					return
+				}
+				_, _ = io.WriteString(w, `{"message":{"tool_calls":[{"function":{"name":"select_evidence_facts","arguments":{"decision":"answer","fact_ids":["series-1"]}}}]},"done":true}`)
+			}))
+			defer interpretServer.Close()
+			stdout.Reset()
+			require.Zero(t, run([]string{"interpret", "-preview", "-endpoint", interpretServer.URL, result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
+			require.Contains(t, stdout.String(), `"decision": "answer"`)
+			require.Contains(t, stdout.String(), `"id": "series-1"`)
 		})
 	}
 }

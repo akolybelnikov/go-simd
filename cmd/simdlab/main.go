@@ -58,6 +58,8 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return runPlan(service, args[1:], stdin, stdout, stderr)
 	case "inspect":
 		return runInspect(service, args[1:], stdout, stderr)
+	case "interpret":
+		return runInterpret(service, args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -155,6 +157,7 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  catalog [-group group]     print structured capabilities")
 	fmt.Fprintln(writer, "  plan                       read a JSON plan request from stdin")
 	fmt.Fprintln(writer, "  inspect <measurements.json> validate and inspect saved evidence")
+	fmt.Fprintln(writer, "  interpret -preview <measurements.json> [question]  select grounded evidence facts")
 	fmt.Fprintln(writer, "  ask -preview [question]    try the local Ollama catalog assistant")
 	fmt.Fprintln(writer, "  experiment -preview <request> propose, review, and confirm a local benchmark")
 }

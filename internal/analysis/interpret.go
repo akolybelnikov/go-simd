@@ -169,6 +169,9 @@ func InterpretCapture(capture evidence.Capture) (Interpretation, error) {
 	if strings.HasSuffix(capture.Config.Benchtime, "x") {
 		addCaveat(&output, "fixed_iterations", "Fixed iteration measurements may be too short for stable performance evidence.")
 	}
+	if len(output.Comparisons) == 0 {
+		addCaveat(&output, "no_compatible_scalar_comparison", "The capture has no comparable pair with positive scalar and candidate medians.")
+	}
 	if capture.Status == "failed" {
 		addCaveat(&output, "incomplete_run", "The run failed or was interrupted; only completed checkpoint observations are included.")
 	}
@@ -178,6 +181,15 @@ func InterpretCapture(capture evidence.Capture) (Interpretation, error) {
 	addCaveat(&output, "host_contention_unmeasured", "Host contention and background load were not measured; execution was serialized only within this lab service.")
 	if mixesParallelAndSerial(capture.Run.Observations) {
 		addCaveat(&output, "parallel_vs_serial", "The comparison includes concurrency effects as well as implementation differences.")
+	}
+	foldOrders := make(map[string]bool)
+	for _, observation := range capture.Run.Observations {
+		if order := observation.Key.Case.Reduction.OrderID; order != "" {
+			foldOrders[order] = true
+		}
+	}
+	if len(foldOrders) > 1 {
+		addCaveat(&output, "different_fold_orders", "The measured strategies use different reduction orders; timing observations do not establish bitwise-equivalent results.")
 	}
 	return output, nil
 }
