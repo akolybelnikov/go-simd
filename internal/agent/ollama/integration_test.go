@@ -91,6 +91,25 @@ func (d *observedDispatcher) Dispatch(ctx context.Context, call agent.ToolCall) 
 	return d.dispatcher.Dispatch(ctx, call)
 }
 
+func TestIntegration_DocumentationCitation(t *testing.T) {
+	client := setupModelClient(t)
+	service, err := labservice.NewDeterministic(platform.Current(), labapi.DefaultPlanPolicy())
+	require.NoError(t, err)
+	dispatcher, err := labdispatch.NewDispatcher(service)
+	require.NoError(t, err)
+	observed := &observedDispatcher{dispatcher: dispatcher}
+	runtime, err := agent.NewRuntime(client, "Use search_lab_docs to answer documentation questions. After the lookup, answer briefly from the notes and cite their exact source path and section.", []agent.ToolDefinition{labdispatch.DocsTool()})
+	require.NoError(t, err)
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
+	defer cancel()
+	reply, err := runtime.RunTurn(ctx, []agent.Message{{Role: agent.RoleUser, Content: "Use the documentation tool to explain what ns/op means and cite the source path and section."}}, observed, agent.TurnLimits{MaxModelSteps: 2, MaxToolCalls: 1})
+	require.NoError(t, err)
+	require.Equal(t, []string{"search_lab_docs"}, observed.names)
+	t.Log(reply.Content)
+	assert.Contains(t, reply.Content, "docs/wiki/06-Understanding-results.md")
+	assert.Contains(t, reply.Content, "Read each number correctly")
+}
+
 func TestIntegration_RuntimeText(t *testing.T) {
 	modelClient := setupModelClient(t)
 	agentRuntime, err := agent.NewRuntime(modelClient, "Answer briefly and directly", nil)
