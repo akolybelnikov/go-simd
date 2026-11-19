@@ -69,24 +69,26 @@ func TestIntegration_ExploreCatalog(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
 	defer cancel()
 
-	assistantResponse, err := agentRuntime.RunModelStep(ctx, messages)
+	observed := &observedDispatcher{dispatcher: dispatcher}
+	finalResponse, err := agentRuntime.RunTurn(ctx, messages, observed, agent.TurnLimits{MaxModelSteps: 3, MaxToolCalls: 2})
 	require.NoError(t, err)
-	require.Len(t, assistantResponse.ToolCalls, 1)
-	assert.Equal(t, "explore_catalog", assistantResponse.ToolCalls[0].Name)
-
-	toolResult, err := dispatcher.Dispatch(ctx, assistantResponse.ToolCalls[0])
-	require.NoError(t, err)
-	require.NoError(t, toolResult.Validate())
-	assert.Equal(t, assistantResponse.ToolCalls[0].ID, toolResult.ToolCallID)
-	t.Log(toolResult.Content)
-
-	messages = append(messages, assistantResponse, toolResult)
-	finalResponse, err := agentRuntime.RunModelStep(ctx, messages)
-	require.NoError(t, err)
+	require.Contains(t, observed.names, "explore_catalog")
 	assert.Equal(t, agent.RoleAssistant, finalResponse.Role)
-	assert.NotEmpty(t, finalResponse.Content)
+	for _, label := range []string{"Scalar", "SIMDPartial", "SIMDTail", "SIMDParallel"} {
+		assert.Contains(t, finalResponse.Content, label)
+	}
 	assert.Empty(t, finalResponse.ToolCalls)
 	t.Log(finalResponse.Content)
+}
+
+type observedDispatcher struct {
+	dispatcher agent.ToolDispatcher
+	names      []string
+}
+
+func (d *observedDispatcher) Dispatch(ctx context.Context, call agent.ToolCall) (agent.Message, error) {
+	d.names = append(d.names, call.Name)
+	return d.dispatcher.Dispatch(ctx, call)
 }
 
 func TestIntegration_RuntimeText(t *testing.T) {

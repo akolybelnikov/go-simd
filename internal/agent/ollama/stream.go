@@ -11,8 +11,12 @@ import (
 type modelStream struct {
 	body          io.ReadCloser
 	decoder       *json.Decoder
+	limitedBody   *io.LimitedReader
 	pendingEvents []agent.ModelEvent
+	nextCall      int
 }
+
+const maxResponseBytes = 1 << 20
 
 func (s *modelStream) Next() (agent.ModelEvent, error) {
 	for {
@@ -24,8 +28,15 @@ func (s *modelStream) Next() (agent.ModelEvent, error) {
 			return e, nil
 		}
 
-		if err := s.decoder.Decode(&resp); err != nil {
+		err := s.decoder.Decode(&resp)
+		if s.limitedBody.N == 0 {
+			return agent.ModelEvent{}, fmt.Errorf("Ollama response exceeds %d bytes", maxResponseBytes)
+		}
+		if err != nil {
 			return agent.ModelEvent{}, fmt.Errorf("error decoding body: %w", err)
+		}
+		if resp.Error != "" {
+			return agent.ModelEvent{}, fmt.Errorf("Ollama reported an error in the response stream")
 		}
 
 		if resp.Message.Content != "" {
@@ -39,11 +50,12 @@ func (s *modelStream) Next() (agent.ModelEvent, error) {
 			s.pendingEvents = append(s.pendingEvents, agent.ModelEvent{
 				Kind: agent.EventToolCall,
 				ToolCall: &agent.ToolCall{
-					ID:        fmt.Sprintf("ollama-call-%d", toolCall.Function.Index),
+					ID:        fmt.Sprintf("ollama-call-%d", s.nextCall),
 					Name:      toolCall.Function.Name,
 					Arguments: toolCall.Function.Arguments.Clone(),
 				},
 			})
+			s.nextCall++
 		}
 
 		if resp.Done {
@@ -57,8 +69,10 @@ func (s *modelStream) Close() error {
 }
 
 func newModelStream(body io.ReadCloser) *modelStream {
+	limited := &io.LimitedReader{R: body, N: maxResponseBytes + 1}
 	return &modelStream{
-		body:    body,
-		decoder: json.NewDecoder(body),
+		body:        body,
+		decoder:     json.NewDecoder(limited),
+		limitedBody: limited,
 	}
 }

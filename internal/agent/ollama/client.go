@@ -18,6 +18,7 @@ type Client struct {
 	baseURL    *url.URL
 	modelName  string
 	httpClient *http.Client
+	think      bool
 }
 
 // Stream sends a chat request to Ollama and opens a stream of model events.
@@ -71,13 +72,18 @@ func (c *Client) Stream(ctx context.Context, req agent.ModelRequest) (agent.Mode
 
 // NewClient creates an Ollama client using the provided base URL, model name, and HTTP client.
 func NewClient(baseURL *url.URL, modelName string, httpClient *http.Client) (*Client, error) {
+	return NewClientWithThinking(baseURL, modelName, httpClient, true)
+}
+
+// NewClientWithThinking allows the caller to set Ollama's thinking option.
+func NewClientWithThinking(baseURL *url.URL, modelName string, httpClient *http.Client, think bool) (*Client, error) {
 	if baseURL == nil {
 		return nil, fmt.Errorf("base URL cannot be nil")
 	}
 	if baseURL.Scheme != "http" && baseURL.Scheme != "https" {
 		return nil, fmt.Errorf("unsupported URL scheme %q", baseURL.Scheme)
 	}
-	if baseURL.Host == "" {
+	if baseURL.Hostname() == "" {
 		return nil, fmt.Errorf("base URL host cannot be empty")
 	}
 	if modelName == "" {
@@ -93,5 +99,6 @@ func NewClient(baseURL *url.URL, modelName string, httpClient *http.Client) (*Cl
 		baseURL:    &urlCp,
 		modelName:  modelName,
 		httpClient: httpClient,
+		think:      think,
 	}, nil
 }

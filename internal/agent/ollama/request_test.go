@@ -11,6 +11,7 @@ import (
 func Test_BuildChatRequest(t *testing.T) {
 	var client = Client{
 		modelName: "qwen3:4b",
+		think:     true,
 	}
 
 	var mRequest = agent.ModelRequest{

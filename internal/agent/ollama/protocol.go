@@ -23,6 +23,7 @@ type chatMessage struct {
 type chatResponse struct {
 	Message chatMessage `json:"message"`
 	Done    bool        `json:"done"`
+	Error   string      `json:"error"`
 }
 
 type chatTool struct {

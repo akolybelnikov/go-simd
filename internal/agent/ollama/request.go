@@ -37,6 +37,9 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 				Content: msg.Content,
 			}
 			for idx, tc := range msg.ToolCalls {
+				if _, pending := pendingToolCalls[tc.ID]; pending {
+					return nil, fmt.Errorf("duplicate pending tool call ID %q", tc.ID)
+				}
 				chatMsg.ToolCalls = append(chatMsg.ToolCalls, chatToolCall{
 					Type: "function",
 					Function: chatToolCallFunction{
@@ -80,7 +83,7 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 		Model:    c.modelName,
 		Messages: msgs,
 		Stream:   true,
-		Think:    true,
+		Think:    c.think,
 		Tools:    tools,
 	}, nil
 }
