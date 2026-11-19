@@ -22,6 +22,8 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 		Content: req.Instructions,
 	})
 
+	pendingToolCalls := make(map[string]string)
+
 	for _, msg := range req.Messages {
 		switch msg.Role {
 		case agent.RoleUser:
@@ -30,13 +32,33 @@ func (c *Client) buildChatRequest(req agent.ModelRequest) (*chatRequest, error) 
 				Content: msg.Content,
 			})
 		case agent.RoleAssistant:
-			if len(msg.ToolCalls) > 0 {
-				return nil, fmt.Errorf("tools are not supported yet")
-			}
-			msgs = append(msgs, chatMessage{
+			chatMsg := chatMessage{
 				Role:    assistantRole,
 				Content: msg.Content,
+			}
+			for idx, tc := range msg.ToolCalls {
+				chatMsg.ToolCalls = append(chatMsg.ToolCalls, chatToolCall{
+					Type: "function",
+					Function: chatToolCallFunction{
+						Index:     idx,
+						Name:      tc.Name,
+						Arguments: tc.Arguments.Clone(),
+					},
+				})
+				pendingToolCalls[tc.ID] = tc.Name
+			}
+			msgs = append(msgs, chatMsg)
+		case agent.RoleTool:
+			toolName, ok := pendingToolCalls[msg.ToolCallID]
+			if !ok {
+				return nil, fmt.Errorf("unmatched tool call ID %q", msg.ToolCallID)
+			}
+			msgs = append(msgs, chatMessage{
+				Role:     "tool",
+				ToolName: toolName,
+				Content:  msg.Content,
 			})
+			delete(pendingToolCalls, msg.ToolCallID)
 		default:
 			return nil, fmt.Errorf("unsupported message role: %s", msg.Role)
 		}

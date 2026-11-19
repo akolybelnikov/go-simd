@@ -17,6 +17,7 @@ type chatMessage struct {
 	Content   string         `json:"content"`
 	Thinking  string         `json:"thinking,omitempty"`
 	ToolCalls []chatToolCall `json:"tool_calls,omitempty"`
+	ToolName  string         `json:"tool_name,omitempty"`
 }
 
 type chatResponse struct {

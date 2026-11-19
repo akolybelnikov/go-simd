@@ -6,6 +6,8 @@ import (
 
 	"github.com/akolybelnikov/go-simd/internal/agent"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
+	"github.com/akolybelnikov/go-simd/internal/labservice"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,13 +29,15 @@ func (c *fakeCatalogExplorer) Catalog(group string) (labapi.CatalogResponse, err
 func TestDispatcher_ExploreCatalog(t *testing.T) {
 	tests := []struct {
 		name      string
+		toolName  string
 		group     string
 		arguments []byte
 		wantErr   bool
 	}{
-		{name: "addition", group: "addition", arguments: []byte(`{"group":"addition"}`)},
-		{name: "multiplication", group: "multiplication", arguments: []byte(`{"group":"multiplication"}`)},
-		{name: "rejects invalid catalog arguments", arguments: []byte(`{}`), wantErr: true},
+		{name: "addition", toolName: "explore_catalog", group: "addition", arguments: []byte(`{"group":"addition"}`)},
+		{name: "multiplication", toolName: "explore_catalog", group: "multiplication", arguments: []byte(`{"group":"multiplication"}`)},
+		{name: "rejects invalid catalog arguments", toolName: "explore_catalog", arguments: []byte(`{}`), wantErr: true},
+		{name: "rejects unknown tool", toolName: "unknown_tool", arguments: []byte(`{}`), wantErr: true},
 	}
 
 	for _, tt := range tests {
@@ -42,7 +46,7 @@ func TestDispatcher_ExploreCatalog(t *testing.T) {
 			d, err := NewDispatcher(c)
 			require.NoError(t, err)
 
-			tc := agent.ToolCall{ID: "call-1", Name: "explore_catalog", Arguments: tt.arguments}
+			tc := agent.ToolCall{ID: "call-1", Name: tt.toolName, Arguments: tt.arguments}
 			msg, err := d.Dispatch(t.Context(), tc)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -64,5 +68,30 @@ func TestDispatcher_ExploreCatalog(t *testing.T) {
 			assert.Equal(t, labapi.CatalogSchema, cr.Schema)
 			require.NoError(t, msg.Validate())
 		})
+	}
+}
+
+func TestDispatcher_RealCatalog(t *testing.T) {
+	machine := platform.Current()
+	service, err := labservice.NewDeterministic(machine, labapi.DefaultPlanPolicy())
+	require.NoError(t, err)
+
+	d, err := NewDispatcher(service)
+	require.NoError(t, err)
+
+	tc := agent.ToolCall{
+		ID:        "call-1",
+		Name:      "explore_catalog",
+		Arguments: []byte(`{"group":"addition"}`),
+	}
+	msg, err := d.Dispatch(t.Context(), tc)
+	require.NoError(t, err)
+	require.NoError(t, msg.Validate())
+
+	var response labapi.CatalogResponse
+	require.NoError(t, json.Unmarshal([]byte(msg.Content), &response))
+	require.NotEmpty(t, response.Operations)
+	for _, operation := range response.Operations {
+		assert.Equal(t, "addition", operation.Group)
 	}
 }

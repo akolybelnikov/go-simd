@@ -9,7 +9,11 @@ import (
 	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/agent"
+	"github.com/akolybelnikov/go-simd/internal/agent/labdispatch"
 	"github.com/akolybelnikov/go-simd/internal/agent/ollama"
+	"github.com/akolybelnikov/go-simd/internal/labapi"
+	"github.com/akolybelnikov/go-simd/internal/labservice"
+	"github.com/akolybelnikov/go-simd/internal/platform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,6 +33,60 @@ func setupModelClient(t *testing.T) *ollama.Client {
 	require.NoError(t, err)
 
 	return modelClient
+}
+
+func TestIntegration_ExploreCatalog(t *testing.T) {
+	modelClient := setupModelClient(t)
+
+	service, err := labservice.NewDeterministic(platform.Current(), labapi.DefaultPlanPolicy())
+	require.NoError(t, err)
+
+	dispatcher, err := labdispatch.NewDispatcher(service)
+	require.NoError(t, err)
+	require.NotNil(t, dispatcher)
+
+	toolDefinitions := []agent.ToolDefinition{
+		{
+			Name:        "explore_catalog",
+			Description: "explore the available catalog operations",
+			InputSchema: []byte(`{"type":"object","properties":{"group":{"type":"string"}},"required":["group"],"additionalProperties":false}`),
+		},
+	}
+	agentRuntime, err := agent.NewRuntime(
+		modelClient,
+		"Use explore_catalog to answer catalog questions. After receiving the result, answer from that result.",
+		toolDefinitions,
+	)
+	require.NoError(t, err)
+	require.NotNil(t, agentRuntime)
+
+	messages := []agent.Message{
+		{
+			Role:    agent.RoleUser,
+			Content: "Which addition implementations are available? Use the catalog.",
+		},
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
+	defer cancel()
+
+	assistantResponse, err := agentRuntime.RunModelStep(ctx, messages)
+	require.NoError(t, err)
+	require.Len(t, assistantResponse.ToolCalls, 1)
+	assert.Equal(t, "explore_catalog", assistantResponse.ToolCalls[0].Name)
+
+	toolResult, err := dispatcher.Dispatch(ctx, assistantResponse.ToolCalls[0])
+	require.NoError(t, err)
+	require.NoError(t, toolResult.Validate())
+	assert.Equal(t, assistantResponse.ToolCalls[0].ID, toolResult.ToolCallID)
+	t.Log(toolResult.Content)
+
+	messages = append(messages, assistantResponse, toolResult)
+	finalResponse, err := agentRuntime.RunModelStep(ctx, messages)
+	require.NoError(t, err)
+	assert.Equal(t, agent.RoleAssistant, finalResponse.Role)
+	assert.NotEmpty(t, finalResponse.Content)
+	assert.Empty(t, finalResponse.ToolCalls)
+	t.Log(finalResponse.Content)
 }
 
 func TestIntegration_RuntimeText(t *testing.T) {
