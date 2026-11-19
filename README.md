@@ -84,6 +84,20 @@ local and requires no credentials. The preview's prose is model-generated;
 use `simdlab catalog` for authoritative strategy and supported-size lists.
 See [Explore preview and release checks](docs/agent-preview.md) for verification.
 
+### Local Experiment preview
+
+```powershell
+go run ./cmd/simdlab experiment -preview 'Compare addition strategies scalar and simd-partial at size 8, count 1, benchtime 1x.'
+```
+
+The command asks Ollama to propose one benchmark using the default generated
+fixture. Review the exact cases, scope, warnings, and measuring host printed to
+stderr. Type `run <plan-id>` using the ID shown within five minutes to run that
+plan once. Press Ctrl+C or enter a different line to decline. The CLI reports
+checkpoint progress and prints a JSON manifest with the evidence path when a
+capture is available. Pass that path to `simdlab inspect` to inspect the capture.
+Use `-artifacts` to choose where the local job directories are written.
+
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:
 

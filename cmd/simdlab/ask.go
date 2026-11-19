@@ -53,17 +53,7 @@ func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader,
 		fmt.Fprintf(stderr, "question must contain text and fit within %d bytes\n", maxQuestionBytes)
 		return 2
 	}
-	base, err := url.Parse(*endpoint)
-	if err != nil || base.User != nil || base.RawQuery != "" || base.Fragment != "" {
-		fmt.Fprintln(stderr, "invalid Ollama endpoint")
-		return 2
-	}
-	client, err := ollama.NewClientWithThinking(base, *model, &http.Client{
-		Timeout: *timeout,
-		CheckRedirect: func(*http.Request, []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}, *think)
+	client, err := newLocalModelClient(*endpoint, *model, *timeout, *think)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
@@ -93,6 +83,17 @@ func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader,
 		return 1
 	}
 	return 0
+}
+
+func newLocalModelClient(endpoint, model string, timeout time.Duration, think bool) (*ollama.Client, error) {
+	base, err := url.Parse(endpoint)
+	if err != nil || base.User != nil || base.RawQuery != "" || base.Fragment != "" {
+		return nil, fmt.Errorf("invalid Ollama endpoint")
+	}
+	return ollama.NewClientWithThinking(base, model, &http.Client{
+		Timeout:       timeout,
+		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+	}, think)
 }
 
 func terminalText(text string) string {

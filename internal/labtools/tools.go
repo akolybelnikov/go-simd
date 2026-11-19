@@ -10,12 +10,14 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/labapi"
 	"github.com/akolybelnikov/go-simd/internal/labworker"
 )
 
 const maxSessionPlans = 16
+const ExperimentPlanTTL = 5 * time.Minute
 
 type Executor interface {
 	Execute(context.Context, labworker.Request) (labworker.RunResult, error)
@@ -31,8 +33,9 @@ const (
 )
 
 type storedPlan struct {
-	plan  labapi.ExperimentPlan
-	state planState
+	plan      labapi.ExperimentPlan
+	state     planState
+	expiresAt time.Time
 }
 
 type Toolset struct {
@@ -88,7 +91,10 @@ func (t *Toolset) ProposeExperiment(request labapi.PlanRequest) (labapi.Experime
 	if _, exists := t.plans[plan.ID]; !exists && len(t.plans) >= maxSessionPlans {
 		return labapi.ExperimentPlan{}, fmt.Errorf("session plan limit reached")
 	}
-	t.plans[plan.ID] = storedPlan{plan: stored, state: proposed}
+	if existing, exists := t.plans[plan.ID]; exists && (existing.state == confirmed || existing.state == running) {
+		return labapi.ExperimentPlan{}, fmt.Errorf("experiment plan is already %s", existing.state)
+	}
+	t.plans[plan.ID] = storedPlan{plan: stored, state: proposed, expiresAt: time.Now().Add(ExperimentPlanTTL)}
 	return clonePlan(plan)
 }
 
@@ -103,6 +109,9 @@ func (t *Toolset) ConfirmExperiment(planID string) error {
 	}
 	if stored.state != proposed {
 		return fmt.Errorf("experiment plan is %s, not proposed", stored.state)
+	}
+	if !time.Now().Before(stored.expiresAt) {
+		return fmt.Errorf("experiment plan expired")
 	}
 	if err := labapi.RevalidateExperimentPlan(stored.plan, t.runtime, t.policy); err != nil {
 		return err
@@ -119,6 +128,9 @@ func (t *Toolset) ExecuteConfirmed(ctx context.Context, planID string) (labworke
 	if ctx == nil {
 		return labworker.RunResult{}, fmt.Errorf("nil execution context")
 	}
+	if err := ctx.Err(); err != nil {
+		return labworker.RunResult{}, err
+	}
 	t.mu.Lock()
 	stored, ok := t.plans[planID]
 	if !ok {
@@ -128,6 +140,10 @@ func (t *Toolset) ExecuteConfirmed(ctx context.Context, planID string) (labworke
 	if stored.state != confirmed {
 		t.mu.Unlock()
 		return labworker.RunResult{}, fmt.Errorf("experiment plan is %s, not confirmed", stored.state)
+	}
+	if !time.Now().Before(stored.expiresAt) {
+		t.mu.Unlock()
+		return labworker.RunResult{}, fmt.Errorf("experiment plan expired")
 	}
 	stored.state = running
 	t.plans[planID] = stored

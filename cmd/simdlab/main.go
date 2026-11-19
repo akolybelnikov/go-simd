@@ -41,6 +41,9 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		printUsage(stderr)
 		return 2
 	}
+	if args[0] == "experiment" {
+		return runExperiment(args[1:], stdin, stdout, stderr)
+	}
 	service, err := labservice.NewDeterministic(platform.Current(), labapi.DefaultPlanPolicy())
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -153,4 +156,5 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  plan                       read a JSON plan request from stdin")
 	fmt.Fprintln(writer, "  inspect <measurements.json> validate and inspect saved evidence")
 	fmt.Fprintln(writer, "  ask -preview [question]    try the local Ollama catalog assistant")
+	fmt.Fprintln(writer, "  experiment -preview <request> propose, review, and confirm a local benchmark")
 }

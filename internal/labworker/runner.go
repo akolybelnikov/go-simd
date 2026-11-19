@@ -67,6 +67,12 @@ func NewRunnerWithCommand(command CommandFactory) (*Runner, error) {
 // Run starts one child process, persists every checkpoint, and always attempts
 // to replace a running manifest with a terminal state before returning.
 func (r *Runner) Run(ctx context.Context, artifactRoot string, request Request) (RunResult, error) {
+	return r.RunWithProgress(ctx, artifactRoot, request, nil)
+}
+
+// RunWithProgress reports the running manifest and persisted checkpoints.
+// The returned result contains the terminal manifest and any retained capture.
+func (r *Runner) RunWithProgress(ctx context.Context, artifactRoot string, request Request, progress func(Manifest)) (RunResult, error) {
 	now := time.Now().UTC()
 	manifest := Manifest{Schema: manifestSchema, JobID: request.JobID, PlanID: request.Plan.ID, Status: "queued", QueuedAt: now}
 	result := RunResult{Manifest: manifest}
@@ -124,8 +130,11 @@ func (r *Runner) Run(ctx context.Context, artifactRoot string, request Request) 
 		_ = cmd.Wait()
 		return result, err
 	}
+	if progress != nil {
+		progress(result.Manifest)
+	}
 
-	scanErr := r.consume(stdout, directory, manifestPath, request.Plan.ID, &result)
+	scanErr := r.consume(stdout, directory, manifestPath, request.Plan.ID, &result, progress)
 	_ = stdout.Close()
 	waitErr := cmd.Wait()
 	terminalErr := errors.Join(scanErr, waitErr)
@@ -151,7 +160,7 @@ func (r *Runner) Run(ctx context.Context, artifactRoot string, request Request) 
 	return result, nil
 }
 
-func (r *Runner) consume(stdout io.Reader, directory, manifestPath, planID string, result *RunResult) error {
+func (r *Runner) consume(stdout io.Reader, directory, manifestPath, planID string, result *RunResult, progress func(Manifest)) error {
 	scanner := bufio.NewScanner(stdout)
 	scanner.Buffer(make([]byte, 64<<10), MaxEvent)
 	for scanner.Scan() {
@@ -190,6 +199,9 @@ func (r *Runner) consume(stdout io.Reader, directory, manifestPath, planID strin
 			}
 			if err := writeJSONAtomic(manifestPath, result.Manifest); err != nil {
 				return err
+			}
+			if progress != nil && event.Type == "checkpoint" {
+				progress(result.Manifest)
 			}
 		default:
 			return fmt.Errorf("unknown worker event type %q", event.Type)

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
@@ -90,5 +91,31 @@ func TestProposalLimitsAndSessionBound(t *testing.T) {
 	request.Count = labapi.DefaultPlanPolicy().MaxCount + 1
 	if _, err := tools.ProposeExperiment(request); err == nil {
 		t.Fatal("oversized proposal accepted")
+	}
+}
+
+func TestExpiredPlanCannotBeConfirmedOrExecuted(t *testing.T) {
+	for _, state := range []planState{proposed, confirmed} {
+		executor := &recordingExecutor{}
+		tools, err := New(toolRuntime(), labapi.DefaultPlanPolicy(), executor)
+		if err != nil {
+			t.Fatal(err)
+		}
+		plan, err := tools.ProposeExperiment(proposal())
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored := tools.plans[plan.ID]
+		stored.state = state
+		stored.expiresAt = time.Now().Add(-time.Second)
+		tools.plans[plan.ID] = stored
+		if state == proposed {
+			err = tools.ConfirmExperiment(plan.ID)
+		} else {
+			_, err = tools.ExecuteConfirmed(t.Context(), plan.ID)
+		}
+		if err == nil || !strings.Contains(err.Error(), "expired") || len(executor.requests) != 0 {
+			t.Fatalf("state=%s error=%v requests=%d", state, err, len(executor.requests))
+		}
 	}
 }
