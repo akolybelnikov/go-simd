@@ -33,6 +33,7 @@ func TestExperimentCLI(t *testing.T) {
 		wantCode                            int
 	}{
 		{"confirmed", "plan_experiment", `{"group":"addition","variants":["scalar","simd-partial"],"sizes":[8],"count":1,"benchtime":"1x"}`, "run " + plan.ID + "\n", 0},
+		{"exact flags", "", "", "run " + plan.ID + "\n", 0},
 		{"wrong plan ID", "plan_experiment", `{"group":"addition","variants":["scalar"],"sizes":[8],"count":1,"benchtime":"1x"}`, "run " + plan.ID + "\n", 2},
 		{"model cannot confirm", "plan_experiment", `{"group":"addition","variants":["scalar"],"sizes":[8],"count":1,"benchtime":"1x"}`, "", 2},
 		{"execution tool unavailable", "run_experiment", `{}`, "run " + plan.ID + "\n", 1},
@@ -56,7 +57,13 @@ func TestExperimentCLI(t *testing.T) {
 			defer server.Close()
 			root := t.TempDir()
 			var stdout, stderr bytes.Buffer
-			code := run([]string{"experiment", "-preview", "-endpoint", server.URL, "-artifacts", root, "Compare scalar and SIMD addition"}, strings.NewReader(tt.confirmation), &stdout, &stderr)
+			args := []string{"experiment", "-preview", "-artifacts", root}
+			if tt.tool == "" {
+				args = append(args, "-endpoint", "http://127.0.0.1:1", "-group", "addition", "-variants", "scalar,simd-partial", "-sizes", "8", "-count", "1", "-benchtime", "1x")
+			} else {
+				args = append(args, "-endpoint", server.URL, "Compare scalar and SIMD addition")
+			}
+			code := run(args, strings.NewReader(tt.confirmation), &stdout, &stderr)
 			require.Equal(t, tt.wantCode, code, stderr.String())
 			entries, err := os.ReadDir(root)
 			require.NoError(t, err)

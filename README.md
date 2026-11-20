@@ -87,16 +87,20 @@ See [Explore preview and release checks](docs/agent-preview.md) for verification
 ### Local Experiment preview
 
 ```powershell
-go run ./cmd/simdlab experiment -preview 'Compare addition strategies scalar and simd-partial at size 8, count 1, benchtime 1x.'
+go run ./cmd/simdlab experiment -preview -group addition -variants scalar,simd-partial -sizes 8 -count 1 -benchtime 1x
 ```
 
-The command asks Ollama to propose one benchmark using the default generated
-fixture. Review the exact cases, scope, warnings, and measuring host printed to
+The exact flags resolve one benchmark locally using the default generated
+fixture. This form works without Ollama. Review the exact cases, scope, warnings, and measuring host printed to
 stderr. Type `run <plan-id>` using the ID shown within five minutes to run that
 plan once. Press Ctrl+C or enter a different line to decline. The CLI reports
 checkpoint progress and prints a JSON manifest with the evidence path when a
 capture is available. Pass that path to `simdlab inspect` to inspect the capture.
 Use `-artifacts` to choose where the local job directories are written.
+
+To try model-assisted planning, pass a request in words in place of the five
+plan flags. This sends one request to Ollama, which can take tens of seconds.
+If the model produces no valid proposal, use the exact flags above.
 
 ### Local Interpret preview
 

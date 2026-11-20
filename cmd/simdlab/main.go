@@ -159,5 +159,5 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "  inspect <measurements.json> validate and inspect saved evidence")
 	fmt.Fprintln(writer, "  interpret -preview <measurements.json> [question]  select grounded evidence facts")
 	fmt.Fprintln(writer, "  ask -preview [question]    try the local Ollama catalog assistant")
-	fmt.Fprintln(writer, "  experiment -preview <request> propose, review, and confirm a local benchmark")
+	fmt.Fprintln(writer, "  experiment -preview ...    review and confirm a benchmark using exact flags or a model proposal")
 }
