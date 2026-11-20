@@ -98,6 +98,7 @@ func TestInterpretModelOutputBoundary(t *testing.T) {
 			require.Len(t, answer.Facts, 1)
 			require.Equal(t, "comparison-1", answer.Facts[0].ID)
 			require.Contains(t, answer.Facts[0].Text, "+50%")
+			require.Contains(t, answer.Facts[0].Display, "50.0% more time than Scalar")
 			require.NotContains(t, answer.Facts[0].Text, "10000")
 		})
 	}
@@ -110,6 +111,11 @@ func TestInterpretRejectsUnregisteredEvidenceLabels(t *testing.T) {
 	require.ErrorContains(t, err, "unregistered operation or strategy")
 	require.Equal(t, "insufficient_evidence", answer.Decision)
 	require.Empty(t, answer.Facts)
+}
+
+func TestComparisonSentenceUsesTimeRatioForLargeSlowdown(t *testing.T) {
+	comparison := analysis.ComparisonFact{Elements: 1024, TimeChangePercent: 1019.92}
+	require.Equal(t, "At 1024 elements, SIMDParallel took 11.2 times as long as Scalar (median kernel time).", comparisonSentence(comparison, "Scalar", "SIMDParallel"))
 }
 
 func TestInterpretModelEvaluation(t *testing.T) {

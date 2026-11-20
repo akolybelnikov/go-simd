@@ -150,8 +150,9 @@ A remote endpoint receives the prompt and any catalog or evidence summaries
 used by the selected command. Model-assisted steps can take tens of seconds,
 can return no usable proposal, and are cancellable with Ctrl+C. Exact flags
 provide a fallback for experiments. Each model-proposed plan still requires the
-same human confirmation. Interpret returns verified evidence values and caveats
-as JSON. See the [preview checks](docs/agent-preview.md) and
+same human confirmation. Interpret prints verified observations and caveats as
+plain text. Use `interpret -preview -json` for structured output with fact IDs.
+See the [preview checks](docs/agent-preview.md) and
 [model evaluation](docs/interpret-evaluation.md) for current limitations.
 
 Use `-group computation` for the expression experiment. Every Make run, list

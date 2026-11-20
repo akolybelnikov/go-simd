@@ -20,6 +20,7 @@ func runInterpret(service *labservice.Deterministic, args []string, stdout, stde
 	flags := flag.NewFlagSet("interpret", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	preview := flags.Bool("preview", false, "enable model-assisted interpretation")
+	structured := flags.Bool("json", false, "emit structured JSON including evidence IDs")
 	endpoint := flags.String("endpoint", "http://127.0.0.1:11434", "Ollama server base URL")
 	model := flags.String("model", "qwen3:4b", "installed Ollama model")
 	think := flags.Bool("think", true, "request Ollama's separate thinking channel")
@@ -63,7 +64,13 @@ func runInterpret(service *labservice.Deterministic, args []string, stdout, stde
 	ctx, cancel := context.WithTimeout(interrupt, *timeout)
 	defer cancel()
 	answer, modelErr := labinterpret.Interpret(ctx, client, facts, question)
-	if writeJSON(stdout, stderr, answer) != 0 {
+	var code int
+	if *structured {
+		code = writeJSON(stdout, stderr, answer)
+	} else {
+		code = writeText(stdout, stderr, interpretationText(answer))
+	}
+	if code != 0 {
 		return 1
 	}
 	if modelErr != nil {
@@ -71,4 +78,26 @@ func runInterpret(service *labservice.Deterministic, args []string, stdout, stde
 		return 1
 	}
 	return 0
+}
+
+func interpretationText(answer labinterpret.Answer) string {
+	var text strings.Builder
+	if answer.Decision == "answer" && len(answer.Facts) > 0 {
+		fmt.Fprintln(&text, "What the measurements show")
+		for _, fact := range answer.Facts {
+			fmt.Fprintln(&text, "-", fact.Display)
+		}
+	} else {
+		fmt.Fprintln(&text, "The saved evidence is insufficient to answer this question.")
+	}
+	if len(answer.Caveats) > 0 {
+		fmt.Fprintln(&text, "\nWhat to keep in mind")
+		for _, caveat := range answer.Caveats {
+			fmt.Fprintln(&text, "-", caveat.Message)
+		}
+	}
+	if answer.MeasurementNotice != "" {
+		fmt.Fprintln(&text, "\n"+answer.MeasurementNotice)
+	}
+	return text.String()
 }

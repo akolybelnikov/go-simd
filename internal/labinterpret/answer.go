@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/akolybelnikov/go-simd/internal/agent"
 	"github.com/akolybelnikov/go-simd/internal/analysis"
@@ -28,8 +29,9 @@ type Answer struct {
 }
 
 type Fact struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
+	ID      string `json:"id"`
+	Text    string `json:"text"`
+	Display string `json:"-"`
 }
 
 type selection struct {
@@ -43,28 +45,40 @@ func Interpret(ctx context.Context, client agent.ModelClient, evidence analysis.
 	fallback := Answer{Decision: "insufficient_evidence", Caveats: evidence.Caveats, MeasurementNotice: evidence.MeasurementNotice}
 	facts := make(map[string]Fact, len(evidence.Series)+len(evidence.Comparisons))
 	env := evidence.MeasuringEnvironment
-	facts["environment"] = Fact{"environment", fmt.Sprintf("Recorded measuring process: %q/%q, %d-bit vectors, %d float32 lanes, GOMAXPROCS=%d, emulated SIMD=%t.", env.OS, env.Arch, env.VectorBits, env.Float32Lanes, env.GOMAXPROCS, env.Emulated)}
+	environment := fmt.Sprintf("Recorded measuring process: %q/%q, %d-bit vectors, %d float32 lanes, GOMAXPROCS=%d, emulated SIMD=%t.", env.OS, env.Arch, env.VectorBits, env.Float32Lanes, env.GOMAXPROCS, env.Emulated)
+	facts["environment"] = Fact{ID: "environment", Text: environment, Display: environment}
 	orderedFacts := []Fact{facts["environment"]}
-	strategies := make(map[string]bool)
-	registered := make(map[[2]string]bool)
+	strategies := make(map[string]string)
+	registered := make(map[[2]string]string)
 	for _, op := range catalog.All() {
 		for _, variant := range op.Variants {
-			registered[[2]string{op.ID, variant.ID}] = true
+			registered[[2]string{op.ID, variant.ID}] = variant.Label
 		}
 	}
 	for _, series := range evidence.Series {
-		if !registered[[2]string{series.OperationID, series.StrategyID}] {
+		label, ok := registered[[2]string{series.OperationID, series.StrategyID}]
+		if !ok {
 			return fallback, fmt.Errorf("capture contains an unregistered operation or strategy")
 		}
-		strategies[series.StrategyID] = true
-		facts[series.FactID] = Fact{series.FactID, fmt.Sprintf("%s at %d elements: median %.6g ns per complete kernel call (%d observations; observed range %.6g–%.6g ns).", series.StrategyID, series.Elements, series.MedianNS, series.Samples, series.MinimumNS, series.MaximumNS)}
+		strategies[series.StrategyID] = label
+		facts[series.FactID] = Fact{
+			ID:      series.FactID,
+			Text:    fmt.Sprintf("%s at %d elements: median %.6g ns per complete kernel call (%d observations; observed range %.6g–%.6g ns).", series.StrategyID, series.Elements, series.MedianNS, series.Samples, series.MinimumNS, series.MaximumNS),
+			Display: fmt.Sprintf("%s at %d elements: median %.4g ns per kernel call, based on %d measurements.", label, series.Elements, series.MedianNS, series.Samples),
+		}
 		orderedFacts = append(orderedFacts, facts[series.FactID])
 	}
 	for _, comparison := range evidence.Comparisons {
-		if !strategies[comparison.BaselineStrategy] || !strategies[comparison.CandidateStrategy] {
+		baseline, baselineOK := strategies[comparison.BaselineStrategy]
+		candidate, candidateOK := strategies[comparison.CandidateStrategy]
+		if !baselineOK || !candidateOK {
 			return fallback, fmt.Errorf("comparison references an unregistered strategy")
 		}
-		facts[comparison.FactID] = Fact{comparison.FactID, fmt.Sprintf("%s versus %s at %d elements: median kernel time changed by %+.6g%% (baseline/candidate ratio %.6gx).", comparison.CandidateStrategy, comparison.BaselineStrategy, comparison.Elements, comparison.TimeChangePercent, comparison.SpeedupRatio)}
+		facts[comparison.FactID] = Fact{
+			ID:      comparison.FactID,
+			Text:    fmt.Sprintf("%s versus %s at %d elements: median kernel time changed by %+.6g%% (baseline/candidate ratio %.6gx).", comparison.CandidateStrategy, comparison.BaselineStrategy, comparison.Elements, comparison.TimeChangePercent, comparison.SpeedupRatio),
+			Display: comparisonSentence(comparison, baseline, candidate),
+		}
 		orderedFacts = append(orderedFacts, facts[comparison.FactID])
 	}
 	payload, err := json.Marshal(struct {
@@ -101,6 +115,28 @@ func Interpret(ctx context.Context, client agent.ModelClient, evidence analysis.
 		fallback.Facts = append(fallback.Facts, facts[id])
 	}
 	return fallback, nil
+}
+
+func comparisonSentence(comparison analysis.ComparisonFact, baseline, candidate string) string {
+	change := comparison.TimeChangePercent
+	if change == 0 {
+		return fmt.Sprintf("At %d elements, %s and %s had the same median kernel time.", comparison.Elements, candidate, baseline)
+	}
+	if change >= 100 {
+		return fmt.Sprintf("At %d elements, %s took %.3g times as long as %s (median kernel time).", comparison.Elements, candidate, 1+change/100, baseline)
+	}
+	direction := "more"
+	if change < 0 {
+		direction = "less"
+	}
+	percent := fmt.Sprintf("%.1f", math.Abs(change))
+	if percent == "0.0" {
+		percent = fmt.Sprintf("%.3g", math.Abs(change))
+	}
+	if change < 0 && percent == "100.0" {
+		percent = "over 99.9"
+	}
+	return fmt.Sprintf("At %d elements, %s took %s%% %s time than %s (median kernel time).", comparison.Elements, candidate, percent, direction, baseline)
 }
 
 func validateSelection(raw []byte, facts map[string]Fact) (selection, error) {
