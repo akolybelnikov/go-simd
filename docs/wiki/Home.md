@@ -17,6 +17,7 @@ simdlab ui
 - **Explore** shows what the lab can measure. Browse operations and choose a method and batch size.
 - **Compare** shows the proposed settings. Select **Run locally** to start a measurement.
 - **Results** shows the timing difference and individual repeats. Open a saved capture or download a Markdown report here.
+- **Ask an agent** in Explore or Results prepares a question with lab context for the AI assistant you choose.
 
 The browser opens on the machine running `simdlab`. The starter runs offline.
 Use the terminal commands below for scripts or SSH. [Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
@@ -33,7 +34,7 @@ the settings, runs the comparison, and prints the timing difference and the
 paths to the Markdown report and measurement file. This path works without
 a model. Press Ctrl+C to cancel.
 
-## Ask an agent
+## Guided CLI preview
 
 The examples below work without Ollama. Other wording may use the optional local model.
 

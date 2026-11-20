@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"os/signal"
@@ -22,9 +23,10 @@ import (
 )
 
 const starterSize = 1024
+const starterRepeats = 3
 
 func comparisonRequest(group string, variants []string, size int) labapi.PlanRequest {
-	return labapi.PlanRequest{Group: group, Variants: variants, Sizes: []int{size}, Count: 3, Benchtime: "100ms"}
+	return labapi.PlanRequest{Group: group, Variants: variants, Sizes: []int{size}, Count: starterRepeats, Benchtime: "100ms"}
 }
 
 func additionStarter() labapi.PlanRequest {
@@ -226,7 +228,7 @@ func executeComparison(ctx context.Context, tools *labtools.Toolset, plan labapi
 		return savedComparison{}, fmt.Errorf("read results in %s: %w", path, err)
 	}
 	reportPath := filepath.Join(run.Directory, "report.md")
-	report := comparisonReport(plan.Group, inspection, true)
+	report := comparisonReport(*run.Capture, inspection, true)
 	saved := savedComparison{inspection: inspection, capture: run.Capture, path: path}
 	if err := os.WriteFile(reportPath, []byte(report), 0o600); err != nil {
 		return saved, fmt.Errorf("write report (measurements saved at %s): %w", path, err)
@@ -235,14 +237,29 @@ func executeComparison(ctx context.Context, tools *labtools.Toolset, plan labapi
 	return saved, nil
 }
 
-func comparisonReport(group string, inspection analysis.Interpretation, local bool) string {
+func comparisonReport(capture evidence.Capture, inspection analysis.Interpretation, local bool) string {
 	summary := comparisonSummary(inspection)
 	if local {
 		summary += "This run used generated data on this machine.\n\nMeasurements: [measurements.json](measurements.json)\n"
 	}
 	details := strings.TrimSuffix(strings.NewReplacer("\r\n", "\n", "\r", "\n").Replace(inspectionText(inspection)), "\n")
-	return "# " + group + " comparison\n\n" + summary + "\n## Measurement details\n\n    " +
-		strings.ReplaceAll(details, "\n", "\n    ") + "\n"
+	var report strings.Builder
+	fmt.Fprintf(&report, "# %s comparison\n\n%s\n## Measurement details\n\n", capture.Group, summary)
+	if fixture := comparisonFixture(capture); fixture != "" {
+		fmt.Fprintf(&report, "    Input fixture: %s\n", strings.NewReplacer("\r", " ", "\n", " ").Replace(fixture))
+	}
+	fmt.Fprintf(&report, "    Measurement target per repeat: %s\n", strings.NewReplacer("\r", " ", "\n", " ").Replace(capture.Config.Benchtime))
+	fmt.Fprintf(&report, "    %s\n", strings.ReplaceAll(details, "\n", "\n    "))
+	report.WriteString("\n## Individual repeat timings\n\n")
+	report.WriteString("| Method | Values per array | Repeat | ns per batch |\n| --- | ---: | ---: | ---: |\n")
+	escapeCell := strings.NewReplacer("|", "&#124;", "\r", " ", "\n", " ")
+	for _, series := range comparisonSeries(capture, inspection) {
+		method := escapeCell.Replace(html.EscapeString(series.Method))
+		for _, repeat := range series.Repeats {
+			fmt.Fprintf(&report, "| %s | %d | %d | %.6g |\n", method, series.Size, repeat.Number, repeat.NS)
+		}
+	}
+	return report.String()
 }
 
 func comparisonSummary(inspection analysis.Interpretation) string {

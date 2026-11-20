@@ -53,6 +53,7 @@ type uiPreview struct {
 	Methods   []string `json:"methods"`
 	Size      int      `json:"size"`
 	Repeats   int      `json:"repeats"`
+	Benchtime string   `json:"benchtime"`
 	Host      string   `json:"host"`
 	Warnings  []string `json:"warnings,omitempty"`
 	TailNotes []string `json:"tail_notes,omitempty"`
@@ -138,8 +139,13 @@ func (app *localUI) explore(w http.ResponseWriter) {
 	}
 	view := struct {
 		labapi.CatalogResponse
-		Operations []operationView `json:"operations"`
-	}{CatalogResponse: app.catalog}
+		Operations     []operationView `json:"operations"`
+		DefaultRepeats int             `json:"default_repeats"`
+		MaxRepeats     int             `json:"max_repeats"`
+	}{
+		CatalogResponse: app.catalog, DefaultRepeats: starterRepeats,
+		MaxRepeats: labapi.DefaultPlanPolicy().MaxCount,
+	}
 	for _, operation := range app.catalog.Operations {
 		operation.Strategies = slices.Clone(operation.Strategies)
 		for j := range operation.Strategies {
@@ -154,9 +160,10 @@ func (app *localUI) explore(w http.ResponseWriter) {
 
 func (app *localUI) preview(w http.ResponseWriter, r *http.Request) {
 	var choice struct {
-		Group  string `json:"group"`
-		Method string `json:"method"`
-		Size   int    `json:"size"`
+		Group   string `json:"group"`
+		Method  string `json:"method"`
+		Size    int    `json:"size"`
+		Repeats *int   `json:"repeats"`
 	}
 	if err := decodeBounded(r.Body, 1024, &choice); err != nil || choice.Group == "" || choice.Method == "" {
 		uiError(w, http.StatusBadRequest, "Choose an operation, a method, and a whole number for the batch size.")
@@ -167,7 +174,11 @@ func (app *localUI) preview(w http.ResponseWriter, r *http.Request) {
 		uiError(w, http.StatusUnprocessableEntity, "Choose a supported operation from Explore.")
 		return
 	}
-	app.previewComparison(w, *operation, []string{operation.ReferenceStrategy, choice.Method}, choice.Size)
+	repeats := starterRepeats
+	if choice.Repeats != nil {
+		repeats = *choice.Repeats
+	}
+	app.previewComparison(w, *operation, []string{operation.ReferenceStrategy, choice.Method}, choice.Size, repeats)
 }
 
 func (app *localUI) serveAsset(w http.ResponseWriter, path string) {
@@ -209,7 +220,7 @@ func (app *localUI) propose(w http.ResponseWriter, request labapi.PlanRequest) {
 	app.mu.Unlock()
 
 	preview := uiPreview{
-		Ref: proposal.ref, Operation: plan.Group, Repeats: plan.Count, Size: plan.Cases[0].Elements,
+		Ref: proposal.ref, Operation: plan.Group, Repeats: plan.Count, Size: plan.Cases[0].Elements, Benchtime: plan.Benchtime,
 		Host: fmt.Sprintf("%s / %s", plan.Runtime.OS, plan.Runtime.Arch), Ollama: app.model != nil,
 		TailNotes: comparisonTailNotes(plan),
 	}
@@ -281,7 +292,7 @@ func (app *localUI) open(w http.ResponseWriter, r *http.Request) {
 		uiError(w, http.StatusUnprocessableEntity, "Could not compare this capture. "+err.Error())
 		return
 	}
-	report := comparisonReport(capture.Group, inspection, false)
+	report := comparisonReport(capture, inspection, false)
 	uiJSON(w, http.StatusOK, newUIResult(capture, inspection, report, "", ""))
 }
 
@@ -329,16 +340,22 @@ func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
 	if size == 0 {
 		size = starterSize
 	}
-	app.previewComparison(w, *operation, request.Methods, size)
+	app.previewComparison(w, *operation, request.Methods, size, starterRepeats)
 }
 
-func (app *localUI) previewComparison(w http.ResponseWriter, operation labapi.OperationDescriptor, requested []string, size int) {
+func (app *localUI) previewComparison(w http.ResponseWriter, operation labapi.OperationDescriptor, requested []string, size, repeats int) {
 	methods, err := guideMethods(operation, requested)
 	if err != nil {
 		uiError(w, http.StatusUnprocessableEntity, "Choose two supported methods, including the ordinary scalar method.")
 		return
 	}
-	app.propose(w, comparisonRequest(operation.Group, methods, size))
+	if maxRepeats := labapi.DefaultPlanPolicy().MaxCount; repeats < 1 || repeats > maxRepeats {
+		uiError(w, http.StatusUnprocessableEntity, fmt.Sprintf("Choose between 1 and %d repeats per method.", maxRepeats))
+		return
+	}
+	request := comparisonRequest(operation.Group, methods, size)
+	request.Count = repeats
+	app.propose(w, request)
 }
 
 func uiSizeRange() string {

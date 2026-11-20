@@ -36,6 +36,7 @@
         <label for="operation-search">Search operations</label>
         <input type="search" id="operation-search" placeholder="Try addition, sum, or copy" disabled>
         <p id="catalog-status" class="status" role="status">Loading operations…</p>
+        <button class="secondary agent-trigger" type="button" id="agent-catalog" disabled>Ask an agent about your use case</button>
         <ul id="operation-list"></ul>
       </section>
       <section class="card setup operation-details" id="catalog-details" aria-labelledby="catalog-operation" hidden>
@@ -51,6 +52,10 @@
               <input id="catalog-size" type="number" min="1" step="1" required list="catalog-size-suggestions" aria-describedby="catalog-size-hint">
               <datalist id="catalog-size-suggestions"></datalist>
               <small id="catalog-size-hint" class="meta"></small>
+            </label>
+            <label for="catalog-repeats">Repeats per method
+              <input id="catalog-repeats" type="number" min="1" step="1" required aria-describedby="catalog-repeats-hint">
+              <small id="catalog-repeats-hint" class="meta"></small>
             </label>
           </div>
           <button class="primary" type="submit" id="catalog-submit">Preview comparison <span aria-hidden="true">→</span></button>
@@ -84,23 +89,15 @@
           <p id="status" class="status" role="status"></p>
         </section>
 
-        <section class="card options" aria-labelledby="ask-title">
-          <h2 id="ask-title">Set up another comparison</h2>
+        <section class="card options" aria-labelledby="examples-title">
+          <h2 id="examples-title">Set up another comparison</h2>
           <p>Pick an example to preview its settings above. Choose <strong>Run locally</strong> when you’re ready to measure.</p>
           <div class="comparison-examples">
-            <button type="button" class="secondary" data-question="Compare summing an array with a loop and with vectors.">Compare ways to sum an array</button>
-            <button type="button" class="secondary" data-question="Compare addition at 8,192 values.">Compare addition at 8,192 values</button>
+            <button type="button" class="secondary" data-group="sum" data-method="simd-striped" data-size="1024">Compare ways to sum an array</button>
+            <button type="button" class="secondary" data-group="addition" data-method="simd-partial" data-size="8192">Compare addition at 8,192 values</button>
           </div>
-          <details class="custom-comparison">
-            <summary>Describe your own comparison</summary>
-            <form id="ask">
-              <label for="question">What operation and array size would you like to compare?</label>
-              <textarea id="question" rows="3" maxlength="8192" required placeholder="Compare ordinary and vectorized addition for 1,024 values."></textarea>
-              <button class="secondary" id="ask-submit" type="submit">Preview comparison</button>
-            </form>
-            <p id="model-mode" class="meta"></p>
-          </details>
-          <p id="ask-status" class="status" role="status"></p>
+          <p>Use <strong>Explore</strong> to choose another operation, method, or batch size.</p>
+          <p id="examples-status" class="status" role="status"></p>
         </section>
     </section>
 
@@ -127,6 +124,7 @@
           <p id="medians" class="medians"></p>
           <ul id="caveats" class="notices" hidden></ul>
           <div class="host-data"><strong>Measuring host</strong><span id="host"></span></div>
+          <button class="secondary agent-trigger" type="button" id="agent-results">Ask an agent about these results</button>
           <div class="repeat-area">
             <div class="section-head">
               <h4>Individual repeats</h4>
@@ -149,6 +147,24 @@
       </section>
     </section>
   </main>
+  <dialog id="agent-dialog" aria-labelledby="agent-title" aria-describedby="agent-description">
+    <header class="section-head">
+      <h2 id="agent-title">Ask an agent</h2>
+      <button class="quiet" id="agent-close" type="button">Close</button>
+    </header>
+    <p id="agent-description">Write a question, then paste it into an AI assistant you choose. SIMD Lab prepares the context locally.</p>
+    <form id="agent-form">
+      <label for="agent-question">Your question</label>
+      <textarea id="agent-question" rows="3" maxlength="8192" required autofocus></textarea>
+      <details id="agent-share-preview">
+        <summary>Review what will be copied</summary>
+        <label for="agent-context">Question and lab context</label>
+        <textarea id="agent-context" rows="6" readonly></textarea>
+      </details>
+      <button class="primary" type="submit">Copy question and context</button>
+      <p id="agent-status" class="status" role="status"></p>
+    </form>
+  </dialog>
   <footer>Measurements describe the machine that ran the benchmark.</footer>
 </body>
 </html>

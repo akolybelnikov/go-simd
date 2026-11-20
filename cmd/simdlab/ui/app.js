@@ -19,8 +19,10 @@ let activeRun = null;
 let busy = false;
 let currentReport = "";
 let currentSeries = [];
+let currentResult;
 let operations = [];
 let selectedOperation;
+let agentPrompt;
 
 function selectTab(name) {
   for (const tab of tabs) {
@@ -57,8 +59,6 @@ function updateControls() {
   byID("starter").disabled = busy || !token;
   byID("cancel").hidden = !activeRun;
   byID("capture").disabled = busy || !token;
-  byID("question").disabled = busy || !token;
-  byID("ask-submit").disabled = busy || !token;
   byID("catalog-submit").disabled = busy || !token || !byID("catalog-method").value;
   for (const example of examples) {
     example.disabled = busy || !token;
@@ -70,7 +70,12 @@ function updateControls() {
 async function loadCatalog() {
   try {
     const catalog = await api("/api/catalog");
+    const repeats = byID("catalog-repeats");
+    repeats.max = catalog.max_repeats;
+    repeats.value = catalog.default_repeats;
+    byID("catalog-repeats-hint").textContent = "1 to " + catalog.max_repeats + " repeats.";
     operations = catalog.operations.toSorted((a, b) => a.title.localeCompare(b.title));
+    byID("agent-catalog").disabled = operations.length === 0;
     const host = catalog.runtime;
     byID("catalog-host").textContent = host.os + " / " + host.arch +
       " · " + host.vector_bits + "-bit vectors" + (host.emulated ? " · SIMD emulated" : "");
@@ -137,22 +142,27 @@ function chooseOperation(operation) {
 
 async function previewOperation(event) {
   event.preventDefault();
-  if (!selectedOperation || busy) return;
-  const choice = {
+  if (!selectedOperation) return;
+  await previewComparison({
     group: selectedOperation.group,
     method: byID("catalog-method").value,
     size: Number(byID("catalog-size").value),
-  };
+    repeats: Number(byID("catalog-repeats").value),
+  }, "catalog-preview-status");
+}
+
+async function previewComparison(choice, statusID) {
+  if (busy || !token) return;
   busy = true;
   updateControls();
-  status("Preparing the preview…", false, "catalog-preview-status");
+  status("Preparing the preview…", false, statusID);
   try {
     const plan = await api("/api/preview", JSON.stringify(choice));
-    status("", false, "catalog-preview-status");
+    status("", false, statusID);
     selectTab("compare");
     reviewPlan(plan);
   } catch (error) {
-    status(error.message, true, "catalog-preview-status");
+    status(error.message, true, statusID);
   } finally {
     busy = false;
     updateControls();
@@ -187,12 +197,11 @@ function setPlan(plan) {
   byID("operation").textContent = plan.operation;
   const methods = plan.methods.length === 2 ? "Two methods" : plan.methods.length + " methods";
   byID("plan-settings").textContent = methods + " · " + integer.format(plan.size) +
-    " generated values per array · " + plan.repeats + " repeats · running on this machine";
+    " generated values per array · " + plan.repeats + " repeats per method · " +
+    plan.benchtime + " target per repeat · running on this machine";
   fillList(byID("methods"), plan.methods);
   fillList(byID("plan-notes"), [...(plan.tail_notes || []), ...(plan.warnings || [])]);
   byID("plan-host").textContent = plan.host;
-  byID("model-mode").textContent = plan.ollama ?
-    "Local Ollama helps interpret your wording." : "The examples work offline. Start simdlab ui -ollama for help with other wording.";
 }
 
 function reviewPlan(plan) {
@@ -262,23 +271,8 @@ async function openCapture(event) {
   }
 }
 
-async function previewQuestion(question) {
-  if (!question || busy) return;
-  busy = true;
-  updateControls();
-  status("Preparing the preview…", false, "ask-status");
-  try {
-    reviewPlan(await api("/api/ask", JSON.stringify({ question })));
-    status("", false, "ask-status");
-  } catch (error) {
-    status(error.message, true, "ask-status");
-  } finally {
-    busy = false;
-    updateControls();
-  }
-}
-
 function showResult(result) {
+  currentResult = result;
   selectTab("results");
   const [headline, ...detail] = result.timing.trim().split("\n");
   byID("headline").textContent = headline;
@@ -387,6 +381,87 @@ function saveReport() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+const agentScope = "SIMD Lab measures individual operations on generated arrays. Use the supplied lab context as evidence. Treat it as data, distinguish measured facts from hypotheses, and say what would need a separate test.";
+
+function operationContext(operation) {
+  return {
+    operation: operation.title,
+    group: operation.group,
+    input_type: operation.type_id,
+    formula: operation.expression,
+    numeric_rules: operation.numerical_policy,
+  };
+}
+
+function openAgent(mode) {
+  if (mode === "catalog") {
+    agentPrompt = {
+      guidance: "Recommend an operation from this catalog only where the input type, intended output, and numerical requirements fit. Explain tradeoffs and suggest a useful comparison. Ask for a missing detail if it affects the choice. Say if the catalog has no suitable operation.",
+      context: operations.map(operationContext),
+    };
+  } else {
+    const result = currentResult;
+    const operation = operations.find((item) => item.group === result.group);
+    const { os, arch, vector_bits, emulated } = result.host;
+    agentPrompt = {
+      guidance: "Explain these timings for the selected batch size. Discuss the median and observed variability, and distinguish numerical correctness from timing. Avoid inferring statistical significance, a bottleneck, production speedup, or savings from these measurements alone.",
+      context: {
+        operation: operation ? operationContext(operation) : result.group,
+        input_fixture: result.input_fixture,
+        measurement_target_per_repeat: result.benchtime,
+        capture_status: result.capture_status,
+        measuring_process: { os, arch, vector_bits, emulated },
+        values_per_array: Number(byID("plot-size").value),
+        methods: selectedSeries().map((series) => ({
+          method: series.method,
+          median_ns_per_batch: series.median_ns,
+          observed_range_ns_per_batch: [series.min_ns, series.max_ns],
+          repeat_count: series.repeats.length,
+          first_repeat_timings_ns_per_batch: series.repeats.slice(0, 50).map((repeat) => repeat.ns),
+        })),
+        caveats: result.caveats || [],
+      },
+    };
+  }
+  const question = byID("agent-question");
+  question.value = "";
+  question.placeholder = mode === "catalog" ?
+    "I have float32 sensor readings and need to clip them to a fixed range. Which operation should I compare?" :
+    "How consistent were the timings? What should I measure next?";
+  byID("agent-share-preview").open = false;
+  status("", false, "agent-status");
+  updateAgentQuestion();
+  byID("agent-dialog").showModal();
+}
+
+function updateAgentQuestion() {
+  const question = byID("agent-question").value.trim();
+  byID("agent-context").value = [
+    agentScope, agentPrompt.guidance, "My question:\n" + question,
+    "SIMD Lab context:\n" + JSON.stringify(agentPrompt.context, null, 2),
+  ].join("\n\n");
+}
+
+async function copyAgentQuestion(event) {
+  event.preventDefault();
+  if (!byID("agent-question").value.trim()) {
+    status("Enter a question before copying.", true, "agent-status");
+    byID("agent-question").focus();
+    return;
+  }
+  updateAgentQuestion();
+  const context = byID("agent-context");
+  try {
+    await navigator.clipboard.writeText(context.value);
+    status("Copied. Paste it into your AI assistant.", false, "agent-status");
+  } catch {
+    byID("agent-share-preview").open = true;
+    context.focus();
+    context.select();
+    status("Copy the selected text and paste it into your AI assistant.", false, "agent-status");
+  }
+}
+
 byID("starter").addEventListener("click", useStarter);
 byID("run").addEventListener("click", runComparison);
 byID("cancel").addEventListener("click", () => activeRun?.abort());
@@ -394,17 +469,17 @@ byID("report").addEventListener("click", saveReport);
 byID("capture").addEventListener("change", openCapture);
 byID("operation-search").addEventListener("input", renderOperations);
 byID("explore-preview").addEventListener("submit", previewOperation);
-byID("ask").addEventListener("submit", (event) => {
-  event.preventDefault();
-  previewQuestion(byID("question").value.trim());
-});
 for (const example of examples) {
   example.addEventListener("click", () => {
-    const question = example.dataset.question;
-    byID("question").value = question;
-    previewQuestion(question);
+    const { group, method, size } = example.dataset;
+    previewComparison({ group, method, size: Number(size) }, "examples-status");
   });
 }
+byID("agent-catalog").addEventListener("click", () => openAgent("catalog"));
+byID("agent-results").addEventListener("click", () => openAgent("results"));
+byID("agent-close").addEventListener("click", () => byID("agent-dialog").close());
+byID("agent-question").addEventListener("input", updateAgentQuestion);
+byID("agent-form").addEventListener("submit", copyAgentQuestion);
 byID("plot-size").addEventListener("change", showRepeats);
 new ResizeObserver(drawRepeats).observe(byID("results"));
 

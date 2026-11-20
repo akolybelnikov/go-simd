@@ -14,7 +14,9 @@ Use **Explore** to see available operations, methods, and array sizes.
 On **Compare**, choose **Run locally** for the addition starter or use a
 preview from the catalog. **Results** shows the measured difference and
 individual repeats, opens saved captures, and downloads Markdown. The
-benchmark runs on the machine that launched `simdlab`. The starter works offline.
+benchmark runs on the machine that launched `simdlab`. Comparisons work offline.
+Use **Ask an agent** in Explore or Results to prepare a free-text question
+with the catalog or measured timings, then paste it into an AI assistant you choose.
 
 Use the CLI for scripts, automation, and SSH. The public site source provides
 downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)
@@ -32,7 +34,7 @@ the settings, runs the comparison, and prints the timing difference and the
 paths to the Markdown report and measurement file. This path works without
 a model. Press Ctrl+C to cancel.
 
-## Ask an agent
+## Guided CLI preview
 
 The examples below work without Ollama. Other wording may use the optional local model.
 

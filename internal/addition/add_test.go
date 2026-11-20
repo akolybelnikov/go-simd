@@ -8,7 +8,24 @@ import (
 	"testing"
 
 	"github.com/akolybelnikov/go-simd/internal/addition"
+	"github.com/akolybelnikov/go-simd/internal/input"
 )
+
+func TestGeneratedAddition4096(t *testing.T) {
+	a, b, scalar := input.MakeFloat32Slices(4096)
+	vector := make([]float32, len(scalar))
+	if err := addition.AddScalar(a, b, scalar); err != nil {
+		t.Fatal(err)
+	}
+	if err := addition.AddSIMD(a, b, vector); err != nil {
+		t.Fatal(err)
+	}
+	for i := range a {
+		if want := a[i] + b[i]; scalar[i] != want || vector[i] != want {
+			t.Fatalf("index %d: scalar %g, vector %g, want %g", i, scalar[i], vector[i], want)
+		}
+	}
+}
 
 func TestImplementations(t *testing.T) {
 	variants := []struct {

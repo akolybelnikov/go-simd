@@ -122,7 +122,7 @@ func TestResolveExperimentPlanRejectsInvalidRequests(t *testing.T) {
 			r.Variants = []string{catalog.Scalar, catalog.Scalar}
 		}, "duplicate_variant"},
 		{"bad count", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Count = 0 }, "invalid_count"},
-		{"count policy", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Count = 11 }, "policy_exceeded"},
+		{"count policy", func(r *PlanRequest, _ *RuntimeContext, p *PlanPolicy) { r.Count = p.MaxCount + 1 }, "policy_exceeded"},
 		{"bad benchtime", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Benchtime = "0s" }, "invalid_benchtime"},
 		{"duration policy", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Benchtime = "2s" }, "policy_exceeded"},
 		{"iteration policy", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Benchtime = "1000001x" }, "policy_exceeded"},

@@ -24,7 +24,7 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 	flags.SetOutput(stderr)
 	root := flags.String("artifacts", filepath.Join("artifacts", "experiments"), "local artifact directory")
 	noOpen := flags.Bool("no-open", false, "print the private browser URL without opening it")
-	useOllama := flags.Bool("ollama", false, "use local Ollama for additional question phrasings")
+	useOllama := flags.Bool("ollama", false, "enable Ollama for the experimental comparison preview API")
 	model := flags.String("model", "qwen3:4b", "installed local Ollama model")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {

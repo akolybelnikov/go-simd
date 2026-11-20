@@ -90,7 +90,7 @@ type PlanPolicy struct {
 
 func DefaultPlanPolicy() PlanPolicy {
 	return PlanPolicy{
-		ID: defaultPolicyID, MaxCases: 32, MaxCount: 10,
+		ID: defaultPolicyID, MaxCases: 32, MaxCount: 50,
 		MaxMeasurements: 200, MaxBenchtime: time.Second,
 		MaxFixedIterations: 1_000_000,
 	}

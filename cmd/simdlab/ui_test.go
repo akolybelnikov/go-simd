@@ -75,6 +75,8 @@ func TestLocalUIRequiresSessionAndOneApproval(t *testing.T) {
 	report, err := os.ReadFile(result.ReportPath)
 	require.NoError(t, err)
 	require.Equal(t, result.Report, string(report))
+	require.Contains(t, result.Report, "## Individual repeat timings")
+	require.Equal(t, 2*current.Repeats, strings.Count(result.Report, " | 1024 | "))
 	require.FileExists(t, result.Evidence)
 	require.Equal(t, http.StatusConflict, postUI(app, "/api/run", approvalJSON(t, current.Ref)).Code)
 
@@ -134,17 +136,22 @@ func TestLocalUIExploreUsesCatalogMethodsAndSizes(t *testing.T) {
 		`{"group":"unknown","method":"simd-striped-2","size":64}`,
 		`{"group":"sum","method":"simd-striped-2","size":0}`,
 		`{"group":"sum","method":"scalar","size":64}`,
+		`{"group":"sum","method":"simd-striped-2","size":64,"repeats":0}`,
+		`{"group":"sum","method":"simd-striped-2","size":64,"repeats":51}`,
 	} {
 		require.Equal(t, http.StatusUnprocessableEntity, postUI(app, "/api/preview", invalid).Code)
 		require.Nil(t, app.pending)
 	}
-	response = postUI(app, "/api/preview", `{"group":"sum","method":"simd-striped-2","size":1003}`)
+	response = postUI(app, "/api/preview", `{"group":"sum","method":"simd-striped-2","size":1003,"repeats":30}`)
 	require.Equal(t, http.StatusOK, response.Code, response.Body.String())
 	var preview uiPreview
 	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &preview))
 	require.Equal(t, 1003, preview.Size)
+	require.Equal(t, 30, preview.Repeats)
+	require.Equal(t, "100ms", preview.Benchtime)
 	require.Equal(t, []string{"Ordinary sum (left to right)", "Vectorized sum (two accumulators)"}, preview.Methods)
 	require.Equal(t, preview.Ref, app.pending.ref)
+	require.Equal(t, 30, app.pending.plan.Count)
 	entries, err := os.ReadDir(app.root)
 	require.NoError(t, err)
 	require.Empty(t, entries)
