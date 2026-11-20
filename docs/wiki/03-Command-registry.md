@@ -6,6 +6,8 @@ Run these commands from a terminal where the lab executables are on your PATH. T
 | --- | --- |
 | Open the browser lab | `simdlab ui` |
 | Print the private browser address | `simdlab ui -no-open` |
+| Enable chat with installed local Ollama models | `simdlab ui -ollama` |
+| Choose one installed model for local chat | `simdlab ui -ollama -model MODEL` |
 | Compare two ways of adding 1,024 values | `simdlab run addition` |
 | Browse operations and methods in the terminal | `simdlab catalog -text` |
 | Open the guided terminal session | `simdlab ask` |
@@ -14,6 +16,7 @@ Run these commands from a terminal where the lab executables are on your PATH. T
 | Save a Markdown report for an addition sweep | `simdreport -group addition -format md` |
 
 Use `-h` with a command to see its options. The [CLI guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md) includes advanced comparison examples.
+For OpenAI chat setup and the browser controls, see [Chat with an agent](33-Chat-with-an-agent).
 
 ## Reporting options
 

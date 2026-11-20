@@ -152,17 +152,35 @@
       <h2 id="agent-title">Ask an agent</h2>
       <button class="quiet" id="agent-close" type="button">Close</button>
     </header>
-    <p id="agent-description">Write a question, then paste it into an AI assistant you choose. SIMD Lab prepares the context locally.</p>
+    <p id="agent-description">Ask about SIMD, find an operation for your workload, or work through a result.</p>
+    <p class="meta" id="agent-selection"></p>
+    <div id="agent-transcript" class="chat-transcript" role="log" aria-label="Conversation" tabindex="0" hidden></div>
     <form id="agent-form">
+      <label for="agent-provider">How to ask</label>
+      <select id="agent-provider"></select>
+      <p class="meta" id="agent-sharing"></p>
+      <section class="agent-setup" id="agent-setup" aria-live="polite" hidden>
+        <h3 id="agent-setup-title"></h3>
+        <p id="agent-setup-instructions"></p>
+        <pre id="agent-setup-command"></pre>
+        <p id="agent-setup-next"></p>
+      </section>
+      <p class="meta"><a href="/wiki/33-Chat-with-an-agent" target="_blank" rel="noopener">Local and remote chat setup ↗</a></p>
+      <div id="agent-compose">
       <label for="agent-question">Your question</label>
-      <textarea id="agent-question" rows="3" maxlength="8192" required autofocus></textarea>
+      <textarea id="agent-question" rows="3" maxlength="4096" required autofocus></textarea>
       <details id="agent-share-preview">
-        <summary>Review what will be copied</summary>
+        <summary id="agent-preview-label">Review what will be shared</summary>
         <label for="agent-context">Question and lab context</label>
         <textarea id="agent-context" rows="6" readonly></textarea>
       </details>
-      <button class="primary" type="submit">Copy question and context</button>
+      <div class="run-controls">
+        <button class="primary" id="agent-send" type="submit">Copy question and context</button>
+        <button class="secondary" id="agent-stop" type="button" hidden>Stop</button>
+        <button class="secondary" id="agent-reset" type="button" hidden>New chat</button>
+      </div>
       <p id="agent-status" class="status" role="status"></p>
+      </div>
     </form>
   </dialog>
   <footer>Measurements describe the machine that ran the benchmark.</footer>

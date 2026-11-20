@@ -20,6 +20,13 @@ a model. Press Ctrl+C to cancel.
 
 ## Ask an agent
 
+In browser **Results**, select **Ask an agent about these results**. Try
+“Were the repeats consistent?” or “What would help explain the gap at this
+batch size?” You can copy the question with its lab context or send it from the
+panel after [enabling in-app chat](33-Chat-with-an-agent).
+
+### Guided terminal preview
+
 The examples below work without Ollama. Other wording may use the optional local model.
 
 ```text

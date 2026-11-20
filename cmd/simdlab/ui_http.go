@@ -34,10 +34,15 @@ type localUI struct {
 	root                string
 	model               agent.ModelClient
 	catalog             labapi.CatalogResponse
+	chatProviders       []chatProvider
 
-	mu      sync.Mutex
-	pending *uiProposal
-	running bool
+	mu             sync.Mutex
+	pending        *uiProposal
+	running        bool
+	chatCapture    *chatCapture
+	chatRunning    bool
+	hostedTurns    int
+	lastHostedTurn time.Time
 }
 
 type uiProposal struct {
@@ -126,6 +131,8 @@ func (app *localUI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		app.open(w, r)
 	case "/api/ask":
 		app.ask(w, r)
+	case "/api/chat", "/api/chat/context":
+		app.chat(w, r, r.URL.Path == "/api/chat/context")
 	default:
 		uiError(w, http.StatusNotFound, "Unknown lab action.")
 	}
@@ -139,12 +146,14 @@ func (app *localUI) explore(w http.ResponseWriter) {
 	}
 	view := struct {
 		labapi.CatalogResponse
-		Operations     []operationView `json:"operations"`
-		DefaultRepeats int             `json:"default_repeats"`
-		MaxRepeats     int             `json:"max_repeats"`
+		Operations     []operationView      `json:"operations"`
+		DefaultRepeats int                  `json:"default_repeats"`
+		MaxRepeats     int                  `json:"max_repeats"`
+		ChatProviders  []chatProviderOption `json:"chat_providers"`
 	}{
 		CatalogResponse: app.catalog, DefaultRepeats: starterRepeats,
-		MaxRepeats: labapi.DefaultPlanPolicy().MaxCount,
+		MaxRepeats:    labapi.DefaultPlanPolicy().MaxCount,
+		ChatProviders: app.chatOptions(),
 	}
 	for _, operation := range app.catalog.Operations {
 		operation.Strategies = slices.Clone(operation.Strategies)
@@ -251,6 +260,11 @@ func (app *localUI) run(w http.ResponseWriter, r *http.Request) {
 		uiError(w, http.StatusConflict, "A comparison is already measuring.")
 		return
 	}
+	if app.chatRunning {
+		app.mu.Unlock()
+		uiError(w, http.StatusConflict, "Wait for the model request to finish before measuring.")
+		return
+	}
 	pending := app.pending
 	if pending == nil || pending.ref != request.Ref || !time.Now().Before(pending.expires) {
 		app.mu.Unlock()
@@ -273,7 +287,8 @@ func (app *localUI) run(w http.ResponseWriter, r *http.Request) {
 		uiError(w, http.StatusUnprocessableEntity, err.Error())
 		return
 	}
-	uiJSON(w, http.StatusOK, newUIResult(*saved.capture, saved.inspection, saved.report, saved.path, saved.reportPath))
+	view := newUIResult(*saved.capture, saved.inspection, saved.report, saved.path, saved.reportPath)
+	uiJSON(w, http.StatusOK, app.rememberResult(*saved.capture, saved.inspection, view))
 }
 
 func (app *localUI) open(w http.ResponseWriter, r *http.Request) {
@@ -293,7 +308,8 @@ func (app *localUI) open(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	report := comparisonReport(capture, inspection, false)
-	uiJSON(w, http.StatusOK, newUIResult(capture, inspection, report, "", ""))
+	view := newUIResult(capture, inspection, report, "", "")
+	uiJSON(w, http.StatusOK, app.rememberResult(capture, inspection, view))
 }
 
 func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
@@ -310,6 +326,11 @@ func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
 			uiError(w, http.StatusUnprocessableEntity, "Try “Compare summing an array with a loop and with vectors.” For other wording, start simdlab ui -ollama.")
 			return
 		}
+		if status, message := app.beginModel("ollama"); status != 0 {
+			uiError(w, status, message)
+			return
+		}
+		defer app.endModel()
 		ctx, cancel := context.WithTimeout(r.Context(), uiModelTimeout)
 		defer cancel()
 		var err error

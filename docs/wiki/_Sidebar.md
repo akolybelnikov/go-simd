@@ -4,6 +4,7 @@
 - [What is SIMD?](https://github.com/akolybelnikov/go-simd/wiki/00-What-is-SIMD)
 - [01 · Getting started](https://github.com/akolybelnikov/go-simd/wiki/01-Getting-started)
 - [02 · First experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment)
+- [Chat with an agent](https://github.com/akolybelnikov/go-simd/wiki/33-Chat-with-an-agent)
 - [03 · Command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)
 - [04 · Operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide)
 - [32 · How the operation benchmarks work](https://github.com/akolybelnikov/go-simd/wiki/32-Operation-measurement-guide)

@@ -49,6 +49,9 @@ recipe, validated plan and measuring code.
 
 ## Ask an agent
 
+For a step-by-step walkthrough, including terminal setup for both providers,
+see [Chat with an agent](wiki/33-Chat-with-an-agent.md).
+
 Use **Ask an agent about your use case** in **Explore** to describe the type
 of data you have, the operation you need, and any precision requirements.
 For example, ask which operation fits clipping float32 sensor readings to a
@@ -56,12 +59,36 @@ fixed range.
 
 In **Results**, select a batch size if the capture has several, then use
 **Ask an agent about these results**. Ask what the repeats suggest or what
-comparison would help answer a follow-up question. The copied context contains
-the selected size, measured medians and ranges, repeat counts, and caveats.
+comparison would help answer a follow-up question. The lab shows recorded
+evidence and caveats alongside the model’s explanation. Treat explanations
+about cache, bandwidth, and similar bottlenecks as hypotheses to test.
 
-Review the text, copy it, and paste it into an AI assistant you choose.
-SIMD Lab prepares the text locally. It copies a summary without file paths or
-raw input arrays. Use the local controls to run any follow-up comparison.
+- **Copy to another assistant** works out of the box. Review the question and
+  lab context, then paste it into an assistant you choose.
+- **OpenAI** appears when the process starts with `OPENAI_API_KEY` set.
+  Launch `simdlab ui` from that environment and choose **OpenAI ·
+  gpt-6.1-sol** in **How to ask**. This uses the API with your key and is
+  billed to your API account. The lab allows up to 24 OpenAI requests per
+  session. [GPT-6.1 Sol API documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
+- **Ollama** appears when you start Ollama with an installed model and launch
+  `simdlab ui -ollama`. Choose an installed model from the list. Use
+  `simdlab ui -ollama -model MODEL` to choose one at launch. Ollama’s
+  local-only mode keeps inference offline. Model quality and reply time
+  depend on the model and machine. [Ollama local-only setup](https://docs.ollama.com/faq#how-do-i-disable-ollamas-cloud-features)
+
+Use **Review what will be sent** (or **Review what will be copied** in copy
+mode) to inspect the question, recent messages,
+catalog, and selected result summary before sending. The lab omits file
+paths and raw input arrays from that summary. Keep secrets and sensitive
+data out of the question. **Stop** cancels the request from the lab.
+The next question includes up to three recent exchanges.
+**New chat** clears the thread. Changing provider or reopening the panel
+starts a new thread. Chat and benchmark requests take turns.
+
+When an answer includes a suggested experiment, choose **Edit suggested
+comparison** to fill in **Explore**. Change the method, batch size, or
+repeats, choose **Preview comparison**, and use **Run locally** when you
+are ready. The lab uses generated input for that experiment.
 
 `simdlab ui -no-open` prints the private URL for manual use. Keep the
 terminal running during the session. Ctrl+C stops the local app. Each launch

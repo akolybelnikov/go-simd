@@ -23,6 +23,13 @@ let currentResult;
 let operations = [];
 let selectedOperation;
 let agentPrompt;
+let agentSelection;
+let agentProviders = [];
+let agentHistory = [];
+let agentRequest;
+let agentConversation = 0;
+let agentShareVersion = 0;
+let agentShareTimer;
 
 function selectTab(name) {
   for (const tab of tabs) {
@@ -75,6 +82,7 @@ async function loadCatalog() {
     repeats.value = catalog.default_repeats;
     byID("catalog-repeats-hint").textContent = "1 to " + catalog.max_repeats + " repeats.";
     operations = catalog.operations.toSorted((a, b) => a.title.localeCompare(b.title));
+    agentProviders = catalog.chat_providers || [];
     byID("agent-catalog").disabled = operations.length === 0;
     const host = catalog.runtime;
     byID("catalog-host").textContent = host.os + " / " + host.arch +
@@ -394,14 +402,19 @@ function operationContext(operation) {
 }
 
 function openAgent(mode) {
+  const selectionLabel = byID("agent-selection");
   if (mode === "catalog") {
+    agentSelection = { group: selectedOperation?.group };
+    selectionLabel.textContent = selectedOperation ? "Catalog · " + selectedOperation.title : "Operation catalog";
     agentPrompt = {
       guidance: "Recommend an operation from this catalog only where the input type, intended output, and numerical requirements fit. Explain tradeoffs and suggest a useful comparison. Ask for a missing detail if it affects the choice. Say if the catalog has no suitable operation.",
       context: operations.map(operationContext),
     };
   } else {
     const result = currentResult;
+    agentSelection = { result_ref: result.chat_ref, size: Number(byID("plot-size").value) };
     const operation = operations.find((item) => item.group === result.group);
+    selectionLabel.textContent = (operation?.title || result.group) + " · " + integer.format(agentSelection.size) + " values";
     const { os, arch, vector_bits, emulated } = result.host;
     agentPrompt = {
       guidance: "Explain these timings for the selected batch size. Discuss the median and observed variability, and distinguish numerical correctness from timing. Avoid inferring statistical significance, a bottleneck, production speedup, or savings from these measurements alone.",
@@ -424,31 +437,111 @@ function openAgent(mode) {
     };
   }
   const question = byID("agent-question");
+  const localProviders = agentProviders.filter((provider) => provider.id.startsWith("ollama:"));
+  const remoteProviders = agentProviders.filter((provider) => provider.id === "openai");
+  byID("agent-provider").replaceChildren(
+    new Option("Copy to another assistant", "copy"),
+    ...(localProviders.length ? localProviders.map((provider) => new Option("Local · Ollama · " + provider.model, provider.id)) :
+      [new Option("Local · Ollama — set up", "setup-local")]),
+    ...(remoteProviders.length ? remoteProviders.map((provider) => new Option("Remote · OpenAI · " + provider.model, provider.id)) :
+      [new Option("Remote · OpenAI — set up", "setup-remote")]),
+  );
   question.value = "";
   question.placeholder = mode === "catalog" ?
     "I have float32 sensor readings and need to clip them to a fixed range. Which operation should I compare?" :
     "How consistent were the timings? What should I measure next?";
   byID("agent-share-preview").open = false;
-  status("", false, "agent-status");
-  updateAgentQuestion();
+  resetAgentConversation();
   byID("agent-dialog").showModal();
 }
 
-function updateAgentQuestion() {
-  const question = byID("agent-question").value.trim();
-  byID("agent-context").value = [
-    agentScope, agentPrompt.guidance, "My question:\n" + question,
-    "SIMD Lab context:\n" + JSON.stringify(agentPrompt.context, null, 2),
-  ].join("\n\n");
+function resetAgentConversation() {
+  agentConversation++;
+  agentHistory = [];
+  const transcript = byID("agent-transcript");
+  transcript.replaceChildren();
+  transcript.hidden = true;
+  status("", false, "agent-status");
+  updateAgentControls();
+  updateAgentQuestion();
 }
 
-async function copyAgentQuestion(event) {
-  event.preventDefault();
-  if (!byID("agent-question").value.trim()) {
-    status("Enter a question before copying.", true, "agent-status");
-    byID("agent-question").focus();
+function updateAgentControls() {
+  const provider = byID("agent-provider").value;
+  const copy = provider === "copy";
+  const setup = provider.startsWith("setup-");
+  const localSetup = provider === "setup-local";
+  byID("agent-compose").hidden = setup;
+  byID("agent-question").required = !setup;
+  byID("agent-setup").hidden = !setup;
+  byID("agent-sharing").hidden = setup;
+  if (setup) {
+    byID("agent-setup-title").textContent = localSetup ? "Enable local Ollama chat" : "Enable remote OpenAI chat";
+    byID("agent-setup-instructions").textContent = localSetup ?
+      "Start Ollama on this machine with an installed local model. Stop the lab in its terminal with Ctrl+C, then launch it again:" :
+      "Set OPENAI_API_KEY in the terminal that launches the lab. Requests use your API account. Stop the lab with Ctrl+C and use the commands for your terminal, replacing your-api-key with your own key:";
+    byID("agent-setup-command").textContent = localSetup ? "simdlab ui -ollama" :
+      "Windows PowerShell\n$env:OPENAI_API_KEY = 'your-api-key'\nsimdlab ui\n\nmacOS / Linux\nexport OPENAI_API_KEY='your-api-key'\nsimdlab ui";
+    byID("agent-setup-next").textContent = localSetup ?
+      "Open the new browser address, return to Ask an agent, and select your installed model under How to ask. The setup guide explains how to install a model." :
+      "Open the new browser address, return to Ask an agent, and select Remote · OpenAI. Enter your key only in the terminal.";
+  }
+  byID("agent-sharing").textContent = copy
+    ? (agentProviders.length ? "Copy the question and lab context to paste into an assistant you choose."
+      : "Copy works offline. In-app chat can be enabled with a local Ollama model or an OpenAI API key.")
+    : provider === "openai"
+      ? "Send shares your question, recent replies, and lab context with OpenAI. API charges may apply. Avoid pasting sensitive data."
+      : "Send shares your question, recent replies, and lab context with Ollama on this machine. Use Ollama’s local-only mode for offline chat.";
+  byID("agent-preview-label").textContent = copy ? "Review what will be copied" : "Review what will be sent";
+  byID("agent-send").textContent = copy ? "Copy question and context" : "Send";
+  byID("agent-provider").disabled = Boolean(agentRequest);
+  byID("agent-question").readOnly = Boolean(agentRequest);
+  byID("agent-send").disabled = Boolean(agentRequest);
+  byID("agent-stop").hidden = !agentRequest;
+  byID("agent-reset").hidden = copy || agentHistory.length === 0;
+  byID("agent-reset").disabled = Boolean(agentRequest);
+}
+
+function agentBody() {
+  return {
+    provider: byID("agent-provider").value,
+    selection: agentSelection,
+    question: byID("agent-question").value.trim(),
+    history: agentHistory,
+  };
+}
+
+function updateAgentQuestion() {
+  clearTimeout(agentShareTimer);
+  const version = ++agentShareVersion;
+  const output = byID("agent-context");
+  if (byID("agent-provider").value.startsWith("setup-")) {
+    output.value = "";
     return;
   }
+  const question = byID("agent-question").value.trim();
+  if (byID("agent-provider").value === "copy") {
+    output.value = [
+      agentScope, agentPrompt.guidance, "My question:\n" + question,
+      "SIMD Lab context:\n" + JSON.stringify(agentPrompt.context, null, 2),
+    ].join("\n\n");
+  } else if (byID("agent-share-preview").open) {
+    output.value = "Preparing the sharing preview…";
+    agentShareTimer = setTimeout(async () => {
+      try {
+        const body = agentBody();
+        const context = await api("/api/chat/context", JSON.stringify(body));
+        if (version === agentShareVersion) output.value = JSON.stringify({
+          question: body.question, recent_messages: body.history, lab_context: context,
+        }, null, 2);
+      } catch (error) {
+        if (version === agentShareVersion) output.value = error.message;
+      }
+    }, 200);
+  }
+}
+
+async function copyAgentQuestion() {
   updateAgentQuestion();
   const context = byID("agent-context");
   try {
@@ -460,6 +553,123 @@ async function copyAgentQuestion(event) {
     context.select();
     status("Copy the selected text and paste it into your AI assistant.", false, "agent-status");
   }
+}
+
+async function submitAgentQuestion(event) {
+  event.preventDefault();
+  if (agentRequest) return;
+  if (byID("agent-provider").value.startsWith("setup-")) return;
+  const body = agentBody();
+  if (!body.question) return;
+  if (body.provider === "copy") {
+    await copyAgentQuestion();
+    return;
+  }
+  if (new TextEncoder().encode(body.question).length > 4096) {
+    status("Shorten your question and try again.", true, "agent-status");
+    return;
+  }
+  const request = new AbortController();
+  const conversation = agentConversation;
+  agentRequest = request;
+  updateAgentControls();
+  status("Waiting for " + agentProviders.find((provider) => provider.id === body.provider)?.label + "…", false, "agent-status");
+  try {
+    const reply = await api("/api/chat", JSON.stringify(body), request.signal);
+    if (conversation !== agentConversation || !byID("agent-dialog").open) return;
+    if (reply.lab_only) {
+      renderAgentReply(reply, body.provider);
+      status("", false, "agent-status");
+      return;
+    }
+    appendAgentEntry("You", body.question, "user");
+    renderAgentReply(reply, body.provider);
+    agentHistory = [...agentHistory, { role: "user", content: body.question },
+      { role: "assistant", content: [reply.answer, reply.hypothesis,
+        reply.draft && "Suggested comparison: " + JSON.stringify(reply.draft)].filter(Boolean).join("\n") }].slice(-6);
+    byID("agent-question").value = "";
+    status("", false, "agent-status");
+  } catch (error) {
+    if (conversation === agentConversation && byID("agent-dialog").open) {
+      status(error.name === "AbortError" ? "Stopped waiting for the reply." : error.message,
+        error.name !== "AbortError", "agent-status");
+    }
+  } finally {
+    agentRequest = null;
+    updateAgentControls();
+    updateAgentQuestion();
+  }
+}
+
+function appendAgentEntry(label, message, role) {
+  const entry = document.createElement("article");
+  entry.className = "chat-entry";
+  entry.dataset.role = role;
+  const heading = document.createElement("strong");
+  heading.textContent = label;
+  const text = document.createElement("p");
+  text.textContent = message;
+  entry.append(heading, text);
+  const transcript = byID("agent-transcript");
+  transcript.hidden = false;
+  transcript.append(entry);
+  return entry;
+}
+
+function renderAgentReply(reply, providerID) {
+  const provider = agentProviders.find((option) => option.id === providerID);
+  const entry = appendAgentEntry(reply.lab_only ? "SIMD Lab" : provider.label, reply.answer, "assistant");
+  if (reply.hypothesis) {
+    const paragraph = document.createElement("p");
+    const heading = document.createElement("strong");
+    heading.textContent = "Hypothesis to test";
+    paragraph.append(heading, document.createTextNode("\n" + reply.hypothesis));
+    entry.append(paragraph);
+  }
+  if (reply.facts?.length || reply.caveats?.length) {
+    const details = document.createElement("details");
+    details.open = true;
+    const heading = document.createElement("summary");
+    heading.textContent = "Recorded evidence and limits";
+    const list = document.createElement("ul");
+    for (const text of [...(reply.facts || []).map((fact) => fact.text),
+      ...(reply.caveats || []).map((caveat) => caveat.message)]) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      list.append(item);
+    }
+    details.append(heading, list);
+    entry.append(details);
+  }
+  if (reply.draft) {
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "secondary";
+    edit.textContent = "Edit suggested comparison";
+    edit.addEventListener("click", () => editAgentDraft(reply.draft));
+    entry.append(edit);
+  } else if (reply.draft_error) {
+    const note = document.createElement("p");
+    note.className = "meta";
+    note.textContent = reply.draft_error;
+    entry.append(note);
+  }
+  const transcript = byID("agent-transcript");
+  transcript.scrollTop = transcript.scrollHeight;
+}
+
+function editAgentDraft(draft) {
+  const operation = operations.find((choice) => choice.group === draft.group);
+  if (!operation) return;
+  byID("agent-dialog").close();
+  byID("operation-search").value = "";
+  selectedOperation = operation;
+  renderOperations();
+  byID("catalog-method").value = draft.method;
+  byID("catalog-size").value = draft.size;
+  byID("catalog-repeats").value = draft.repeats;
+  selectTab("explore");
+  byID("catalog-size").focus();
 }
 
 byID("starter").addEventListener("click", useStarter);
@@ -478,8 +688,19 @@ for (const example of examples) {
 byID("agent-catalog").addEventListener("click", () => openAgent("catalog"));
 byID("agent-results").addEventListener("click", () => openAgent("results"));
 byID("agent-close").addEventListener("click", () => byID("agent-dialog").close());
+byID("agent-dialog").addEventListener("close", () => {
+  if (!byID("agent-dialog").open) agentRequest?.abort();
+});
+byID("agent-provider").addEventListener("change", resetAgentConversation);
+byID("agent-stop").addEventListener("click", () => agentRequest?.abort());
+byID("agent-reset").addEventListener("click", () => {
+  byID("agent-question").value = "";
+  resetAgentConversation();
+  byID("agent-question").focus();
+});
 byID("agent-question").addEventListener("input", updateAgentQuestion);
-byID("agent-form").addEventListener("submit", copyAgentQuestion);
+byID("agent-share-preview").addEventListener("toggle", updateAgentQuestion);
+byID("agent-form").addEventListener("submit", submitAgentQuestion);
 byID("plot-size").addEventListener("change", showRepeats);
 new ResizeObserver(drawRepeats).observe(byID("results"));
 

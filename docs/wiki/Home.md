@@ -17,7 +17,7 @@ simdlab ui
 - **Explore** shows what the lab can measure. Browse operations and choose a method and batch size.
 - **Compare** shows the proposed settings. Select **Run locally** to start a measurement.
 - **Results** shows the timing difference and individual repeats. Open a saved capture or download a Markdown report here.
-- **Ask an agent** in Explore or Results prepares a question with lab context for the AI assistant you choose.
+- **Ask an agent** in Explore or Results explains SIMD, helps choose an operation, or discusses the selected timing results. Copy a question to your usual assistant or chat in the panel with Ollama or an OpenAI API key. [Chat setup and examples](33-Chat-with-an-agent)
 
 The browser opens on the machine running `simdlab`. The starter runs offline.
 Use the terminal commands below for scripts or SSH. [Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
@@ -58,6 +58,7 @@ Follow the [first experiment walkthrough](02-First-experiment) or see the
 | Open the lab and prepare your machine | [Getting started](01-Getting-started) |
 | Run a comparison and interpret the outcome | [Your first addition comparison](02-First-experiment) |
 | Find terminal commands and options | [Command reference](03-Command-registry) |
+| Set up a model and ask follow-up questions in the browser | [Chat with an agent](33-Chat-with-an-agent) |
 | Understand the methods and why their timings differ | [Operation guide](04-Operation-guide) |
 | See what each benchmark times and where the operation is used | [How the operation benchmarks work](32-Operation-measurement-guide) |
 | Save and reopen measurements | [Reports and evidence](05-Reports-and-evidence) |

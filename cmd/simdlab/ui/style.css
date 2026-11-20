@@ -96,6 +96,19 @@ textarea { width: 100%; display: block; color: var(--ink); border: 1px solid #cb
 #agent-description { margin: 8px 0 12px; color: var(--muted); font-size: .85rem; }
 #agent-share-preview { margin-bottom: 12px; }
 #agent-context { font-family: ui-monospace, monospace; }
+#agent-sharing { margin-top: 5px; }
+.agent-setup { margin-top: 12px; padding: 12px; background: var(--soft); border: 1px solid var(--border); border-radius: 7px; }
+.agent-setup h3 { font-size: 1rem; }
+.agent-setup p { font-size: .86rem; margin-top: 8px; }
+.agent-setup pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; }
+#agent-dialog a { color: var(--blue-dark); text-underline-offset: 3px; }
+#agent-selection { margin-bottom: 8px; }
+.chat-transcript { max-height: min(38vh, 330px); overflow: auto; margin-bottom: 12px; }
+.chat-entry { padding: 10px 12px; margin-bottom: 6px; border-radius: 8px; background: var(--soft); overflow-wrap: anywhere; font-size: .85rem; }
+.chat-entry[data-role="user"] { background: white; border: 1px solid var(--border); }
+.chat-entry p { margin-top: 4px; white-space: pre-wrap; }
+.chat-entry ul { margin: 6px 0 8px; padding-left: 20px; }
+.chat-entry button { margin-top: 8px; }
 .results { min-height: 465px; }
 .result-head { padding: 15px 20px; border-bottom: 1px solid var(--border); }
 .empty { display: grid; justify-items: center; align-content: center; min-height: 395px; padding: 34px 18px; text-align: center; gap: 9px; }

@@ -9,6 +9,7 @@ import (
 )
 
 type uiResult struct {
+	ChatRef    string                   `json:"chat_ref,omitempty"`
 	Group      string                   `json:"group"`
 	Status     string                   `json:"capture_status"`
 	Fixture    string                   `json:"input_fixture,omitempty"`
