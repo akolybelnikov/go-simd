@@ -1,6 +1,13 @@
 # go-simd user knowledge guide
 
-[Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) to try either path.
+[Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) to start a comparison.
+
+## Open the local browser UI
+
+Run `simdlab ui` to open the browser on the measuring machine. The panel runs
+the addition starter, opens a saved capture, and previews optional guided
+requests. The CLI remains available for automation and SSH.
+[Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
 
 ## Run directly
 

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>SIMD Lab · Local comparisons</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span> SIMD Lab</div>
+      <span class="local"><span aria-hidden="true"></span> Local workspace</span>
+    </div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="main-title">
+      <h1 id="main-title">Compare SIMD on your machine</h1>
+      <p>Run two implementations on generated arrays and see how their timings compare.</p>
+    </section>
+
+    <div class="workspace">
+      <div class="controls">
+        <section class="card setup" aria-labelledby="comparison-title">
+          <header class="section-head">
+            <h2 id="comparison-title">Run a comparison</h2>
+            <button type="button" class="quiet" id="starter">Use addition starter</button>
+          </header>
+          <div class="preview" id="preview" aria-live="polite">
+            <h3 id="operation">Preparing addition</h3>
+            <p id="plan-settings" class="settings">Loading the local catalog…</p>
+            <ul id="methods" class="methods"></ul>
+            <ul id="plan-notes" class="notices" hidden></ul>
+            <p id="plan-host" class="meta"></p>
+          </div>
+          <div class="run-controls">
+            <button type="button" class="primary" id="run" disabled>Run locally <span aria-hidden="true">→</span></button>
+            <button type="button" class="secondary" id="cancel" hidden>Cancel run</button>
+          </div>
+          <p id="status" class="status" role="status"></p>
+        </section>
+
+        <section class="card options" aria-labelledby="open-title">
+          <h2 id="open-title">Open a saved run</h2>
+          <p>Choose a measurement file from this lab.</p>
+          <label for="capture" class="secondary file-label">Choose capture</label>
+          <input id="capture" type="file" accept=".json,application/json" class="file-input">
+          <p id="open-status" class="status" role="status"></p>
+        </section>
+
+        <section class="card options" aria-labelledby="ask-title">
+          <h2 id="ask-title">Ask a question</h2>
+          <form id="ask">
+            <label for="question">Describe an operation and the methods you want to compare.</label>
+            <textarea id="question" rows="3" maxlength="8192" required placeholder="Compare summing an array with a loop and with vectors."></textarea>
+            <button class="secondary" id="ask-submit" type="submit">Preview comparison</button>
+          </form>
+          <p id="model-mode" class="meta"></p>
+          <p id="ask-status" class="status" role="status"></p>
+        </section>
+      </div>
+
+      <section class="card results" aria-labelledby="results-title" aria-busy="false" id="results">
+        <header class="section-head result-head">
+          <h2 id="results-title">Results</h2>
+          <button type="button" id="report" class="secondary" disabled>Save report</button>
+        </header>
+        <div class="empty" id="empty">
+          <div class="empty-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <h3>No measurements yet</h3>
+          <p>Run a comparison to see the median timing and the individual repeats here.</p>
+        </div>
+        <div class="result-body" id="result-body" hidden>
+          <h3 id="headline" tabindex="-1"></h3>
+          <p id="medians" class="medians"></p>
+          <ul id="caveats" class="notices" hidden></ul>
+          <div class="host-data"><strong>Measuring host</strong><span id="host"></span></div>
+          <div class="repeat-area">
+            <div class="section-head">
+              <h4>Individual repeats</h4>
+              <label class="meta" id="plot-size-label" hidden>Batch size <select id="plot-size"></select></label>
+            </div>
+            <p class="meta">Nanoseconds per batch · lower is faster</p>
+            <canvas id="plot" aria-hidden="true"></canvas>
+            <details>
+              <summary>Repeat measurements</summary>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th scope="col">Method</th><th scope="col">Values</th><th scope="col">Repeat</th><th scope="col">ns / batch</th></tr></thead>
+                  <tbody id="repeat-table"></tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+          <p class="artifact meta" id="artifact"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer>Measurements describe the machine that ran the benchmark.</footer>
+</body>
+</html>

@@ -2,7 +2,22 @@
 
 Compare ordinary and vectorized Go operations on generated arrays. Timings
 describe the operation on the machine running the lab. [Install the CLI](docs/cli.md#install-the-cli-from-source)
-to try either path.
+to get started.
+
+## Open the local browser UI
+
+```text
+simdlab ui
+```
+
+Choose **Run locally** for the addition starter, open a saved measurement
+file, or ask for a comparison. The result shows the measured difference,
+the individual repeats, and a **Save report** button. The benchmark runs on
+the machine that launched `simdlab`. The example works offline.
+
+Use the CLI for scripts, automation, and SSH. The public site source provides
+downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)
+and [distribution roadmap](docs/local-ui-roadmap.md).
 
 ## Run directly
 
@@ -37,6 +52,7 @@ for Ollama setup, exact flags, and reopening saved evidence.
 The lab covers 23 operations and 58 implementations. See the [operation catalogue](#operation-catalogue),
 [experiment recipes](docs/wiki/07-Experiment-recipes.md), and
 [SDK coverage ledger](docs/features/F004-api-coverage.md).
+Inspired by [SIMD and Go](https://internals-for-interns.com/posts/go-simd/) by Jesús Espino.
 
 ## Command reference
 

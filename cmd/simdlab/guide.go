@@ -343,9 +343,13 @@ func resultAtSize(inspection analysis.Interpretation, size int) analysis.Interpr
 }
 
 func (s *guideSession) operation(group string) *labapi.OperationDescriptor {
-	for i := range s.operations {
-		if s.operations[i].Group == group {
-			return &s.operations[i]
+	return findGuideOperation(s.operations, group)
+}
+
+func findGuideOperation(operations []labapi.OperationDescriptor, group string) *labapi.OperationDescriptor {
+	for i := range operations {
+		if operations[i].Group == group {
+			return &operations[i]
 		}
 	}
 	return nil

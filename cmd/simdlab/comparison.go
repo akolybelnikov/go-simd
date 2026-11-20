@@ -13,6 +13,7 @@ import (
 
 	"github.com/akolybelnikov/go-simd/internal/analysis"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
+	"github.com/akolybelnikov/go-simd/internal/evidence"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
 	"github.com/akolybelnikov/go-simd/internal/labrun"
 	"github.com/akolybelnikov/go-simd/internal/labtools"
@@ -126,17 +127,36 @@ func methodName(group, id, label string) string {
 
 type savedComparison struct {
 	inspection analysis.Interpretation
+	capture    *evidence.Capture
 	path       string
+	reportPath string
+	report     string
 }
 
 func measureComparison(ctx context.Context, tools *labtools.Toolset, plan labapi.ExperimentPlan, stdout, stderr io.Writer) (savedComparison, error) {
+	if _, err := fmt.Fprintln(stdout, "Measuring… Press Ctrl+C to cancel."); err != nil {
+		return savedComparison{}, err
+	}
+	saved, err := executeComparison(ctx, tools, plan)
+	if err != nil {
+		if saved.capture != nil && saved.inspection.Status == "" {
+			fmt.Fprintln(stderr, terminalText("Partial measurements: "+saved.path))
+			return savedComparison{}, err
+		}
+		return saved, err
+	}
+	summary := comparisonSummary(saved.inspection) + "This run used generated data on this machine.\n"
+	if _, err := io.WriteString(stdout, terminalText(summary+"Report: "+saved.reportPath+"\nMeasurements: "+saved.path+"\n")); err != nil {
+		return saved, err
+	}
+	return saved, nil
+}
+
+func executeComparison(ctx context.Context, tools *labtools.Toolset, plan labapi.ExperimentPlan) (savedComparison, error) {
 	if err := ctx.Err(); err != nil {
 		return savedComparison{}, err
 	}
 	if err := tools.ConfirmExperiment(plan.ID); err != nil {
-		return savedComparison{}, err
-	}
-	if _, err := fmt.Fprintln(stdout, "Measuring… Press Ctrl+C to cancel."); err != nil {
 		return savedComparison{}, err
 	}
 	ctx, cancel := context.WithTimeout(ctx, experimentRunTimeout)
@@ -144,13 +164,14 @@ func measureComparison(ctx context.Context, tools *labtools.Toolset, plan labapi
 	run, err := tools.ExecuteConfirmed(ctx, plan.ID)
 	path := filepath.Join(run.Directory, "measurements.json")
 	if err != nil {
+		var failed savedComparison
 		if run.Capture != nil {
-			fmt.Fprintln(stderr, terminalText("Partial measurements: "+path))
+			failed = savedComparison{capture: run.Capture, path: path}
 		}
 		if ctx.Err() != nil {
-			return savedComparison{}, fmt.Errorf("measurement interrupted: %w", ctx.Err())
+			return failed, fmt.Errorf("measurement interrupted: %w", ctx.Err())
 		}
-		return savedComparison{}, err
+		return failed, err
 	}
 	if run.Capture == nil {
 		return savedComparison{}, errors.New("measurement completed without saved evidence")
@@ -159,23 +180,33 @@ func measureComparison(ctx context.Context, tools *labtools.Toolset, plan labapi
 	if err != nil {
 		return savedComparison{}, fmt.Errorf("read results in %s: %w", path, err)
 	}
-	saved := savedComparison{inspection: inspection, path: path}
-	summary := comparisonSummary(inspection) + "This run used generated data on this machine.\n"
 	reportPath := filepath.Join(run.Directory, "report.md")
-	report := "# " + plan.Group + " comparison\n\n" + summary + "\nMeasurements: [measurements.json](measurements.json)\n\n" +
-		"## Measurement details\n\n```text\n" + inspectionText(inspection) + "```\n"
+	report := comparisonReport(plan.Group, inspection, true)
+	saved := savedComparison{inspection: inspection, capture: run.Capture, path: path}
 	if err := os.WriteFile(reportPath, []byte(report), 0o600); err != nil {
 		return saved, fmt.Errorf("write report (measurements saved at %s): %w", path, err)
 	}
-	if _, err := io.WriteString(stdout, terminalText(summary+"Report: "+reportPath+"\nMeasurements: "+path+"\n")); err != nil {
-		return saved, err
-	}
+	saved.reportPath, saved.report = reportPath, report
 	return saved, nil
 }
 
+func comparisonReport(group string, inspection analysis.Interpretation, local bool) string {
+	summary := comparisonSummary(inspection)
+	if local {
+		summary += "This run used generated data on this machine.\n\nMeasurements: [measurements.json](measurements.json)\n"
+	}
+	details := strings.TrimSuffix(strings.NewReplacer("\r\n", "\n", "\r", "\n").Replace(inspectionText(inspection)), "\n")
+	return "# " + group + " comparison\n\n" + summary + "\n## Measurement details\n\n    " +
+		strings.ReplaceAll(details, "\n", "\n    ") + "\n"
+}
+
 func comparisonSummary(inspection analysis.Interpretation) string {
-	var text strings.Builder
 	qualifications := shortResultCaveats(inspection)
+	return comparisonTiming(inspection, qualifications != "") + qualifications
+}
+
+func comparisonTiming(inspection analysis.Interpretation, limited bool) string {
+	var text strings.Builder
 	for _, c := range inspection.Comparisons {
 		baseline := findSeries(inspection, c.BaselineStrategy, c.Elements)
 		candidate := findSeries(inspection, c.CandidateStrategy, c.Elements)
@@ -193,7 +224,7 @@ func comparisonSummary(inspection analysis.Interpretation) string {
 			if percent == "100%" {
 				percent = "over 99.9%"
 			}
-			if qualifications != "" {
+			if limited {
 				fmt.Fprintf(&text, "%s had a %s lower median in this run than %s for the %d-value batch.\n", firstName, percent, secondName, c.Elements)
 			} else {
 				fmt.Fprintf(&text, "%s took %s less time than %s for the %d-value batch.\n", firstName, percent, secondName, c.Elements)
@@ -209,7 +240,6 @@ func comparisonSummary(inspection analysis.Interpretation) string {
 	if text.Len() == 0 {
 		fmt.Fprintln(&text, "The saved run has no compatible timing comparison.")
 	}
-	text.WriteString(qualifications)
 	return text.String()
 }
 

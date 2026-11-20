@@ -53,6 +53,8 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "run":
 		return runStarter(args[1:], stdout, stderr)
+	case "ui":
+		return runUI(service, args[1:], stdout, stderr)
 	case "ask":
 		for _, arg := range args[1:] {
 			name, _, _ := strings.Cut(arg, "=")
@@ -187,6 +189,7 @@ func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "usage: simdlab <command>")
 	fmt.Fprintln(writer, "\nWithout a model:")
 	fmt.Fprintln(writer, "  run addition                         compare ordinary and vectorized addition")
+	fmt.Fprintln(writer, "  ui                                   open the local browser lab")
 	fmt.Fprintln(writer, "  catalog -text [-group group]          find operation groups, strategy IDs and sizes")
 	fmt.Fprintln(writer, "  plan                                 validate a JSON plan request from stdin")
 	fmt.Fprintln(writer, "  experiment -preview <plan flags>     review and confirm an exact benchmark")

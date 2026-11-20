@@ -48,6 +48,7 @@ The default is `artifacts/experiments/` in the current working directory.
 
 | Command | Purpose |
 | --- | --- |
+| `simdlab ui` | Open the [local browser UI](local-ui.md) for interactive comparisons. |
 | `simdlab run addition` | Run the starter with generated data. |
 | `simdlab ask` | Explore operations, approve a comparison, or explain saved results. |
 | `simdlab ask -evidence "path/to/measurements.json"` | Start a session with saved measurements. |

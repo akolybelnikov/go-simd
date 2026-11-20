@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Download SIMD Lab and compare Go kernels on your own machine.">
+  <title>SIMD Lab · Local Go benchmarks</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <a class="brand" href="#top"><span aria-hidden="true">∥</span> SIMD Lab</a>
+      <nav aria-label="Main navigation">
+        <a href="#downloads">Downloads</a>
+        <a href="https://github.com/akolybelnikov/go-simd/wiki">Docs</a>
+      </nav>
+    </div>
+  </header>
+  <main id="top">
+    <div class="wrap hero">
+      <div class="pitch">
+        <h1>Compare SIMD on your own machine.</h1>
+        <p>Measure ordinary and vectorized Go operations on generated arrays. Open a local browser panel to run a comparison, inspect the repeats, and keep the report.</p>
+        <div class="links">
+          <a class="primary" href="#downloads">Get SIMD Lab <span aria-hidden="true">↓</span></a>
+          <a class="quiet" href="https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment">Read the quick start</a>
+        </div>
+      </div>
+      <figure class="sample" id="sample">
+        <figcaption>Sample report <span>SUM · 64 VALUES</span></figcaption>
+        <h2>The ordinary sum had a 40% lower median in this run.</h2>
+        <dl>
+          <div><dt>Ordinary sum</dt><dd>100 ns</dd></div>
+          <div><dt>Vectorized sum · one accumulator</dt><dd>166.7 ns</dd></div>
+        </dl>
+        <p>Two fixed-iteration repeats per method. The methods add values in different orders, which can change the rounded result.</p>
+        <a href="https://github.com/akolybelnikov/go-simd/blob/c059978f8181ad893d64768e08e3025c8bdb42f7/docs/features/evidence/sum-cancellation.measurements.json">View the recorded measurements</a>
+      </figure>
+    </div>
+    <section class="download-band" id="downloads" aria-labelledby="download-title">
+      <div class="wrap download-grid">
+        <div>
+          <h2 id="download-title">Download and open</h2>
+          <p>Look for Windows amd64 ZIP or Linux amd64 tar.gz builds and their SHA-256 checksums on GitHub Releases.</p>
+          <a href="https://github.com/akolybelnikov/go-simd/releases">View GitHub Releases →</a>
+        </div>
+        <div>
+          <h3>Run the local app</h3>
+          <p>Extract the archive, open a terminal in that folder, and launch the included executable.</p>
+          <p class="command"><strong>Windows PowerShell</strong><code>.\simdlab.exe ui</code></p>
+          <p class="command"><strong>Linux</strong><code>./simdlab ui</code></p>
+        </div>
+        <div>
+          <h3>Use the CLI or build from source</h3>
+          <p>The CLI runs the same comparison over SSH or from a script. Both workflows save measurements on the measuring machine.</p>
+          <a href="https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md">CLI setup and reference →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap"><a href="https://github.com/akolybelnikov/go-simd">Source on GitHub</a></footer>
+</body>
+</html>

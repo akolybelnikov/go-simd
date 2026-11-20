@@ -1,0 +1,18 @@
+SIMD Lab
+
+Extract this archive and open a terminal in the extracted folder.
+
+Windows PowerShell:  .\simdlab.exe ui
+Linux terminal:     ./simdlab ui
+
+In the local browser tab, review the addition settings and choose Run locally.
+The result shows the median difference and individual repeats. Save report
+downloads Markdown. The app also keeps the report and measurement file under
+artifacts/experiments in the directory where you launched it.
+
+The comparison uses generated arrays and measures the machine running simdlab.
+The executable runs with no Go or Ollama setup. Start with -no-open to print
+the private URL. Stop the app with Ctrl+C.
+
+For automation or SSH, run the same executable with "run addition".
+Help and documentation: https://github.com/akolybelnikov/go-simd
