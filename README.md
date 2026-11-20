@@ -21,19 +21,41 @@ contracts and evidence are indexed in [F004 completion](docs/features/F004-compl
 
 ## Start here
 
-From a source checkout in PowerShell:
+**Ollama is optional.** You can explore operations, run benchmarks, and read
+saved evidence with the installed CLI alone.
+
+### Install the CLI from source
+
+For a fresh checkout, run `git clone https://github.com/akolybelnikov/go-simd.git`
+and `cd go-simd`.
+
+From the checkout with Go **1.27.3**, in PowerShell:
 
 ```powershell
 $env:GOEXPERIMENT = 'simd'
-go run ./cmd/simdreport -list
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md
+go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport
+$goBin = go env GOBIN
+if (-not $goBin) { $goBin = Join-Path ((go env GOPATH).Split([IO.Path]::PathSeparator)[0]) 'bin' }
+$env:Path = "$goBin;$env:Path"
+simdlab help
 ```
 
-This bounded experiment saves a comparison and a `.measurements.json` companion
-under `artifacts/addition/`. The full default sweep reaches 16,777,216 elements
-and can take several minutes.
+The PATH change applies to this PowerShell session. Add the same directory to
+your user PATH to keep it for future terminals. On POSIX shells, build with
+`GOEXPERIMENT=simd go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport`
+and add `GOBIN` or the Go workspace's `bin` directory to PATH. The installed
+executables run outside the checkout. See [build or install](#build-or-install)
+for local builds and copying a binary to a measuring host.
 
-## Choose how to run
+### Pick a workflow
+
+| Task | Without a model | With Ollama (preview) |
+| --- | --- | --- |
+| Explore available operations | `simdlab catalog -text -group addition` | `simdlab ask -preview "Which addition implementations are available?"` |
+| Run a benchmark | Use exact `simdlab experiment -preview` flags below, or run `simdreport` directly. | Ask `simdlab experiment -preview` to propose a plan, then confirm it. |
+| Read saved evidence | `simdlab inspect -text` with the evidence file | `simdlab interpret -preview` with the same file and a question |
+
+### Other ways to launch the tools
 
 Flags are the same for installed commands, `go run` and Make. Only the launcher
 changes. Make and `go run` need Go and the checkout. Installed binaries run from
@@ -48,71 +70,71 @@ any working directory.
 | Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |
 | Quick help | `simdbench -h` | `go run ./cmd/simdbench -h` | `make run ARGS="-h"` |
 
-### Deterministic agent foundation preview
+## Run a benchmark without Ollama
 
-`simdlab` currently exposes model-free JSON commands used by the future agent
-and website. They do not contact a model provider. `catalog` and `plan` do not
-run benchmarks; `inspect` reads an existing bounded evidence file.
+1. Find the strategy IDs and supported element counts for addition.
 
-```powershell
-go run ./cmd/simdlab catalog -group addition
-'{"group":"addition","variants":["scalar","simd-partial"],"sizes":[8,1024],"count":3,"benchtime":"100ms"}' |
-  go run ./cmd/simdlab plan
-go run ./cmd/simdlab inspect artifacts/addition/<capture>.measurements.json
-```
+   ```powershell
+   simdlab catalog -text -group addition
+   ```
 
-The catalogue reports exact supported sizes and the measuring-process identity.
-Plans require explicit sizes and strategy IDs and are bounded by the local
-policy. Inspection rejects oversized, malformed, future-schema and inconsistent
-captures before calculating descriptive facts and caveats. Experiment execution
-remains behind the separate confirmed-plan authority boundary.
+2. Request a small, measured comparison with two strategies and three repeats
+   each. Review the displayed plan and measuring host. Copy the exact
+   `run sha256:…` line from the prompt within five minutes to run it once, or
+   press Ctrl+C to decline. `-preview` opts in to the experiment CLI.
 
-### Local Explore preview
+   ```powershell
+   simdlab experiment -preview -group addition -variants 'scalar,simd-partial' -sizes 1024 -count 3 -benchtime 100ms
+   ```
 
-With Ollama running locally and `qwen3:4b` installed, try the read-only catalog
-assistant from a SIMD-enabled checkout or an installed binary:
+3. Copy the `evidence` path from the final JSON output and replace the example
+   path below. By default, experiment evidence is saved under
+   `artifacts/experiments/` relative to the working directory. Use `-artifacts`
+   to choose another location.
 
-```powershell
-go run ./cmd/simdlab ask -preview 'Which addition implementations are available?'
-```
+   ```powershell
+   simdlab inspect -text 'path/to/measurements.json'
+   ```
 
-`ask` takes one question as an argument or from stdin, and prints the final
-answer. Use `ask -h` for endpoint, model, timeout and thinking options. Ctrl+C
-cancels a running turn. If you select a remote endpoint, it receives the
-question and the catalog results used to answer it. The default endpoint is
-local and requires no credentials. The preview's prose is model-generated;
-use `simdlab catalog` for authoritative strategy and supported-size lists.
-See [Explore preview and release checks](docs/agent-preview.md) for verification.
-
-### Local Experiment preview
+For scripts, omit `-text` to get JSON from `catalog` and `inspect`. `simdlab plan`
+reads an explicit JSON request from stdin and prints the resolved plan without
+measuring. For a direct Markdown report, use the report CLI:
 
 ```powershell
-go run ./cmd/simdlab experiment -preview -group addition -variants scalar,simd-partial -sizes 8 -count 1 -benchtime 1x
+simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md
 ```
 
-The exact flags resolve one benchmark locally using the default generated
-fixture. This form works without Ollama. Review the exact cases, scope, warnings, and measuring host printed to
-stderr. Type `run <plan-id>` using the ID shown within five minutes to run that
-plan once. Press Ctrl+C or enter a different line to decline. The CLI reports
-checkpoint progress and prints a JSON manifest with the evidence path when a
-capture is available. Pass that path to `simdlab inspect` to inspect the capture.
-Use `-artifacts` to choose where the local job directories are written.
+The report writes its output and companion capture under `artifacts/addition/`.
+The full default sweep can take several minutes.
 
-To try model-assisted planning, pass a request in words in place of the five
-plan flags. This sends one request to Ollama, which can take tens of seconds.
-If the model produces no valid proposal, use the exact flags above.
+## Try the optional Ollama previews
 
-### Local Interpret preview
+Install and start [Ollama for Windows](https://docs.ollama.com/windows), or use
+an existing server. Download the default development model on that server.
 
 ```powershell
-go run ./cmd/simdlab interpret -preview path/to/measurements.json 'How did SIMD compare with scalar?'
+ollama pull qwen3:4b
+ollama ls
 ```
 
-Go validates the capture and computes the facts. Ollama sees a bounded summary
-and selects fact IDs or reports insufficient evidence. Go renders the referenced
-values, the measuring-host notice, and caveats as JSON. Use `-model` to try another
-installed model, and `inspect` for the model-free summary. For comparison results
-and reproduction commands, see [Interpret evaluation](docs/interpret-evaluation.md).
+Try one of these commands after downloading the model. Replace the capture path
+with the evidence saved by your run.
+
+```powershell
+simdlab ask -preview 'Which addition implementations are available?'
+simdlab experiment -preview 'Use plan_experiment for group addition, variants scalar and simd-partial, size 1024, count 3, benchtime 100ms.'
+simdlab interpret -preview 'path/to/measurements.json' 'How did SIMD compare with scalar?'
+```
+
+The default endpoint is `http://127.0.0.1:11434`. Put `-endpoint` or `-model`
+before the question or file path to use a different server or installed model.
+A remote endpoint receives the prompt and any catalog or evidence summaries
+used by the selected command. Model-assisted steps can take tens of seconds,
+can return no usable proposal, and are cancellable with Ctrl+C. Exact flags
+provide a fallback for experiments. Each model-proposed plan still requires the
+same human confirmation. Interpret returns verified evidence values and caveats
+as JSON. See the [preview checks](docs/agent-preview.md) and
+[model evaluation](docs/interpret-evaluation.md) for current limitations.
 
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:

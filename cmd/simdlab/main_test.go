@@ -90,4 +90,8 @@ func TestInspectCommandValidatesAndAnalyzesCapture(t *testing.T) {
 	if err := json.Unmarshal(stdout.Bytes(), &inspection); err != nil || inspection.Schema == "" || len(inspection.Series) != 1 {
 		t.Fatalf("inspection=%+v err=%v output=%s", inspection, err, stdout.String())
 	}
+	stdout.Reset()
+	if code := run([]string{"inspect", "-text", path}, strings.NewReader(""), &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "median 10 ns/op") || !strings.Contains(stdout.String(), "Caveats:") {
+		t.Fatalf("text inspection code=%d output=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
 }

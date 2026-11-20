@@ -71,7 +71,11 @@ func runCatalog(service *labservice.Deterministic, args []string, stdout, stderr
 	flags := flag.NewFlagSet("catalog", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	group := flags.String("group", "all", "operation group or all")
+	plain := flags.Bool("text", false, "show human-readable results instead of JSON")
 	if err := flags.Parse(args); err != nil || flags.NArg() != 0 {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
 		if err == nil {
 			fmt.Fprintln(stderr, "catalog accepts no positional arguments")
 		}
@@ -81,6 +85,9 @@ func runCatalog(service *labservice.Deterministic, args []string, stdout, stderr
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
+	}
+	if *plain {
+		return writeText(stdout, stderr, catalogText(response))
 	}
 	return writeJSON(stdout, stderr, response)
 }
@@ -104,11 +111,23 @@ func runPlan(service *labservice.Deterministic, args []string, stdin io.Reader, 
 }
 
 func runInspect(service *labservice.Deterministic, args []string, stdout, stderr io.Writer) int {
-	if len(args) != 1 {
-		fmt.Fprintln(stderr, "usage: simdlab inspect <measurements.json>")
+	flags := flag.NewFlagSet("inspect", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	plain := flags.Bool("text", false, "show human-readable results instead of JSON")
+	flags.Usage = func() {
+		fmt.Fprintln(stderr, "usage: simdlab inspect [-text] <measurements.json>")
+		flags.PrintDefaults()
+	}
+	if err := flags.Parse(args); err != nil || flags.NArg() != 1 {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		if err == nil {
+			flags.Usage()
+		}
 		return 2
 	}
-	file, err := os.Open(args[0])
+	file, err := os.Open(flags.Arg(0))
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
@@ -118,6 +137,9 @@ func runInspect(service *labservice.Deterministic, args []string, stdout, stderr
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
+	}
+	if *plain {
+		return writeText(stdout, stderr, inspectionText(inspection))
 	}
 	return writeJSON(stdout, stderr, inspection)
 }
@@ -154,10 +176,14 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 
 func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "usage: simdlab <command>")
-	fmt.Fprintln(writer, "  catalog [-group group]     print structured capabilities")
-	fmt.Fprintln(writer, "  plan                       read a JSON plan request from stdin")
-	fmt.Fprintln(writer, "  inspect <measurements.json> validate and inspect saved evidence")
-	fmt.Fprintln(writer, "  interpret -preview <measurements.json> [question]  select grounded evidence facts")
-	fmt.Fprintln(writer, "  ask -preview [question]    try the local Ollama catalog assistant")
-	fmt.Fprintln(writer, "  experiment -preview ...    review and confirm a benchmark using exact flags or a model proposal")
+	fmt.Fprintln(writer, "\nWithout a model:")
+	fmt.Fprintln(writer, "  catalog -text [-group group]          find operation groups, strategy IDs and sizes")
+	fmt.Fprintln(writer, "  plan                                 validate a JSON plan request from stdin")
+	fmt.Fprintln(writer, "  experiment -preview <plan flags>     review and confirm an exact benchmark")
+	fmt.Fprintln(writer, "  inspect -text <measurements.json>     read saved evidence")
+	fmt.Fprintln(writer, "\nOptional Ollama previews:")
+	fmt.Fprintln(writer, "  ask -preview <question>              ask about the operation catalog")
+	fmt.Fprintln(writer, "  experiment -preview <request>        ask for a benchmark proposal, then review it")
+	fmt.Fprintln(writer, "  interpret -preview <file> [question] select evidence facts for a question")
+	fmt.Fprintln(writer, "\nCatalog and inspect emit JSON by default. Use <command> -h for options.")
 }
