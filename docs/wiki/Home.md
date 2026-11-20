@@ -6,15 +6,20 @@ A CPU can apply the same operation to several values at once. Start with
 [What is SIMD?](00-What-is-SIMD) for a simple example, where it helps, and
 why it can sometimes be slower.
 
-[Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) to start a comparison.
-
 ## Open the local browser UI
 
-Run `simdlab ui` to open the browser on the measuring machine. **Explore**
-lists supported operations and methods, **Compare** previews and runs a
-comparison, and **Results** shows timings or opens a saved capture. The CLI
-remains available for automation and SSH.
-[Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
+After [installing `simdlab`](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source), open the lab:
+
+```text
+simdlab ui
+```
+
+- **Explore** shows what the lab can measure. Browse operations and choose a method and batch size.
+- **Compare** shows the proposed settings. Select **Run locally** to start a measurement.
+- **Results** shows the timing difference and individual repeats. Open a saved capture or download a Markdown report here.
+
+The browser opens on the machine running `simdlab`. The starter runs offline.
+Use the terminal commands below for scripts or SSH. [Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
 
 ## Run directly
 
