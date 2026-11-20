@@ -18,7 +18,8 @@ func catalogText(response labapi.CatalogResponse) string {
 		for _, strategy := range operation.Strategies {
 			fmt.Fprintf(&text, "    %s (%s, %s)\n", strategy.ID, strategy.Label, strategy.WorkerPolicy)
 		}
-		fmt.Fprintf(&text, "  Supported element counts: %v\n", operation.SupportedSizes)
+		fmt.Fprintf(&text, "  Array size: any whole number from 1 to %d\n", operation.MaxSize)
+		fmt.Fprintf(&text, "  Suggested sweep sizes: %v\n", operation.SupportedSizes)
 	}
 	return text.String()
 }

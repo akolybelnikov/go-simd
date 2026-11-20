@@ -155,8 +155,8 @@ func TestGuideDiscoverClarifyAndDecline(t *testing.T) {
 	input := strings.Join([]string{
 		"Can I compare ways of summing an array?",
 		"Can you benchmark addition from my CSV?",
-		"Compare ordinary and vectorized addition for 1,003 values.",
-		"1,024",
+		"Compare ordinary and vectorized addition for 20,000,000 values.",
+		"80,003",
 		"no",
 		"Which took less time, and by how much?",
 		"quit",
@@ -164,8 +164,9 @@ func TestGuideDiscoverClarifyAndDecline(t *testing.T) {
 	require.Zero(t, run([]string{"ask", "-endpoint", "http://127.0.0.1:1", "-artifacts", root}, strings.NewReader(input), &stdout, &stderr), stderr.String())
 	require.Contains(t, stdout.String(), "Vectorized sum (four accumulators)")
 	require.Contains(t, stdout.String(), "cannot benchmark your files")
-	require.Contains(t, stdout.String(), "Which supported size should I use?")
-	require.Contains(t, stdout.String(), "1024 values per input array")
+	require.Contains(t, stdout.String(), "Choose a whole number from 1 to 16777216")
+	require.Contains(t, stdout.String(), "80003 values per input array")
+	require.Contains(t, stdout.String(), "final partial vector")
 	require.Contains(t, stdout.String(), "Comparison canceled.")
 	require.Contains(t, stdout.String(), "No saved measurements yet.")
 	dirs, err := os.ReadDir(root)

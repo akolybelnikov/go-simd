@@ -199,6 +199,9 @@ func (s *guideSession) handle(ctx context.Context, reader *bufio.Scanner, reques
 	case "unsupported":
 		_, err := fmt.Fprintln(stdout, guideScope+" "+guideFallback)
 		return false, err
+	case "invalid_size":
+		_, err := fmt.Fprintf(stdout, "Choose a whole number from 1 to %d values per input array.\n", labapi.MaxExperimentSize)
+		return false, err
 	case "inference":
 		_, err := fmt.Fprintln(stdout, "The lab reports observed timings and repeat ranges. It does not estimate statistical significance or confidence intervals.")
 		return false, err
@@ -220,8 +223,8 @@ func (s *guideSession) handle(ctx context.Context, reader *bufio.Scanner, reques
 	if size == 0 {
 		size = starterSize
 	}
-	if !slices.Contains(operation.SupportedSizes, size) {
-		_, err := fmt.Fprintf(stdout, "%s does not support %d values. Which supported size should I use? %s\n", operation.Title, size, supportedSizesText(operation.SupportedSizes))
+	if size < 1 || size > operation.MaxSize {
+		_, err := fmt.Fprintf(stdout, "Which size should I use? Choose a whole number from 1 to %d values per input array.\n", operation.MaxSize)
 		return true, err
 	}
 	methods, err := guideMethods(*operation, request.Methods)
@@ -361,7 +364,8 @@ func discoverOperation(stdout io.Writer, operation labapi.OperationDescriptor) e
 	for _, method := range operation.Strategies {
 		fmt.Fprintln(&text, "  "+methodName(operation.Group, method.ID, method.Label))
 	}
-	fmt.Fprintf(&text, "Supported values per input array: %s\n", supportedSizesText(operation.SupportedSizes))
+	fmt.Fprintf(&text, "Values per input array: any whole number from 1 to %d.\n", operation.MaxSize)
+	fmt.Fprintf(&text, "Suggested sweep sizes: %s\n", supportedSizesText(operation.SupportedSizes))
 	_, err := io.WriteString(stdout, text.String())
 	return err
 }

@@ -1,4 +1,6 @@
 const byID = (id) => document.getElementById(id);
+const examples = document.querySelectorAll(".comparison-examples button");
+const tabs = [...document.querySelectorAll('[role="tab"]')];
 const storageKey = "simdlab-session";
 let token = location.hash.slice(1);
 if (token) {
@@ -17,6 +19,33 @@ let activeRun = null;
 let busy = false;
 let currentReport = "";
 let currentSeries = [];
+let operations = [];
+let selectedOperation;
+
+function selectTab(name) {
+  for (const tab of tabs) {
+    const selected = tab.id === "tab-" + name;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    byID(tab.getAttribute("aria-controls")).hidden = !selected;
+  }
+}
+
+for (const [index, tab] of tabs.entries()) {
+  tab.addEventListener("click", () => selectTab(tab.id.slice(4)));
+  tab.addEventListener("keydown", (event) => {
+    const target = {
+      ArrowLeft: (index + tabs.length - 1) % tabs.length,
+      ArrowRight: (index + 1) % tabs.length,
+      Home: 0,
+      End: tabs.length - 1,
+    }[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    tabs[target].click();
+    tabs[target].focus();
+  });
+}
 
 function status(message, error = false, id = "status") {
   byID(id).textContent = message;
@@ -30,8 +59,104 @@ function updateControls() {
   byID("capture").disabled = busy || !token;
   byID("question").disabled = busy || !token;
   byID("ask-submit").disabled = busy || !token;
+  byID("catalog-submit").disabled = busy || !token || !byID("catalog-method").value;
+  for (const example of examples) {
+    example.disabled = busy || !token;
+  }
   document.querySelector(".file-label").setAttribute("aria-disabled", String(byID("capture").disabled));
   byID("results").setAttribute("aria-busy", String(busy));
+}
+
+async function loadCatalog() {
+  try {
+    const catalog = await api("/api/catalog");
+    operations = catalog.operations.toSorted((a, b) => a.title.localeCompare(b.title));
+    const host = catalog.runtime;
+    byID("catalog-host").textContent = host.os + " / " + host.arch +
+      " · " + host.vector_bits + "-bit vectors" + (host.emulated ? " · SIMD emulated" : "");
+    selectedOperation = operations.find((operation) => operation.group === "addition");
+    byID("operation-search").disabled = false;
+    renderOperations();
+  } catch (error) {
+    status(error.message, true, "catalog-status");
+  }
+}
+
+function renderOperations() {
+  const query = byID("operation-search").value.trim().toLowerCase().split(/\s+/);
+  const matches = operations.filter((operation) => {
+    const text = [operation.title, operation.group, operation.category, operation.type_id].join(" ").toLowerCase();
+    return query.every((word) => text.includes(word));
+  });
+  byID("operation-list").replaceChildren(...matches.map((operation) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.group = operation.group;
+    button.textContent = operation.title;
+    button.addEventListener("click", () => chooseOperation(operation));
+    item.append(button);
+    return item;
+  }));
+  status(matches.length ? matches.length + " of " + operations.length + " operations" : "No matching operations.", false, "catalog-status");
+  chooseOperation(matches.includes(selectedOperation) ? selectedOperation : matches[0]);
+}
+
+function chooseOperation(operation) {
+  selectedOperation = operation;
+  byID("catalog-details").hidden = !operation;
+  if (!operation) return;
+  for (const button of byID("operation-list").querySelectorAll("button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.group === operation.group));
+  }
+  byID("catalog-operation").textContent = operation.title;
+  byID("catalog-summary").textContent = operation.summary;
+  const guide = byID("catalog-guide");
+  guide.hidden = !operation.guide_url;
+  if (operation.guide_url) {
+    guide.href = operation.guide_url;
+    guide.setAttribute("aria-label", "Read the measurement guide for " + operation.title + " (opens in a new tab)");
+  }
+  byID("catalog-expression").textContent = operation.expression;
+  byID("catalog-input").textContent = operation.inputs.length + " generated " + operation.type_id +
+    (operation.inputs.length === 1 ? " input array" : " input arrays");
+  byID("catalog-policy").textContent = operation.numerical_policy;
+  byID("catalog-baseline").textContent = operation.strategies.find((method) => method.id === operation.reference_strategy_id)?.label || "the reference method";
+  const methods = operation.strategies.filter((method) => method.id !== operation.reference_strategy_id);
+  const defaultMethod = methods.find((method) => method.uses_simd && method.worker_policy === "serial") || methods[0];
+  byID("catalog-method").replaceChildren(...methods.map((method) => new Option(method.label, method.id)));
+  byID("catalog-method").value = defaultMethod?.id || "";
+  byID("catalog-size-suggestions").replaceChildren(...operation.supported_sizes.map((size) => new Option(integer.format(size), size)));
+  const size = byID("catalog-size");
+  size.max = operation.max_size;
+  size.value = 1024;
+  byID("catalog-size-hint").textContent = "Any whole number from 1 to " + integer.format(operation.max_size) + ".";
+  status("", false, "catalog-preview-status");
+  updateControls();
+}
+
+async function previewOperation(event) {
+  event.preventDefault();
+  if (!selectedOperation || busy) return;
+  const choice = {
+    group: selectedOperation.group,
+    method: byID("catalog-method").value,
+    size: Number(byID("catalog-size").value),
+  };
+  busy = true;
+  updateControls();
+  status("Preparing the preview…", false, "catalog-preview-status");
+  try {
+    const plan = await api("/api/preview", JSON.stringify(choice));
+    status("", false, "catalog-preview-status");
+    selectTab("compare");
+    reviewPlan(plan);
+  } catch (error) {
+    status(error.message, true, "catalog-preview-status");
+  } finally {
+    busy = false;
+    updateControls();
+  }
 }
 
 async function api(path, body, signal) {
@@ -64,10 +189,16 @@ function setPlan(plan) {
   byID("plan-settings").textContent = methods + " · " + integer.format(plan.size) +
     " generated values per array · " + plan.repeats + " repeats · running on this machine";
   fillList(byID("methods"), plan.methods);
-  fillList(byID("plan-notes"), plan.warnings || []);
+  fillList(byID("plan-notes"), [...(plan.tail_notes || []), ...(plan.warnings || [])]);
   byID("plan-host").textContent = plan.host;
   byID("model-mode").textContent = plan.ollama ?
-    "Local Ollama helps with additional wording." : "Example requests work offline.";
+    "Local Ollama helps interpret your wording." : "The examples work offline. Start simdlab ui -ollama for help with other wording.";
+}
+
+function reviewPlan(plan) {
+  setPlan(plan);
+  status("Preview ready. Choose Run locally to start measuring.");
+  byID("operation").focus();
 }
 
 async function useStarter() {
@@ -131,17 +262,14 @@ async function openCapture(event) {
   }
 }
 
-async function askQuestion(event) {
-  event.preventDefault();
-  const question = byID("question").value.trim();
+async function previewQuestion(question) {
   if (!question || busy) return;
   busy = true;
   updateControls();
-  status("Resolving the question…", false, "ask-status");
+  status("Preparing the preview…", false, "ask-status");
   try {
-    setPlan(await api("/api/ask", JSON.stringify({ question })));
-    status("");
-    status("Review the new preview, then choose Run locally.", false, "ask-status");
+    reviewPlan(await api("/api/ask", JSON.stringify({ question })));
+    status("", false, "ask-status");
   } catch (error) {
     status(error.message, true, "ask-status");
   } finally {
@@ -151,6 +279,7 @@ async function askQuestion(event) {
 }
 
 function showResult(result) {
+  selectTab("results");
   const [headline, ...detail] = result.timing.trim().split("\n");
   byID("headline").textContent = headline;
   byID("medians").textContent = detail.join("\n");
@@ -263,13 +392,29 @@ byID("run").addEventListener("click", runComparison);
 byID("cancel").addEventListener("click", () => activeRun?.abort());
 byID("report").addEventListener("click", saveReport);
 byID("capture").addEventListener("change", openCapture);
-byID("ask").addEventListener("submit", askQuestion);
+byID("operation-search").addEventListener("input", renderOperations);
+byID("explore-preview").addEventListener("submit", previewOperation);
+byID("ask").addEventListener("submit", (event) => {
+  event.preventDefault();
+  previewQuestion(byID("question").value.trim());
+});
+for (const example of examples) {
+  example.addEventListener("click", () => {
+    const question = example.dataset.question;
+    byID("question").value = question;
+    previewQuestion(question);
+  });
+}
 byID("plot-size").addEventListener("change", showRepeats);
 new ResizeObserver(drawRepeats).observe(byID("results"));
 
 if (token) {
   useStarter();
+  loadCatalog();
 } else {
   updateControls();
-  status("Open the private browser URL printed by simdlab ui.", true);
+  const message = "Open the private browser URL printed by simdlab ui.";
+  status(message, true);
+  status(message, true, "catalog-status");
+  status(message, true, "open-status");
 }

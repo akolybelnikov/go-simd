@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/akolybelnikov/go-simd/docs/wiki"
 	"github.com/akolybelnikov/go-simd/internal/agent"
 	"github.com/akolybelnikov/go-simd/internal/analysis"
 	"github.com/akolybelnikov/go-simd/internal/evidence"
@@ -32,7 +33,7 @@ type localUI struct {
 	expires             time.Time
 	root                string
 	model               agent.ModelClient
-	operations          []labapi.OperationDescriptor
+	catalog             labapi.CatalogResponse
 
 	mu      sync.Mutex
 	pending *uiProposal
@@ -54,6 +55,7 @@ type uiPreview struct {
 	Repeats   int      `json:"repeats"`
 	Host      string   `json:"host"`
 	Warnings  []string `json:"warnings,omitempty"`
+	TailNotes []string `json:"tail_notes,omitempty"`
 	Ollama    bool     `json:"ollama"`
 }
 
@@ -64,7 +66,7 @@ func newLocalUI(host, root string, service *labservice.Deterministic, model agen
 	}
 	return &localUI{
 		host: host, origin: "http://" + host, token: rand.Text(), expires: time.Now().Add(uiSessionTTL),
-		root: root, operations: available.Operations, model: model,
+		root: root, catalog: available, model: model,
 	}, nil
 }
 
@@ -88,6 +90,10 @@ func (app *localUI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		app.serveAsset(w, r.URL.Path)
 		return
 	}
+	if r.URL.Path == "/wiki" || strings.HasPrefix(r.URL.Path, "/wiki/") {
+		serveWiki(w, r)
+		return
+	}
 	if !strings.HasPrefix(r.URL.Path, "/api/") {
 		http.NotFound(w, r)
 		return
@@ -107,6 +113,10 @@ func (app *localUI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.URL.Path {
+	case "/api/catalog":
+		app.explore(w)
+	case "/api/preview":
+		app.preview(w, r)
 	case "/api/starter":
 		app.propose(w, additionStarter())
 	case "/api/run":
@@ -118,6 +128,46 @@ func (app *localUI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		uiError(w, http.StatusNotFound, "Unknown lab action.")
 	}
+}
+
+func (app *localUI) explore(w http.ResponseWriter) {
+	type operationView struct {
+		labapi.OperationDescriptor
+		Summary  string `json:"summary"`
+		GuideURL string `json:"guide_url"`
+	}
+	view := struct {
+		labapi.CatalogResponse
+		Operations []operationView `json:"operations"`
+	}{CatalogResponse: app.catalog}
+	for _, operation := range app.catalog.Operations {
+		operation.Strategies = slices.Clone(operation.Strategies)
+		for j := range operation.Strategies {
+			method := &operation.Strategies[j]
+			method.Label = methodName(operation.Group, method.ID, method.Label)
+		}
+		note := wiki.Operation(operation.Group)
+		view.Operations = append(view.Operations, operationView{operation, note.Summary, note.URL})
+	}
+	uiJSON(w, http.StatusOK, view)
+}
+
+func (app *localUI) preview(w http.ResponseWriter, r *http.Request) {
+	var choice struct {
+		Group  string `json:"group"`
+		Method string `json:"method"`
+		Size   int    `json:"size"`
+	}
+	if err := decodeBounded(r.Body, 1024, &choice); err != nil || choice.Group == "" || choice.Method == "" {
+		uiError(w, http.StatusBadRequest, "Choose an operation, a method, and a whole number for the batch size.")
+		return
+	}
+	operation := findGuideOperation(app.catalog.Operations, choice.Group)
+	if operation == nil {
+		uiError(w, http.StatusUnprocessableEntity, "Choose a supported operation from Explore.")
+		return
+	}
+	app.previewComparison(w, *operation, []string{operation.ReferenceStrategy, choice.Method}, choice.Size)
 }
 
 func (app *localUI) serveAsset(w http.ResponseWriter, path string) {
@@ -161,8 +211,9 @@ func (app *localUI) propose(w http.ResponseWriter, request labapi.PlanRequest) {
 	preview := uiPreview{
 		Ref: proposal.ref, Operation: plan.Group, Repeats: plan.Count, Size: plan.Cases[0].Elements,
 		Host: fmt.Sprintf("%s / %s", plan.Runtime.OS, plan.Runtime.Arch), Ollama: app.model != nil,
+		TailNotes: comparisonTailNotes(plan),
 	}
-	if operation := findGuideOperation(app.operations, plan.Group); operation != nil {
+	if operation := findGuideOperation(app.catalog.Operations, plan.Group); operation != nil {
 		preview.Operation = operation.Title
 	}
 	for _, c := range plan.Cases {
@@ -251,7 +302,7 @@ func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), uiModelTimeout)
 		defer cancel()
 		var err error
-		request, err = routeGuideRequest(ctx, app.model, app.operations, body.Question, "", false)
+		request, err = routeGuideRequest(ctx, app.model, app.catalog.Operations, body.Question, "", false)
 		if err != nil {
 			uiError(w, http.StatusUnprocessableEntity, "Ollama could not resolve the question. Try wording from the examples.")
 			return
@@ -261,29 +312,37 @@ func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
 		uiError(w, http.StatusUnprocessableEntity, guideScope)
 		return
 	}
+	if request.Action == "invalid_size" {
+		uiError(w, http.StatusUnprocessableEntity, uiSizeRange())
+		return
+	}
 	if request.Action != "compare" {
 		uiError(w, http.StatusUnprocessableEntity, "Name one operation and the methods to compare. To see earlier timings, open a saved run.")
 		return
 	}
-	operation := findGuideOperation(app.operations, request.Group)
+	operation := findGuideOperation(app.catalog.Operations, request.Group)
 	if operation == nil {
 		uiError(w, http.StatusUnprocessableEntity, "Name a catalog operation such as addition or array sum.")
-		return
-	}
-	methods, err := guideMethods(*operation, request.Methods)
-	if err != nil {
-		uiError(w, http.StatusUnprocessableEntity, "Choose two supported methods, including the ordinary scalar method.")
 		return
 	}
 	size := request.Size
 	if size == 0 {
 		size = starterSize
 	}
-	if !slices.Contains(operation.SupportedSizes, size) {
-		uiError(w, http.StatusUnprocessableEntity, fmt.Sprintf("%s does not support %d values. Supported sizes: %s.", operation.Title, size, supportedSizesText(operation.SupportedSizes)))
+	app.previewComparison(w, *operation, request.Methods, size)
+}
+
+func (app *localUI) previewComparison(w http.ResponseWriter, operation labapi.OperationDescriptor, requested []string, size int) {
+	methods, err := guideMethods(operation, requested)
+	if err != nil {
+		uiError(w, http.StatusUnprocessableEntity, "Choose two supported methods, including the ordinary scalar method.")
 		return
 	}
 	app.propose(w, comparisonRequest(operation.Group, methods, size))
+}
+
+func uiSizeRange() string {
+	return fmt.Sprintf("Choose a whole number from 1 to %d values per input array.", labapi.MaxExperimentSize)
 }
 
 func uiJSON(w http.ResponseWriter, status int, data any) {

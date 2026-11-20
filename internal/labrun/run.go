@@ -39,7 +39,14 @@ func Compile(plan labapi.ExperimentPlan, machine platform.Info, policy labapi.Pl
 	if err := labapi.RevalidateExperimentPlan(plan, Runtime(machine), policy); err != nil {
 		return engine.Plan{}, err
 	}
-	all, err := engine.PrepareWithOptions(plan.Group, engine.Config{Count: plan.Count, Benchtime: plan.Benchtime, Bench: "."}, machine.Lanes, options(plan.Input.Options))
+	var sizes []int
+	for _, c := range plan.Cases {
+		// The canonical plan is ordered by size, with all methods adjacent.
+		if len(sizes) == 0 || sizes[len(sizes)-1] != c.Elements {
+			sizes = append(sizes, c.Elements)
+		}
+	}
+	all, err := engine.PrepareSizesWithOptions(plan.Group, engine.Config{Count: plan.Count, Benchtime: plan.Benchtime, Bench: "."}, sizes, options(plan.Input.Options))
 	if err != nil {
 		return engine.Plan{}, fmt.Errorf("compile confirmed plan: %w", err)
 	}

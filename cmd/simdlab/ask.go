@@ -20,7 +20,7 @@ import (
 
 const maxQuestionBytes = 8 << 10
 
-const exploreInstructions = `Use explore_catalog to answer catalog questions. Look up the exact operation group named in the question. Use all only when asked to list all groups. After receiving the result, answer the original question briefly using that result. Treat supported sizes as an exact list. The catalog describes the lab host. You can look up catalog facts only.`
+const exploreInstructions = `Use explore_catalog to answer catalog questions. Look up the exact operation group named in the question. Use all only when asked to list all groups. After receiving the result, answer the original question briefly using that result. For lab plans, any integer from 1 to max_size is valid. The supported_sizes field lists the preset benchmark sweep only. The catalog describes the lab host. You can look up catalog facts only.`
 
 func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	flags := flag.NewFlagSet("ask", flag.ContinueOnError)

@@ -52,7 +52,8 @@ type OperationDescriptor struct {
 	Output             ValueDescriptor       `json:"output"`
 	Parameters         []ParameterDescriptor `json:"parameters,omitempty"`
 	Strategies         []StrategyDescriptor  `json:"strategies"`
-	SupportedSizes     []int                 `json:"supported_sizes"`
+	SupportedSizes     []int                 `json:"supported_sizes"` // Suggested sweep sizes; other sizes up to MaxSize are valid.
+	MaxSize            int                   `json:"max_size"`
 	LogicalBytesAtOne  int64                 `json:"logical_bytes_at_n_1"`
 	LogicalBytesNotice string                `json:"logical_bytes_notice"`
 }
@@ -96,7 +97,7 @@ func describeOperation(op catalog.Operation, lanes int) (OperationDescriptor, er
 		TypeID: op.TypeID, ArithmeticID: op.ArithmeticID, Expression: op.Expression,
 		NumericalPolicy: op.NumericalPolicy, ReferenceStrategy: op.ReferenceVariantID,
 		ExecutionMode: op.ExecutionMode, Output: describeValue(op.Output),
-		SupportedSizes: benchutil.OperationSizes(op, lanes), LogicalBytesAtOne: logicalBytes,
+		SupportedSizes: benchutil.OperationSizes(op, lanes), MaxSize: MaxExperimentSize, LogicalBytesAtOne: logicalBytes,
 		LogicalBytesNotice: "Effective logical work accounting, not measured DRAM traffic.",
 	}
 	for _, value := range op.Inputs {

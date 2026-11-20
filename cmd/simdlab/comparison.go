@@ -95,10 +95,55 @@ func comparisonPlanText(plan labapi.ExperimentPlan) string {
 		fmt.Fprintf(&text, "  %s · %d values per input array\n", methodName(plan.Group, c.StrategyID, c.StrategyLabel), c.Elements)
 	}
 	fmt.Fprintf(&text, "%d repeats per method · %s target per repeat · generated %s inputs\n", plan.Count, plan.Benchtime, plan.TypeID)
+	for _, note := range comparisonTailNotes(plan) {
+		fmt.Fprintln(&text, note)
+	}
 	for _, warning := range plan.Warnings {
 		fmt.Fprintln(&text, warning.Message)
 	}
 	return text.String()
+}
+
+func comparisonTailNotes(plan labapi.ExperimentPlan) []string {
+	lanes := plan.Runtime.Float32Lanes
+	switch plan.TypeID {
+	case catalog.Float64, catalog.Uint64:
+		lanes = max(1, lanes/2)
+	case catalog.Uint8:
+		lanes *= 4
+	}
+	var notes []string
+	for _, c := range plan.Cases {
+		if plan.OperationID == catalog.Sum8 {
+			if c.StrategyID == catalog.Scalar && c.Elements%8 != 0 {
+				notes = append(notes, "Both methods pad the final eight-value block with zeros.")
+			}
+			continue
+		}
+		if !c.UsesSIMD {
+			continue
+		}
+		if c.StrategyID == catalog.SIMDParallelScalarTail {
+			workers := min(plan.Runtime.GOMAXPROCS, c.Elements)
+			chunk, extra := c.Elements/workers, c.Elements%workers
+			tail := (workers-extra)*(chunk%lanes) + extra*((chunk+1)%lanes)
+			if tail != 0 {
+				notes = append(notes, fmt.Sprintf("Parallel addition handles %d leftover values across worker chunks with scalar additions.", tail))
+			}
+			continue
+		}
+		if remainder := c.Elements % lanes; remainder != 0 {
+			switch {
+			case c.StrategyID == catalog.SIMDScalarTail:
+				notes = append(notes, fmt.Sprintf("The scalar tail handles the last %d of the values after full %d-value vectors.", remainder, lanes))
+			case plan.OperationID == catalog.Add && c.StrategyID == catalog.SIMDPartial:
+				notes = append(notes, fmt.Sprintf("The final partial vector handles %d remaining values, with up to %d values per vector.", remainder, lanes))
+			default:
+				notes = append(notes, fmt.Sprintf("The selected method handles %d remaining input values beyond full %d-value vectors.", remainder, lanes))
+			}
+		}
+	}
+	return notes
 }
 
 func methodName(group, id, label string) string {

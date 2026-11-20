@@ -20,7 +20,7 @@ const catalogToolName = "explore_catalog"
 func CatalogTool() agent.ToolDefinition {
 	return agent.ToolDefinition{
 		Name:        catalogToolName,
-		Description: "List registered SIMD lab operations, strategies, supported sizes, and measuring-process capabilities. Use an exact group name or all.",
+		Description: "List registered SIMD lab operations, strategies, maximum array sizes, preset sweep sizes, and measuring-process capabilities. Use an exact group name or all.",
 		InputSchema: []byte(`{"type":"object","properties":{"group":{"type":"string","minLength":1}},"required":["group"],"additionalProperties":false}`),
 	}
 }

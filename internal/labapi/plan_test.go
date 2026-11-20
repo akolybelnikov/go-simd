@@ -110,7 +110,11 @@ func TestResolveExperimentPlanRejectsInvalidRequests(t *testing.T) {
 	}{
 		{"unknown group", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Group = "missing" }, "unknown_group"},
 		{"missing size", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Sizes = nil }, "required"},
-		{"unsupported size", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Sizes = []int{3} }, "unsupported_size"},
+		{"zero size", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Sizes = []int{0} }, "unsupported_size"},
+		{"negative size", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Sizes = []int{-1} }, "unsupported_size"},
+		{"size above limit", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) {
+			r.Sizes = []int{MaxExperimentSize + 1}
+		}, "unsupported_size"},
 		{"duplicate size", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Sizes = []int{8, 8} }, "duplicate_size"},
 		{"missing variant", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Variants = nil }, "required"},
 		{"unknown variant", func(r *PlanRequest, _ *RuntimeContext, _ *PlanPolicy) { r.Variants = []string{"missing"} }, "unknown_variant"},

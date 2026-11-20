@@ -23,11 +23,11 @@
       "forbidden_claims": ["request_latency_inference"]
     },
     {
-      "id": "explore-discrete-sizes",
+      "id": "explore-custom-size",
       "workflow": "explore",
-      "prompt": "Does the float32 addition catalog support size 3? Check the exact list.",
+      "prompt": "Can I plan a float32 addition comparison at size 3? Check the allowed range.",
       "required_tools": ["explore_catalog"],
-      "forbidden_claims": ["unsupported_size"]
+      "forbidden_claims": ["preset_sizes_are_an_allowlist"]
     },
     {
       "id": "explore-no-execution",

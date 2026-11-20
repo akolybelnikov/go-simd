@@ -4,9 +4,10 @@
 
 ## Open the local browser UI
 
-Run `simdlab ui` to open the browser on the measuring machine. The panel runs
-the addition starter, opens a saved capture, and previews optional guided
-requests. The CLI remains available for automation and SSH.
+Run `simdlab ui` to open the browser on the measuring machine. **Explore**
+lists supported operations and methods, **Compare** previews and runs a
+comparison, and **Results** shows timings or opens a saved capture. The CLI
+remains available for automation and SSH.
 [Browser guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
 
 ## Run directly
@@ -46,6 +47,7 @@ Follow the [first experiment walkthrough](02-First-experiment) or see the
 | Complete a small experiment from start to finish | [02 — Your first experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment) |
 | Look up every project command, flag, and Make target | [03 — Command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry) |
 | Understand the implemented algorithms and functions | [04 — Operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide) |
+| See what each operation measures and where it is used | [32 — How the operation benchmarks work](32-Operation-measurement-guide) |
 | Save TXT, Markdown, CSV, and raw evidence | [05 — Reports and evidence](https://github.com/akolybelnikov/go-simd/wiki/05-Reports-and-evidence) |
 | Explain timings, percentages, tails, and concurrency | [06 — Understanding results](https://github.com/akolybelnikov/go-simd/wiki/06-Understanding-results) |
 | Run focused, repeatable experiments | [07 — Experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experiment-recipes) |

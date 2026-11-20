@@ -14,7 +14,7 @@ func TestCompileRetainsOnlyConfirmedCases(t *testing.T) {
 	machine := platform.Current()
 	runtime := Runtime(machine)
 	plan, err := labapi.ResolveExperimentPlan(labapi.PlanRequest{
-		Group: "addition", Variants: []string{catalog.Scalar}, Sizes: []int{8}, Count: 1, Benchtime: "1x",
+		Group: "addition", Variants: []string{catalog.Scalar}, Sizes: []int{labapi.MaxExperimentSize, 80000, 1}, Count: 1, Benchtime: "1x",
 	}, runtime, labapi.DefaultPlanPolicy())
 	if err != nil {
 		t.Fatal(err)
@@ -23,8 +23,14 @@ func TestCompileRetainsOnlyConfirmedCases(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(compiled.Cases) != 1 || compiled.Cases[0].Implementation.Descriptor.ID != catalog.Scalar || compiled.Cases[0].Elements != 8 {
-		t.Fatalf("unexpected compiled cases: %+v", compiled.Cases)
+	expected := []int{1, 80000, labapi.MaxExperimentSize}
+	if len(compiled.Cases) != len(expected) {
+		t.Fatalf("expected three compiled cases, got %d", len(compiled.Cases))
+	}
+	for i, c := range compiled.Cases {
+		if c.Implementation.Descriptor.ID != catalog.Scalar || c.Elements != expected[i] {
+			t.Fatalf("unexpected compiled case: %s", c.Name)
+		}
 	}
 }
 

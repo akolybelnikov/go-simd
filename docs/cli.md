@@ -85,7 +85,8 @@ any working directory.
 
 ## Review a custom benchmark without Ollama
 
-1. Find the strategy IDs and supported element counts for addition.
+1. Find the strategy IDs and suggested sweep sizes for addition. A lab plan
+   accepts any whole number from 1 to 16,777,216 values per input array.
 
    ```text
    simdlab catalog -text -group addition

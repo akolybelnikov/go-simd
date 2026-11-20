@@ -10,10 +10,11 @@ to get started.
 simdlab ui
 ```
 
-Choose **Run locally** for the addition starter, open a saved measurement
-file, or ask for a comparison. The result shows the measured difference,
-the individual repeats, and a **Save report** button. The benchmark runs on
-the machine that launched `simdlab`. The example works offline.
+Use **Explore** to see available operations, methods, and array sizes.
+On **Compare**, choose **Run locally** for the addition starter or use a
+preview from the catalog. **Results** shows the measured difference and
+individual repeats, opens saved captures, and downloads Markdown. The
+benchmark runs on the machine that launched `simdlab`. The starter works offline.
 
 Use the CLI for scripts, automation, and SSH. The public site source provides
 downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)

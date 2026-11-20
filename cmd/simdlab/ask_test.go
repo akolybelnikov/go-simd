@@ -101,11 +101,11 @@ func TestAskLiveCatalogEvaluation(t *testing.T) {
 			},
 		},
 		{
-			name:   "unsupported size",
-			prompt: "Use the catalog for group addition. Is size 3 supported? Start the answer with Yes or No.",
+			name:   "custom size",
+			prompt: "Use the catalog for group addition. Can I plan a comparison at size 3? Start the answer with Yes or No.",
 			check: func(answer string) bool {
 				answer = strings.TrimLeft(strings.ToLower(answer), " *\t\r\n")
-				return answer == "no" || strings.HasPrefix(answer, "no ") || strings.HasPrefix(answer, "no,") || strings.HasPrefix(answer, "no.")
+				return answer == "yes" || strings.HasPrefix(answer, "yes ") || strings.HasPrefix(answer, "yes,") || strings.HasPrefix(answer, "yes.")
 			},
 		},
 	} {

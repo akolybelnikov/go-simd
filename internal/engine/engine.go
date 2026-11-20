@@ -65,6 +65,19 @@ func Prepare(group string, c Config, width int) (Plan, error) {
 }
 
 func PrepareWithOptions(group string, c Config, width int, options input.Options) (Plan, error) {
+	return prepare(group, c, width, nil, options)
+}
+
+// PrepareSizesWithOptions prepares cases at exact sizes from a validated lab plan.
+// The report and native benchmarks continue to use their standard sweeps.
+func PrepareSizesWithOptions(group string, c Config, sizes []int, options input.Options) (Plan, error) {
+	if len(sizes) == 0 {
+		return Plan{}, fmt.Errorf("at least one explicit size is required")
+	}
+	return prepare(group, c, 0, sizes, options)
+}
+
+func prepare(group string, c Config, width int, sizes []int, options input.Options) (Plan, error) {
 	if err := c.Validate(); err != nil {
 		return Plan{}, err
 	}
@@ -81,7 +94,10 @@ func PrepareWithOptions(group string, c Config, width int, options input.Options
 	}
 	match, _ := compileSelection(c.Bench)
 	plan := Plan{Config: c, Input: options}
-	for _, n := range benchutil.OperationSizes(op, width) {
+	if sizes == nil {
+		sizes = benchutil.OperationSizes(op, width)
+	}
+	for _, n := range sizes {
 		bytes, err := op.LogicalBytes(n)
 		if err != nil {
 			return Plan{}, err

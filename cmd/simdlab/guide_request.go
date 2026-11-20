@@ -68,7 +68,7 @@ func matchGuideRequest(question string) (guideRequest, bool) {
 				var ok bool
 				size, ok = guideSize(match[1])
 				if !ok {
-					return guideRequest{Action: "unsupported"}, true
+					return guideRequest{Action: "invalid_size"}, true
 				}
 			}
 			return guideRequest{Action: "compare", Group: pattern.group, Size: size}, true
@@ -145,7 +145,7 @@ const guideToolName = "route_lab_request"
 const guideInstructions = `Map the user's question to one action by calling route_lab_request once.
 Only select listed catalog groups and method IDs.
 - find: select the operation the user wants to discover.
-- compare: select one operation and one batch size. Include the exact size if specified, even if unsupported. Leave size absent for the default of 1024. Omit methods for ordinary scalar and default serial SIMD, or supply two requested catalog IDs including scalar.
+- compare: select one operation and one batch size. Any whole number from 1 to that operation's max_size is allowed. Include the exact size if specified, even if out of range. Leave size absent for the default of 1024. Omit methods for ordinary scalar and default serial SIMD, or supply two requested catalog IDs including scalar.
 - clarify: ask which operation when multiple choices fit. Adding two arrays is addition; adding up one array is sum.
 - unsupported: custom files, other hosts, pipelines, claims beyond timings, custom fixtures, tuning, multi-size sweeps, or anything outside this tool.
 - result, repeats, result_repeats, details: the user is asking about measurements rather than requesting a new experiment. Do not propose a benchmark in response to a question about measurements.
@@ -156,6 +156,7 @@ func routeGuideRequest(ctx context.Context, client agent.ModelClient, operations
 		Group   string            `json:"group"`
 		Title   string            `json:"title"`
 		Methods map[string]string `json:"methods"`
+		MaxSize int               `json:"max_size"`
 	}
 	choices := make([]operationChoice, 0, len(operations))
 	for _, operation := range operations {
@@ -163,7 +164,7 @@ func routeGuideRequest(ctx context.Context, client agent.ModelClient, operations
 		for _, method := range operation.Strategies {
 			methods[method.ID] = methodName(operation.Group, method.ID, method.Label)
 		}
-		choices = append(choices, operationChoice{Group: operation.Group, Title: operation.Title, Methods: methods})
+		choices = append(choices, operationChoice{Group: operation.Group, Title: operation.Title, Methods: methods, MaxSize: operation.MaxSize})
 	}
 	data, err := json.Marshal(struct {
 		Question         string            `json:"question"`

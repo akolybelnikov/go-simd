@@ -13,12 +13,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akolybelnikov/go-simd/internal/benchutil"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/input"
 )
 
 const PlanSchema = "go-simd.lab-plan/v1"
+
+// MaxExperimentSize retains the existing upper end of the benchmark sweep.
+const MaxExperimentSize = 1 << 24
 
 const defaultPolicyID = "guided-local-preview/v1"
 
@@ -205,7 +207,7 @@ func ResolveExperimentPlan(request PlanRequest, runtime RuntimeContext, policy P
 		return ExperimentPlan{}, planError("policy_exceeded", "benchtime", "benchtime %s exceeds policy maximum %s", duration, policy.MaxBenchtime)
 	}
 
-	sizes, err := resolveSizes(op, runtime.Float32Lanes, request.Sizes)
+	sizes, err := resolveSizes(request.Sizes)
 	if err != nil {
 		return ExperimentPlan{}, err
 	}
@@ -286,11 +288,10 @@ func validateBenchtime(value string) (fixed bool, iterations uint64, duration ti
 	return false, 0, d, nil
 }
 
-func resolveSizes(op catalog.Operation, width int, requested []int) ([]int, error) {
+func resolveSizes(requested []int) ([]int, error) {
 	if len(requested) == 0 {
-		return nil, planError("required", "sizes", "at least one explicit supported size is required")
+		return nil, planError("required", "sizes", "at least one explicit array size is required")
 	}
-	supported := benchutil.OperationSizes(op, width)
 	seen := make(map[int]bool, len(requested))
 	resolved := slices.Clone(requested)
 	for _, size := range resolved {
@@ -298,8 +299,8 @@ func resolveSizes(op catalog.Operation, width int, requested []int) ([]int, erro
 			return nil, planError("duplicate_size", "sizes", "size %d is repeated", size)
 		}
 		seen[size] = true
-		if !slices.Contains(supported, size) {
-			return nil, planError("unsupported_size", "sizes", "size %d is not supported for group %q", size, op.Group)
+		if size < 1 || size > MaxExperimentSize {
+			return nil, planError("unsupported_size", "sizes", "Choose a whole number from 1 to %d values per input array (got %d).", MaxExperimentSize, size)
 		}
 	}
 	slices.Sort(resolved)

@@ -101,9 +101,9 @@ func TestLocalUICaptureAndOfflineQuestion(t *testing.T) {
 	require.Equal(t, http.StatusRequestEntityTooLarge, oversized.Code)
 
 	starter := getUIStarter(t, app)
-	invalid := postUI(app, "/api/ask", `{"question":"Compare addition for 1003 values."}`)
+	invalid := postUI(app, "/api/ask", `{"question":"Compare addition for 16777217 values."}`)
 	require.Equal(t, http.StatusUnprocessableEntity, invalid.Code)
-	require.Contains(t, invalid.Body.String(), "Supported sizes")
+	require.Contains(t, invalid.Body.String(), "Choose a whole number from 1 to 16777216")
 	require.Equal(t, starter.Ref, app.pending.ref)
 	response := postUI(app, "/api/ask", `{"question":"Compare summing an array with a loop and with vectors."}`)
 	require.Equal(t, http.StatusOK, response.Code, response.Body.String())
@@ -115,6 +115,70 @@ func TestLocalUICaptureAndOfflineQuestion(t *testing.T) {
 	entries, err := os.ReadDir(app.root)
 	require.NoError(t, err)
 	require.Empty(t, entries)
+}
+
+func TestLocalUIExploreUsesCatalogMethodsAndSizes(t *testing.T) {
+	app := testLocalUI(t)
+	response := postUI(app, "/api/catalog", "")
+	require.Equal(t, http.StatusOK, response.Code)
+	var catalog labapi.CatalogResponse
+	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &catalog))
+	require.Equal(t, app.catalog.Runtime, catalog.Runtime)
+	require.Len(t, catalog.Operations, len(app.catalog.Operations))
+	sum := findGuideOperation(catalog.Operations, "sum")
+	require.NotNil(t, sum)
+	require.Contains(t, sum.SupportedSizes, 64)
+	require.Nil(t, app.pending)
+
+	for _, invalid := range []string{
+		`{"group":"unknown","method":"simd-striped-2","size":64}`,
+		`{"group":"sum","method":"simd-striped-2","size":0}`,
+		`{"group":"sum","method":"scalar","size":64}`,
+	} {
+		require.Equal(t, http.StatusUnprocessableEntity, postUI(app, "/api/preview", invalid).Code)
+		require.Nil(t, app.pending)
+	}
+	response = postUI(app, "/api/preview", `{"group":"sum","method":"simd-striped-2","size":1003}`)
+	require.Equal(t, http.StatusOK, response.Code, response.Body.String())
+	var preview uiPreview
+	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &preview))
+	require.Equal(t, 1003, preview.Size)
+	require.Equal(t, []string{"Ordinary sum (left to right)", "Vectorized sum (two accumulators)"}, preview.Methods)
+	require.Equal(t, preview.Ref, app.pending.ref)
+	entries, err := os.ReadDir(app.root)
+	require.NoError(t, err)
+	require.Empty(t, entries)
+}
+
+func TestLocalUIRunsCustomAdditionSizes(t *testing.T) {
+	app := testLocalUI(t)
+	aligned := postUI(app, "/api/ask", `{"question":"Compare addition for 80,000 values."}`)
+	require.Equal(t, http.StatusOK, aligned.Code, aligned.Body.String())
+	var preview uiPreview
+	require.NoError(t, json.Unmarshal(aligned.Body.Bytes(), &preview))
+	require.Equal(t, 80000, preview.Size)
+	require.Empty(t, preview.TailNotes)
+
+	partial := postUI(app, "/api/ask", `{"question":"Compare addition for 80,003 values."}`)
+	require.Equal(t, http.StatusOK, partial.Code, partial.Body.String())
+	require.Contains(t, partial.Body.String(), "final partial vector handles 3 remaining values")
+
+	scalarTail := postUI(app, "/api/preview", `{"group":"addition","method":"simd-scalar-tail","size":80003}`)
+	require.Equal(t, http.StatusOK, scalarTail.Code, scalarTail.Body.String())
+	require.NoError(t, json.Unmarshal(scalarTail.Body.Bytes(), &preview))
+	require.Equal(t, 80003, preview.Size)
+	require.Contains(t, preview.TailNotes[0], "scalar tail handles the last 3")
+
+	response := postUI(app, "/api/run", approvalJSON(t, preview.Ref))
+	require.Equal(t, http.StatusOK, response.Code, response.Body.String())
+	var result uiResult
+	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &result))
+	require.Len(t, result.Series, 2)
+	for _, series := range result.Series {
+		require.Equal(t, 80003, series.Size)
+		require.Len(t, series.Repeats, preview.Repeats)
+	}
+	require.FileExists(t, result.Evidence)
 }
 
 func TestLocalUIModelOnlyProposes(t *testing.T) {

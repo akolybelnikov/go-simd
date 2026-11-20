@@ -12,24 +12,66 @@
   <header class="top">
     <div class="top-inner">
       <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span> SIMD Lab</div>
-      <span class="local"><span aria-hidden="true"></span> Local workspace</span>
+      <div class="top-actions">
+        <a href="/wiki/" target="_blank" rel="noopener">Wiki</a>
+        <span class="local"><span aria-hidden="true"></span> Local workspace</span>
+      </div>
     </div>
   </header>
   <main>
     <section class="intro" aria-labelledby="main-title">
-      <h1 id="main-title">Compare SIMD on your machine</h1>
-      <p>Run two implementations on generated arrays and see how their timings compare.</p>
+      <h1 id="main-title">SIMD on your machine</h1>
+      <p>Explore the available operations, compare two methods, and inspect the individual timings.</p>
     </section>
 
-    <div class="workspace">
-      <div class="controls">
+    <div class="tabs" role="tablist" aria-label="Local lab">
+      <button type="button" role="tab" id="tab-explore" aria-controls="panel-explore" aria-selected="true">Explore</button>
+      <button type="button" role="tab" id="tab-compare" aria-controls="panel-compare" aria-selected="false" tabindex="-1">Compare</button>
+      <button type="button" role="tab" id="tab-results" aria-controls="panel-results" aria-selected="false" tabindex="-1">Results</button>
+    </div>
+
+    <section class="workspace" id="panel-explore" role="tabpanel" aria-labelledby="tab-explore" tabindex="0">
+      <section class="card options catalog-list" aria-labelledby="catalog-title">
+        <h2 id="catalog-title">Operations</h2>
+        <label for="operation-search">Search operations</label>
+        <input type="search" id="operation-search" placeholder="Try addition, sum, or copy" disabled>
+        <p id="catalog-status" class="status" role="status">Loading operations…</p>
+        <ul id="operation-list"></ul>
+      </section>
+      <section class="card setup operation-details" id="catalog-details" aria-labelledby="catalog-operation" hidden>
+        <h2 id="catalog-operation"></h2>
+        <p class="meta" id="catalog-host"></p>
+        <p class="catalog-summary" id="catalog-summary"></p>
+        <p class="expression" id="catalog-expression"></p>
+        <p id="catalog-input" class="settings"></p>
+        <form id="explore-preview">
+          <div class="catalog-fields">
+            <label for="catalog-method">Compare with <strong id="catalog-baseline"></strong><select id="catalog-method"></select></label>
+            <label for="catalog-size">Values per input array
+              <input id="catalog-size" type="number" min="1" step="1" required list="catalog-size-suggestions" aria-describedby="catalog-size-hint">
+              <datalist id="catalog-size-suggestions"></datalist>
+              <small id="catalog-size-hint" class="meta"></small>
+            </label>
+          </div>
+          <button class="primary" type="submit" id="catalog-submit">Preview comparison <span aria-hidden="true">→</span></button>
+        </form>
+        <p id="catalog-preview-status" class="status" role="status"></p>
+        <details>
+          <summary>Numeric rules</summary>
+          <p id="catalog-policy" class="settings"></p>
+        </details>
+        <a class="measurement-guide" id="catalog-guide" target="_blank" rel="noopener" hidden>Read the measurement guide <span aria-hidden="true">↗</span></a>
+      </section>
+    </section>
+
+    <section class="workspace compare-workspace" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" tabindex="0" hidden>
         <section class="card setup" aria-labelledby="comparison-title">
           <header class="section-head">
             <h2 id="comparison-title">Run a comparison</h2>
             <button type="button" class="quiet" id="starter">Use addition starter</button>
           </header>
           <div class="preview" id="preview" aria-live="polite">
-            <h3 id="operation">Preparing addition</h3>
+            <h3 id="operation" tabindex="-1">Preparing addition</h3>
             <p id="plan-settings" class="settings">Loading the local catalog…</p>
             <ul id="methods" class="methods"></ul>
             <ul id="plan-notes" class="notices" hidden></ul>
@@ -42,26 +84,34 @@
           <p id="status" class="status" role="status"></p>
         </section>
 
-        <section class="card options" aria-labelledby="open-title">
-          <h2 id="open-title">Open a saved run</h2>
-          <p>Choose a measurement file from this lab.</p>
-          <label for="capture" class="secondary file-label">Choose capture</label>
-          <input id="capture" type="file" accept=".json,application/json" class="file-input">
-          <p id="open-status" class="status" role="status"></p>
-        </section>
-
         <section class="card options" aria-labelledby="ask-title">
-          <h2 id="ask-title">Ask a question</h2>
-          <form id="ask">
-            <label for="question">Describe an operation and the methods you want to compare.</label>
-            <textarea id="question" rows="3" maxlength="8192" required placeholder="Compare summing an array with a loop and with vectors."></textarea>
-            <button class="secondary" id="ask-submit" type="submit">Preview comparison</button>
-          </form>
-          <p id="model-mode" class="meta"></p>
+          <h2 id="ask-title">Set up another comparison</h2>
+          <p>Pick an example to preview its settings above. Choose <strong>Run locally</strong> when you’re ready to measure.</p>
+          <div class="comparison-examples">
+            <button type="button" class="secondary" data-question="Compare summing an array with a loop and with vectors.">Compare ways to sum an array</button>
+            <button type="button" class="secondary" data-question="Compare addition at 8,192 values.">Compare addition at 8,192 values</button>
+          </div>
+          <details class="custom-comparison">
+            <summary>Describe your own comparison</summary>
+            <form id="ask">
+              <label for="question">What operation and array size would you like to compare?</label>
+              <textarea id="question" rows="3" maxlength="8192" required placeholder="Compare ordinary and vectorized addition for 1,024 values."></textarea>
+              <button class="secondary" id="ask-submit" type="submit">Preview comparison</button>
+            </form>
+            <p id="model-mode" class="meta"></p>
+          </details>
           <p id="ask-status" class="status" role="status"></p>
         </section>
-      </div>
+    </section>
 
+    <section class="workspace" id="panel-results" role="tabpanel" aria-labelledby="tab-results" tabindex="0" hidden>
+      <section class="card options" aria-labelledby="open-title">
+        <h2 id="open-title">Open a saved run</h2>
+        <p>Choose a measurement file from this lab.</p>
+        <label for="capture" class="secondary file-label">Choose capture</label>
+        <input id="capture" type="file" accept=".json,application/json" class="file-input">
+        <p id="open-status" class="status" role="status"></p>
+      </section>
       <section class="card results" aria-labelledby="results-title" aria-busy="false" id="results">
         <header class="section-head result-head">
           <h2 id="results-title">Results</h2>
@@ -97,7 +147,7 @@
           <p class="artifact meta" id="artifact"></p>
         </div>
       </section>
-    </div>
+    </section>
   </main>
   <footer>Measurements describe the machine that ran the benchmark.</footer>
 </body>
