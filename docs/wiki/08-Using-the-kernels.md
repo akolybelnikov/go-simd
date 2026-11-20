@@ -1,220 +1,33 @@
-# 08 — Using the kernels in Go
+# Working with arrays
 
-Exact copying adds movement.CopyScalar, CopyBuiltin, CopySIMD and
-CopySIMDVectorTail, each accepting `(x,out []float32) error`. Lengths must agree;
-mismatch returns movement.ErrLengthMismatch before writes. Empty/nil succeeds.
-Disjoint output or exact in-place alias is supported; partial overlap is outside
-the common contract. All float32 bits, including NaN payloads, are preserved.
-Run `go run ./examples/copy`; see [the copy guide](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) for controls, timing,
-unary preparation, `8*n` work and complete output digests.
+The batch size is the number of values in each input array. A dot product with 1,024 values uses two arrays of 1,024 values each. Its output is one number. Elementwise addition produces an output array of 1,024 values.
 
-Packed predicates add patterns.PredicateGTPackedScalar and PredicateGTPackedSIMD:
-`(x []float32,out []uint8,threshold float32) error`. Allocate exactly ceil(n/8)
-output bytes. Input i maps to bit i%8 of byte i/8, least-significant bit first.
-Unused high bits are zero and all bytes are overwritten. Wrong output length
-returns patterns.ErrLengthMismatch before writes; empty/nil succeeds. Input is
-preserved and storage must be disjoint. Run `go run ./examples/predicatepack`;
-see [the packed-mask guide](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) for decoding, timing and evidence.
+## Match the question to the output
 
-Byte-mask export uses patterns.PredicateGTScalar and patterns.PredicateGTSIMD:
-`(x []float32,out []uint8,threshold float32) error`. Allocate one output byte
-per input element; true writes 1, equality/NaN writes 0. Length mismatch returns
-patterns.ErrLengthMismatch before writes. Equal empty/nil succeeds. Input bits
-are preserved; input/output storage must be disjoint. Cross-type unsafe aliases
-are unsupported. This typed path has no dummy float32 output.
+| Question | Operation | Output |
+| --- | --- | --- |
+| How do aligned values combine? | Addition | One result per position |
+| Which values pass a cutoff? | Byte or packed predicate mask | One decision per position |
+| What is the total? | Array sum | One result for the whole array |
+| What are the totals in each window? | Fixed-block sum | One result per group of eight |
+| How much work does copying take? | Exact copy | The same bits in another buffer |
 
-Run `go run ./examples/predicate`; see [the byte-mask guide](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) for
-conversion/extraction timing, valid tails, `5*n` accounting and output digests.
+## Choose informative sizes
 
-Fused dot adds reduction.DotFMAScalar and reduction.DotFMASIMD/2/4, accepting
-`(x,y []float32) (float32,error)`. They use corrected binary32 FMA updates,
-ordinary rounded accumulator merges/lane folds and software FMA tails. Unequal
-lengths return +0,reduction.ErrLengthMismatch before reading input; equal empty
-inputs return +0,nil. Inputs remain unchanged and read-only overlap is supported.
-There is no output slice; logical work is `8*n+4` bytes.
+Use one size close to the measured vector width and one substantially larger. If the width is eight, sizes 7, 8, and 9 tell you about a short vector, a complete vector, and a vector followed by a remainder. A width of eight float32 lanes does not imply eight float64 lanes.
 
-Run `go run ./examples/dotfma` for fusion, accumulator-count and signed-zero
-examples. The [fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders)
-explains the exact order and actual vector/software/tail paths. Software fallback
-preserves each striped order; outputs need not equal the scalar fold.
+A larger batch can change where the data fits in the memory hierarchy. Keep the method and fixture fixed when exploring size alone. The [experiment recipes](07-Experiment-recipes) offer more comparisons.
 
-The current packages are under `internal/`, so Go restricts imports to this
-module's permitted source tree. A separate application cannot simply import
-`github.com/akolybelnikov/go-simd/internal/addition`. Use the checked-out lab and
-its examples to experiment. There is no stable public library/SDK contract yet.
+## Map your data to a benchmark
 
-## Run the complete checked-in example
+| Your data | Comparable setup in the lab |
+| --- | --- |
+| Two 480-sample audio buffers that start at the same time | **Addition** at 480 values per input array. Each result is the sum of two samples at the same position. |
+| 12,000 sensor readings with a cutoff | **Threshold** keeps a 12,000-value output. A byte mask records 12,000 decisions as bytes. A packed mask records the same decisions in 1,500 bytes. |
+| A row of 64 features and 64 weights | **Dot product** at 64 values per input array. The batch returns one score for the row. |
 
-```powershell
-$env:GOEXPERIMENT = 'simd'
-go run ./examples/basic
-```
-
-[Read the example source](https://github.com/akolybelnikov/go-simd/blob/main/examples/basic/main.go).
-For these ordinary exactly representable inputs, expected output is:
-
-```text
-addition/Scalar: [5 7 9]
-addition/SIMDPartial: [5 7 9]
-addition/SIMDTail: [5 7 9]
-addition/SIMDParallel: [5 7 9]
-computation/Scalar: [21 39 63]
-computation/SIMD: [21 39 63]
-addition/output aliases a: [5 7 9]
-addition/output aliases b: [5 7 9]
-addition/length mismatch: true; output=[123]
-addition/empty: ok
-```
-
-This example demonstrates values and contracts. It does not time functions or
-choose an optimal implementation.
-
-## Minimal addition call
-
-Inside a Go source file in this module:
-
-```go
-import "github.com/akolybelnikov/go-simd/internal/addition"
-
-a := []float32{1, 2, 3}
-b := []float32{4, 5, 6}
-out := make([]float32, len(a))
-if err := addition.AddSIMD(a, b, out); err != nil {
-    // Handle invalid slice lengths.
-    panic(err)
-}
-// out is [5 7 9].
-```
-
-The import is a declaration and the statements belong inside your function;
-the complete runnable file linked above shows the required layout. Select
-`AddScalar`, `AddSIMDVectorTail`, or `AddSIMDParallel` explicitly to explore
-those strategies. No automatic best-strategy dispatcher is implemented.
-
-## Compute expression
-
-```go
-if err := computation.ComputeHeavySIMD(a, b, out); err != nil {
-    panic(err)
-}
-// With a=[1 2 3], b=[4 5 6], out is [21 39 63].
-```
-
-Import `internal/computation` in the same module, as the full example does.
-Use `ComputeHeavyScalar` for the scalar reference. These functions implement the
-fixed expression; there is no arbitrary-expression parser or callback workload
-adapter in the CLI.
-
-## Exact in-place output
-
-```go
-if err := addition.AddSIMD(a, b, a); err != nil {
-    panic(err)
-}
-```
-
-Output now replaces `a`. Exact aliasing with `b` is also supported. Repeatedly
-calling this in a hand-written benchmark changes the next iteration's inputs;
-the built-in lab uses a disjoint reusable output to keep the input fixture
-unchanged. Preserve that distinction when comparing measurements.
-
-Different-start overlapping ranges, such as using `buffer[:n]` as input and
-`buffer[1:n+1]` as output, are unsupported even when lengths match.
-
-## Handle a length mismatch
-
-```go
-out := []float32{123}
-err := addition.AddSIMD([]float32{1, 2}, []float32{3, 4}, out)
-if errors.Is(err, addition.ErrLengthMismatch) {
-    // out is still [123].
-}
-```
-
-Import the standard `errors` package. Use
-`computation.ErrLengthMismatch` for computation calls; the two packages have
-distinct sentinels. Zero-length equal slices succeed, including nil slices.
-
-## Fused affine
-
-`patterns.AffineFMAScalar` and `patterns.AffineFMASIMD` round alpha*x+beta once
-to binary32. Signatures and array alias/length rules match existing affine;
-old affine/dot APIs remain unfused. Run `go run ./examples/fma` and inspect its
-actual vector/software path. See [the FMA contract](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
-
-## Bring your own slices carefully
-
-Use `go run ./cmd/simdbench -list` to see implemented descriptors before choosing
-a kernel. The catalogue and typed bindings are internal extension points, not a
-public plugin API. F004 adds configured scalar-parameter bindings for float32
-arrays; run `go run ./examples/patterns` and follow the
-[broadcast/predicate guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments).
-Sum adds `reduction.SumScalar(x)` and `reduction.SumSIMD(x)`, returning float32
-directly without an output slice or error sentinel. Run `go run ./examples/sum`
-and follow [its fold and rounding contract](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
-Additional reductions and output types need their own explicit contracts.
-
-SumSIMD2/4 and DotSIMD2/4 add two/four-accumulator strategies with the same
-signatures/error contracts as their one-accumulator counterparts. Run
-`go run ./examples/accumulators` and follow
-[the exact assignment/merge order](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
-
-Dot now adds `reduction.DotScalar(x,y)` and `reduction.DotSIMD(x,y)`, returning
-`(float32,error)`. Handle `reduction.ErrLengthMismatch` for unequal lengths;
-no output array is used. Input aliases/overlaps are read-only and supported.
-Run `go run ./examples/dot` and follow
-[dot and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
-
-The functions accept caller-supplied `[]float32` inside the module, so you can
-write a local program that prepares different values and checks results. The
-report CLI itself still uses generated fixtures; it has no CSV/JSON input-file
-flag. Preparing data in a local example does not make it part of the built-in
-measurement/export workflow automatically.
-
-Define the correctness rule before measuring unusual floating-point values.
-Compare rounding, NaNs, infinities, signed zero, and arithmetic semantics
-deliberately; equality on a few simple integers is not a full floating-point
-contract. Keep data preparation and complete-output validation outside the
-timed inner loop when your objective is kernel-only timing.
-
-
-## Ordered clamp
-
-`patterns.ClampScalar`, `ClampSIMD` and `ClampSIMDMinMax` accept `(x,out []float32,lower,upper float32) error`. Handle `patterns.ErrLengthMismatch` first and `patterns.ErrInvalidBounds` for reversed/NaN bounds, including empty slices. Failures precede writes; disjoint/exact aliases are supported. Run `go run ./examples/clamp` and follow [its exact bit contract](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
-
-
-## Three-array kernel calls
-
-The [MulAdd guide](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) covers three real operand arrays, a full output digest,
-16*n traffic, actual FMA gate/path/width and matched timed work. Use
-`go run ./examples/muladd` for the module-local four-slice API.
-
-
-## Float64 addition
-
-[Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) uses true []float64 inputs/output and retains complete
-little-endian binary64 fingerprints/digests. Case.Vector.NativeLanes is the actual
-Float64 width; the machine float32_lanes field retains its separate meaning.
-Use `go run ./examples/addition64`; logical work is 24*n.
-
-
-## Numeric uint8 saturation
-
-[Saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) uses real []uint8 operands/output, 3*n work and
-actual byte-lane identity. ByteResultSHA256 covers the numeric output, while
-Case.Predicate is absent. Run `go run ./examples/saturatingadd8`.
-
-
-## Opaque-bit representation round trip
-
-[Bit roundtrip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) preserves every float32 bit, including NaN payloads,
-through Uint32s reinterpretation. Input/output hashes must agree; actual lanes
-are retained. Use `go run ./examples/bitroundtrip`; work is8*n, and timing does
-not establish whether a bitcast instruction was emitted.
-
-
-## XOR of opaque words
-
-[XOR bits](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) computes exact uint32 logic on two float32 representations,
-with no floating arithmetic. Both operands and every result bit contribute to
-retained hashes; actual lanes are recorded. Use `go run ./examples/xorbits`.
+Use the number type your application uses. For comparisons or clipping,
+think about how often values pass and whether they arrive in groups. A
+clustered or shuffled fixture can help explore that difference. The lab
+generates its own inputs, and your application may also spend time loading,
+converting, or moving its data. [Fixture options](03-Command-registry#fixture-options) · [Input and output examples](32-Operation-measurement-guide)

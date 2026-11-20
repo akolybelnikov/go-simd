@@ -29,6 +29,7 @@ var wikiPage = template.Must(template.New("wiki").Parse(`<!doctype html>
   <main class="wiki">
     <nav aria-label="Wiki">
       <a href="/wiki/">Wiki home</a>
+      <a href="/wiki/00-What-is-SIMD">What is SIMD?</a>
       <a href="/wiki/{{.Guide}}">Measurement guide</a>
       <a href="/wiki/06-Understanding-results">Understanding results</a>
     </nav>

@@ -1,128 +1,23 @@
-# 07 — Focused experiment recipes
+# Experiment recipes
 
-These source commands use the repository root and `GOEXPERIMENT=simd`. For an
-installed binary, replace `go run ./cmd/simdreport` with `simdreport`; flags stay
-the same and it runs from any directory without Go. Keep evidence companions
-and record source revision/local changes. Examples use bounded selections so you
-can learn one behavior before running the full sweep.
+Start each comparison with a question about one operation, one piece of work, or one measuring condition. Keep the other settings the same and save the repeats.
 
-## A. Verify plumbing without drawing conclusions
+## Study vector boundaries
 
-```powershell
-go run ./cmd/simdreport -group all -bench '^Benchmark.*$/^n=(8|16)$/^(Scalar|SIMD.*)$' -count 1 -benchtime 1x -format md
-```
+Read the measured lane count for the element type. If the width is eight, use **Explore** to preview 7, 8, 9, 15, 16, and 17 values in separate runs. Compare partial vectors and full vectors with a scalar tail using the same scalar reference. The sizes near each boundary help show the cost of handling a remainder.
 
-Expect two pairs of raw/Markdown files, one per group. This checks selection,
-execution, and saving. Both sizes are powers of two present in every current
-sweep; they are not guaranteed vector boundaries on every environment. `1x`
-timings are not performance evidence.
+## Compare working sets
 
-## B. Study vector boundaries
+Measure addition at 1,024, 65,536, and 1,048,576 values. Then try the compute-heavy expression at the same sizes. Compare the change from each operation's own scalar reference. The expression performs more arithmetic over a similar amount of data, but the timings alone do not identify a bottleneck.
 
-Read `SIMD float32 lanes` from a report. If it is **8**, compare:
+## Explore concurrency
 
-```powershell
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=(7|8|9|15|16|17)$/^(Scalar|SIMDPartial|SIMDTail)$' -count 5 -benchtime 100ms -format md
-```
+At a large size, compare a serial addition method and the parallel vector method in separate runs. Use the same machine and keep its concurrency setting fixed first. Then repeat with a different setting if concurrency is your question. Parallel timing includes worker startup and coordination, so state that when describing a difference.
 
-For another width `w`, replace the sizes with `w-1`, `w`, `w+1`, `2w-1`, `2w`,
-and `2w+1`, omitting nonpositive values. The automatic sweep includes these
-boundaries. Ask whether partial-vector and scalar-tail patterns change locally;
-do not label a crossover universal.
+## Compare fixture patterns
 
-## C. Compare operations across larger working sets
+Hold the batch size and thresholds or bounds fixed while changing the arrangement of values. Alternating, clustered, and shuffled inputs can expose different costs for a scalar branch. For clamp, the pattern describes the positions that get clipped. See the [fixture options](03-Command-registry#fixture-options).
 
-```powershell
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=(1024|65536|1048576)$/^(Scalar|SIMDPartial|SIMDTail)$' -count 5 -benchtime 100ms -format csv
-go run ./cmd/simdreport -group computation -bench '^BenchmarkComputation$/^n=(1024|65536|1048576)$/^(Scalar|SIMD)$' -count 5 -benchtime 100ms -format csv
-```
+## Check repeatability
 
-Compare strategy changes within each operation. Discuss the different arithmetic
-per effective byte, while keeping cache/memory explanations as hypotheses.
-
-## D. Explore concurrency in separate report runs
-
-PowerShell, preserving your previous environment setting:
-
-```powershell
-$previousProcs = $env:GOMAXPROCS
-try {
-    $env:GOMAXPROCS = '1'
-    go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -count 5 -benchtime 100ms -format md -output artifacts/procs-1
-    $env:GOMAXPROCS = '4'
-    go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -count 5 -benchtime 100ms -format md -output artifacts/procs-4
-} finally {
-    $env:GOMAXPROCS = $previousProcs
-}
-```
-
-Both report roots retain their own group directory. A larger GOMAXPROCS bound
-is not a promise of more dedicated physical cores. SIMDParallel still creates
-goroutines at GOMAXPROCS=1 and retains its setup overhead. These comparisons
-explore concurrency; they do not replace a parallel scalar control.
-
-In a POSIX shell, use a per-command environment prefix to avoid changing the
-parent shell:
-
-```bash
-GOMAXPROCS=1 go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -count 5 -benchtime 100ms -format md -output artifacts/procs-1
-```
-
-## E. Use native Go concurrency sweeps
-
-```powershell
-go test ./internal/addition -run='^$' -bench='^BenchmarkAddition$/^n=1048576$/^(Scalar|SIMDParallel)$' -benchmem -count=5 -benchtime=100ms -cpu=1,4
-```
-
-This produces native benchmark lines for each concurrency setting. `-cpu` is
-not a `simdreport` flag. Keep different concurrency contexts separate during
-analysis; the typed comparison model rejects mixed contexts in one table.
-
-## F. Measure only one strategy
-
-```powershell
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$/^SIMDPartial$' -count 5 -benchtime 100ms -format csv
-```
-
-This is valid when you need its timing. Percentage change stays empty because
-there is no measured scalar baseline. Add `Scalar` to the selection if you need
-a baseline ratio.
-
-## G. Check iteration mode
-
-```powershell
-go run ./cmd/simdreport -group computation -bench '^BenchmarkComputation$/^n=1024$/^(Scalar|SIMD)$' -count 3 -benchtime 10x -format txt
-```
-
-Inspect the reported iteration count in raw output. Fixed iterations can check
-runner behavior, but a short batch may be too brief for a reliable performance
-decision. Go can execute calibration invocations in addition to the final
-reported measurement.
-
-## H. Keep a before/after experiment honest
-
-1. Record the question, revision, local changes, toolchain, machine, and settings.
-2. Run a selected repeated comparison into `artifacts/before`.
-3. Make the single intended change and record its revision/diff.
-4. Run the same selection/configuration into `artifacts/after`.
-5. Compare raw variability and summaries without silently pooling contexts.
-6. Preserve regressions, missing evidence, and the scope of the conclusion.
-
-The tool currently has no saved-run comparison command, statistical verdict, or
-automatic regression threshold. Do not replace that missing analysis with a
-claim that every small median change is meaningful.
-
-
-## Clip distributions under the same numerical contract
-
-```powershell
-go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 5 -benchtime 100ms -format md
-go run ./examples/clamp
-```
-
-Compare none/all/alternating/clustered/shuffled in separate runs. Patterns here
-select clipped positions. SIMDMinMax includes explicit outside/tie/NaN repairs;
-the comparison is of complete matched kernels. Retain parameters, input hashes,
-width and policy when interpreting results. The [clamp guide](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
-shows signed-zero/NaN examples; [F004 acceptance](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
-marks the stopping point.
+Use several repeats and keep the individual timings. Short fixed-iteration runs are useful for checking the setup. Use duration-based repeats when comparing performance. If two runs disagree, preserve both and check whether the data, settings, host, or background activity changed. [Understanding results](06-Understanding-results) explains how to report the spread.

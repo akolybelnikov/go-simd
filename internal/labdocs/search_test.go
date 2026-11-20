@@ -7,7 +7,7 @@ import (
 
 func TestSearchBoundsAndReferences(t *testing.T) {
 	results, err := Search("SIMDParallel addition strategies")
-	if err != nil || len(results) == 0 || results[0].Source != "docs/wiki/04-Operation-guide.md" || results[0].Section != "Complete kernel reference" {
+	if err != nil || len(results) == 0 || results[0].Source != "docs/wiki/04-Operation-guide.md" || results[0].Section != "Addition methods" {
 		t.Fatalf("unexpected search results: %+v, %v", results, err)
 	}
 	results, err = Search("../../secrets.txt")

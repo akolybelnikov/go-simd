@@ -12,8 +12,7 @@ for `n=1024` is not the latency of one float addition.
 | `change` | Time change relative to the measured scalar median | Calling it percent speedup without checking the formula |
 | `B/op` | Allocated bytes per operation | Treating it as total memory traffic or peak resident memory |
 | `allocs/op` | Allocations per operation | Assuming lower allocation alone proves lower latency |
-| `MB/s` | Effective byte rate based on `12 * elements` | Treating it as measured DRAM bandwidth |
-| Native `-16` suffix | Go concurrency annotation | Reading it as vector width or worker count for every strategy |
+| `MB/s` | Effective byte rate based on the operation's logical byte count | Treating it as measured DRAM bandwidth |
 
 ## Median and percentage arithmetic
 
@@ -62,13 +61,9 @@ call succeeds; lowering and emulation depend on the experimental environment.
 
 ## Serial versus parallel comparisons
 
-`SIMDPartial` and `SIMDTail` are serial addition strategies. `SIMDParallel` adds
-concurrency, chunk boundaries, allocation, startup, and synchronization.
-Changing GOMAXPROCS changes this experiment.
+Partial vectors and full vectors with a scalar tail are serial methods. A parallel method adds chunk boundaries, worker startup, and synchronization. The machine's concurrency setting can change the comparison.
 
-The current scalar baseline is serial. A 2x parallel-SIMD gain against it is
-not evidence of a 2x vectorization gain. A matched parallel scalar control is
-needed to isolate that contribution and is not implemented yet.
+A comparison with a serial scalar loop combines vectorization and concurrency. To isolate vectorization, prefer the serial vector method.
 
 ## Data movement and arithmetic intensity
 

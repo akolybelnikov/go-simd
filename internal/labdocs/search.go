@@ -25,7 +25,7 @@ var approved = []struct {
 	result   Result
 }{
 	{"addition add scalar simdpartial simdtail simdparallel implementations strategies kernel", Result{
-		Source: "docs/wiki/04-Operation-guide.md", Section: "Complete kernel reference",
+		Source: "docs/wiki/04-Operation-guide.md", Section: "Addition methods",
 		Summary: "Float32 addition has scalar, partial-vector, full-vector with scalar tail, and parallel SIMD implementations. Parallel chunks each use full vectors and a scalar tail.",
 	}},
 	{"measurements results latency bandwidth logical bytes timing ns op allocation", Result{

@@ -1,16 +1,17 @@
 **go-simd knowledge guide**
 
 - [Home](https://github.com/akolybelnikov/go-simd/wiki)
+- [What is SIMD?](https://github.com/akolybelnikov/go-simd/wiki/00-What-is-SIMD)
 - [01 · Getting started](https://github.com/akolybelnikov/go-simd/wiki/01-Getting-started)
 - [02 · First experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment)
 - [03 · Command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)
 - [04 · Operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide)
+- [32 · How the operation benchmarks work](https://github.com/akolybelnikov/go-simd/wiki/32-Operation-measurement-guide)
 - [05 · Reports and evidence](https://github.com/akolybelnikov/go-simd/wiki/05-Reports-and-evidence)
 - [06 · Understanding results](https://github.com/akolybelnikov/go-simd/wiki/06-Understanding-results)
 - [07 · Experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experiment-recipes)
-- [08 · Using the kernels](https://github.com/akolybelnikov/go-simd/wiki/08-Using-the-kernels)
+- [08 · Working with arrays](https://github.com/akolybelnikov/go-simd/wiki/08-Using-the-kernels)
 - [09 · Troubleshooting](https://github.com/akolybelnikov/go-simd/wiki/09-Troubleshooting)
-- [10 · Contribution and maintenance](https://github.com/akolybelnikov/go-simd/wiki/10-Contributing-and-wiki-maintenance)
 - [11 · Glossary and capabilities](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities)
 - [12 · SIMD patterns and reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading)
 - [13 · Broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
@@ -25,7 +26,6 @@
 - [21 · Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement)
 
 - [22 · Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts)
-- [23 · F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features)
 - [24 · Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add)
 - [25 · Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition)
 - [26 · Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition)

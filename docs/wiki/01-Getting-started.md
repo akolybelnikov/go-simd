@@ -1,157 +1,25 @@
-# 01 — Getting started
+# Getting started
 
-Open the [local browser UI](https://github.com/akolybelnikov/go-simd/blob/main/docs/local-ui.md)
-or [run your first addition comparison from a terminal](02-First-experiment).
-If you need to build the CLI first, follow the setup below.
+Use the local browser to see the available operations and run a first comparison. For remote sessions or automation, the terminal commands run the same experiments.
 
-Goal: obtain the checkout, enable the experimental toolchain feature, and verify
-that your environment can run the lab. No account, cloud service, or GUI is
-required for the laboratory commands.
+## Open the lab
 
-## 1. Requirements
+If you downloaded an archive, extract it and open a terminal in that folder.
 
-The steps below build from source. To run an already built compatible binary,
-you need only that executable and a writable report directory. Go, Make, Git and
-GOEXPERIMENT are build-host requirements; see
-[installation and remote use](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry#build-install-and-run-remotely).
+| Platform | Command |
+| --- | --- |
+| Windows PowerShell | `.\simdlab.exe ui` |
+| Linux | `./simdlab ui` |
+| Executable on your PATH | `simdlab ui` |
 
-- The module declares Go **1.27.3**. The selected toolchain must also provide the
-  experimental `simd` package and recognize `GOEXPERIMENT=simd`.
-- Git, or GitHub CLI (`gh`), to obtain the source.
-- A shell such as PowerShell or Bash.
-- Optional: GNU Make and a POSIX shell for the convenience Makefile.
+If you are building from source, follow the [installation guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source).
 
-Windows/amd64 and Linux/amd64 are exercised by the current CI setup. Other
-targets need actual execution before assuming support. Cross-compilation alone
-does not prove SIMD behavior or performance. Experimental APIs can change with
-the toolchain; record the version that actually built the program.
+The browser opens on **Explore**. Choose **Addition**, review the methods and values per input array, and select **Preview comparison**. In **Compare**, choose **Run locally**. **Results** shows the median timing difference and individual repeats.
 
-## 2. Obtain the source
+If the browser does not open, copy the private address printed in the terminal. Leave the terminal running during the session. Ctrl+C stops the lab.
 
-With GitHub CLI:
+## Continue learning
 
-```powershell
-gh repo clone akolybelnikov/go-simd
-cd go-simd
-```
-
-Or with Git:
-
-```powershell
-git clone https://github.com/akolybelnikov/go-simd.git
-cd go-simd
-```
-
-All `go run ./...` and report commands in this guide assume this repository-root
-working directory unless a section says otherwise.
-
-## 3. Enable the experiment in your current shell
-
-PowerShell:
-
-```powershell
-$env:GOEXPERIMENT = 'simd'
-go version
-go env -json GOEXPERIMENT GOAMD64 GOARM64 GOTOOLCHAIN
-```
-
-Bash or another POSIX shell:
-
-```bash
-export GOEXPERIMENT=simd
-go version
-go env -json GOEXPERIMENT GOAMD64 GOARM64 GOTOOLCHAIN
-```
-
-These commands configure the current process environment and its child commands.
-Set the variable again in a new terminal. Make exports `GOEXPERIMENT=simd` for
-its targets unless you override it.
-
-## 4. Verify the checkout
-
-```powershell
-go test ./...
-go vet ./...
-gofmt -l cmd internal examples
-go run ./cmd/simdbench -h
-go run ./cmd/simdbench -list
-go run ./cmd/simdreport -h
-```
-
-`gofmt -l` lists files needing formatting; no output means those files are
-formatted. Help is written to stderr and exits successfully without measuring.
-The test suite includes short real report exports; it is not only kernel tests.
-
-`-list` shows this process's Go/platform, vector width/lanes, emulation flag and
-GOMAXPROCS, followed by the implemented operations and strategies. It allocates
-no benchmark fixtures and runs no measurements. Filter with `-group addition`
-or any group in the compact catalogue. Twenty-three operations/fifty-eight implementations
-are registered. Use `-list -group <name>` for parameters and full details.
-
-Use `go test -race ./...` where the host C toolchain supports race builds. Linux
-CI runs this check. A local `runtime/cgo` build failure is a toolchain problem
-that can occur before the project's tests execute; see troubleshooting.
-
-## 5. Run the small code example
-
-The current catalogue contains twenty-three operations and fifty-eight implementations.
-Use -group addition64 for true float64 inputs; see [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition).
-F004 is complete for the agreed current scope; run `go run ./examples/clamp` for
-ordered clipping and see [the closure boundary](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features).
-Run `go run ./examples/copy` for exact-bit copies and the Go built-in control;
-see [copy and movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
-Run `go run ./examples/predicatepack` to compare byte masks with packed bits;
-see [packed predicates](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
-Run `go run ./examples/predicate` for canonical byte masks, including a short
-negative-threshold tail; see [predicate export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
-Run `go run ./examples/dotfma` to compare fused updates, accumulator-count
-rounding and signed-zero differences; see [fused dot](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
-
-Run `go run ./examples/fma` for fused/unfused and double-rounding examples;
-see [fused affine](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding) for its startup gate and recorded software path.
-
-Run `go run ./examples/accumulators` to compare sum/dot rounding with 1/2/4
-vector accumulators; see [the accumulator guide](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments).
-
-Run `go run ./examples/dot` for an unfused dot product, cancellation and length
-validation; see [the dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding).
-
-For the scalar-result reduction and two rounding-loss examples, run
-`go run ./examples/sum`; see [sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
-
-```powershell
-go run ./examples/basic
-```
-
-This calls all six kernels and demonstrates in-place output, unchanged output
-on length mismatch, and empty input. It prints values, not benchmark claims.
-
-Run `go run ./examples/patterns` for the five new broadcast/predicate operations;
-the [worked guide](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments)
-explains constants, masks and seeded input arrangements.
-
-## 6. Check report generation
-
-```powershell
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^(Scalar|SIMDPartial)$' -count 1 -benchtime 1x
-```
-
-Expect a readable terminal table and two paths: a `.txt` summary and matching
-`.measurements.json` observations under `artifacts/addition/`. Timing values vary by machine.
-You have completed setup when the command succeeds and both files are present.
-
-Continue to [your first experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment).
-
-## 7. Build or install the commands
-
-```powershell
-go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport
-go install ./cmd/simdbench ./cmd/simdreport
-.\bin\simdreport.exe -list
-```
-
-The Make equivalents are `make build` and `make install`. Put `GOBIN` (or Go's
-default workspace bin directory) on PATH to invoke `simdbench` and `simdreport`
-by name. POSIX output names omit `.exe`. Built commands work from any directory
-without Go on PATH; reports are relative to that directory unless `-output` is
-absolute. Both commands accept the same group aliases, `-list` and help flags.
+- [Run and interpret your first comparison](02-First-experiment).
+- [Browse the methods and what they measure](32-Operation-measurement-guide).
+- [Save and reopen your report](05-Reports-and-evidence).

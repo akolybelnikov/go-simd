@@ -1,5 +1,11 @@
 # go-simd user knowledge guide
 
+## What is SIMD?
+
+A CPU can apply the same operation to several values at once. Start with
+[What is SIMD?](00-What-is-SIMD) for a simple example, where it helps, and
+why it can sometimes be slower.
+
 [Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) to start a comparison.
 
 ## Open the local browser UI
@@ -43,110 +49,23 @@ Follow the [first experiment walkthrough](02-First-experiment) or see the
 
 | You want to… | Read |
 | --- | --- |
-| Install prerequisites and verify the checkout | [01 — Getting started](https://github.com/akolybelnikov/go-simd/wiki/01-Getting-started) |
-| Complete a small experiment from start to finish | [02 — Your first experiment](https://github.com/akolybelnikov/go-simd/wiki/02-First-experiment) |
-| Look up every project command, flag, and Make target | [03 — Command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry) |
-| Understand the implemented algorithms and functions | [04 — Operation guide](https://github.com/akolybelnikov/go-simd/wiki/04-Operation-guide) |
-| See what each operation measures and where it is used | [32 — How the operation benchmarks work](32-Operation-measurement-guide) |
-| Save TXT, Markdown, CSV, and raw evidence | [05 — Reports and evidence](https://github.com/akolybelnikov/go-simd/wiki/05-Reports-and-evidence) |
-| Explain timings, percentages, tails, and concurrency | [06 — Understanding results](https://github.com/akolybelnikov/go-simd/wiki/06-Understanding-results) |
-| Run focused, repeatable experiments | [07 — Experiment recipes](https://github.com/akolybelnikov/go-simd/wiki/07-Experiment-recipes) |
-| Call the kernels from Go code inside this module | [08 — Using the kernels](https://github.com/akolybelnikov/go-simd/wiki/08-Using-the-kernels) |
-| Diagnose setup, flags, selection, and report failures | [09 — Troubleshooting](https://github.com/akolybelnikov/go-simd/wiki/09-Troubleshooting) |
-| Contribute and keep this Wiki current | [10 — Contribution and Wiki maintenance](https://github.com/akolybelnikov/go-simd/wiki/10-Contributing-and-wiki-maintenance) |
-| Check terminology and current capability limits | [11 — Glossary and capabilities](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities) |
-| Explore missing SIMD patterns and credited reading | [12 — SIMD patterns and reading](https://github.com/akolybelnikov/go-simd/wiki/12-SIMD-patterns-and-reading) |
-| Try broadcast constants, masks and predicate arrangements | [13 — Broadcast and predicate experiments](https://github.com/akolybelnikov/go-simd/wiki/13-Broadcast-and-predicate-experiments) |
-| Sum an array and understand order-sensitive rounding | [14 — Sum and reduction order](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order) |
-| Compute a dot product with explicit unfused rounding | [15 — Dot product and unfused rounding](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding) |
-| Compare one, two and four independent vector accumulators | [16 — Accumulator-count experiments](https://github.com/akolybelnikov/go-simd/wiki/16-Accumulator-count-experiments) |
-| Compare fused affine and inspect true float32 rounding | [17 — Fused affine and rounding](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding) |
-| Compare fused dot updates, accumulator orders and actual execution paths | [18 — Fused dot and fold orders](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders) |
-| Export ordered predicates as usable uint8 0/1 masks | [19 — Predicate export and byte masks](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks) |
-| Compare byte masks with compact packed-bit output | [20 — Packed predicate masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks) |
-| Compare moving exact bits with Go's built-in copy and explicit SIMD | [21 — Copy and data movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement) |
-| Clip values while keeping NaN payloads and signed-zero ties | [22 — Clamp and numerical contracts](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts) |
-| Check F004 acceptance and the optional backlog | [23 — F004 completion](https://github.com/akolybelnikov/go-simd/wiki/23-F004-completion-and-next-features) |
-| Stream three operand arrays through fused multiply-add | [24 — Three-array fused multiply-add](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add) |
-| Compare true binary64 addition with its own scalar/SIMD controls | [25 — Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition) |
-| Add uint8 values with saturation instead of wraparound | [26 — Uint8 saturating addition](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition) |
-| Preserve every float32 bit through integer reinterpretation | [27 — Bit reinterpretation round trip](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip) |
-| Apply exact word XOR to float32 sign/exponent/payload bits | [28 — XOR of float32 bit patterns](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns) |
-| Fold fixed blocks of eight values with matched ordering | [29 — Fixed-block horizontal sum](https://github.com/akolybelnikov/go-simd/wiki/29-Fixed-block-horizontal-sum) |
-| Multiply binary polynomials modulo x^64 | [30 — Carryless multiplication](https://github.com/akolybelnikov/go-simd/wiki/30-Carryless-polynomial-multiplication) |
-| Move exact binary64 representations | [31 — Exact Float64 copy](https://github.com/akolybelnikov/go-simd/wiki/31-Exact-Float64-copy) |
+| Open the lab and prepare your machine | [Getting started](01-Getting-started) |
+| Run a comparison and interpret the outcome | [Your first addition comparison](02-First-experiment) |
+| Find terminal commands and options | [Command reference](03-Command-registry) |
+| Understand the methods and why their timings differ | [Operation guide](04-Operation-guide) |
+| See what each benchmark times and where the operation is used | [How the operation benchmarks work](32-Operation-measurement-guide) |
+| Save and reopen measurements | [Reports and evidence](05-Reports-and-evidence) |
+| Read medians, variability, and timing percentages | [Understanding results](06-Understanding-results) |
+| Design a focused comparison | [Experiment recipes](07-Experiment-recipes) |
+| Learn how arrays, batches, and tails fit together | [Working with arrays](08-Using-the-kernels) |
+| Diagnose problems opening the lab or comparing results | [Troubleshooting](09-Troubleshooting) |
+| Look up terms and what the lab can measure | [Glossary and capabilities](11-Glossary-and-capabilities) |
+| Follow recommended reading on SIMD | [SIMD patterns and reading](12-SIMD-patterns-and-reading) |
 
-## What you can do today
+## Explore by topic
 
-- Compare four addition strategies and two implementations of `a*a + b*b + a*b`
-  over generated `float32` slices.
-- Compare scalar/SIMD scale, affine, threshold, selection and range masking,
-  with exact scalar parameters and controlled predicate distributions.
-- Compare left-to-right and striped float32 sum with balanced, cancellation and
-  mixed-magnitude inputs, retaining scalar result bits and fold identity.
-- Compare unfused dot strategies over two generated arrays, with checked scalar
-  returns, product/fold semantics and four fixture choices shared with fused dot.
-- Compare 1/2/4-vector accumulation strategies for sum/dot with explicit merge
-  orders and retained accumulator-count/result identities.
-- Compare fused affine with a corrected software baseline and a gated vector
-  or explicitly recorded software path.
-- Compare fused dot with Scalar and 1/2/4-vector accumulators, explicit merges,
-  software tails and per-case execution paths.
-- Export a canonical byte mask with scalar/SIMD comparisons, timed conversion
-  and stores, and complete output digests outside timing.
-- Pack eight predicates per byte with defined LSB-first order, zero final padding,
-  timed conversion/packing and physical output-size accounting.
-- Clip values through scalar branches, SIMD selection and repaired Min/Max, with
-  exact NaN/tie/zero-bit behavior and recorded bounds.
-- Compare source-loop, Go built-in and partial/tail SIMD copying over disjoint
-  buffers, retaining complete exact-bit output evidence.
-- Run a quick comparison at 1,048,576 elements or a configurable multi-size sweep.
-- Inspect registered operations and live SIMD context with either CLI's `-list`.
-- Run installed commands on a compatible local or remote machine without Go.
-- Select benchmark groups, sizes, and variants using Go benchmark expressions.
-- Choose repetitions and a target measurement duration or fixed iteration count.
-- Save median tables as TXT, Markdown, or CSV, with companion raw observations.
-- Run correctness checks and inspect the actual Go kernels and measurement code.
-- Explore serial vector work, partial loads/stores, scalar tails, and per-call
-  goroutine overhead. Results can show regressions as well as improvements.
-
-The packages currently live under `internal/`. This is a source-checkout lab,
-not a stable public import API. Installed commands run without Go or source;
-`go run`, Make and the explicit developer backend need the checkout. See the
-[capability ledger](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities)
-before planning file imports, additional numeric types, or installed tooling.
-
-## Guide history
-
-| Date | Delivered knowledge |
-| --- | --- |
-| 2026-10-27 | Initial progressive guide, full command registry, six-kernel reference, report conventions, experiment recipes, troubleshooting, and runnable Go example |
-| 2026-10-27 | F004 pattern-gap review, portable/architecture API checks, and credit to Jesús Espino's *SIMD and Go* |
-| 2026-10-27 | M2 shared catalogue, typed bindings, descriptor traffic, runtime listing and contributor workflow |
-| 2026-10-27 | M3 standalone reports, exact structured evidence, consistent flags/Make launchers, installation and remote-use guide |
-| 2026-10-27 | F004 first slice: five broadcast/predicate operations, scalar bits, seeded arrangements, compact catalogue and worked examples |
-| 2026-11-03 | F004 sum: typed scalar results, specified fold orders, three input recipes, exact result-bit evidence and cancellation examples; eight operations/eighteen implementations |
-| 2026-11-03 | F004 dot: unfused products, checked scalar returns, both-input fingerprints and compiled/native evidence parity; nine operations/twenty implementations |
-| 2026-11-03 | F004 accumulators: sum/dot with 1/2/4 vector accumulators, declared merge orders, count-sensitive examples and result identity; nine operations/twenty-four implementations |
-| 2026-11-03 | F004 fused affine: one-rounding reference, double-rounding counterexamples and explicit vector/software evidence; ten operations/twenty-six implementations |
-| 2026-11-03 | F004 fused dot: corrected FMA updates, four specified folds, actual vector/software/tail paths and shared fusion-sensitive fixture; eleven operations/thirty implementations |
-| 2026-11-03 | F004 predicate export: typed uint8 output, canonical 0/1, valid tail writes, complete output digests and 5*n accounting; twelve operations/thirty-two implementations |
-| 2026-11-03 | F004 packed predicates: LSB-first bits, zero padding, exact storage extent, timed packing, byte-boundary sweeps and complete output evidence; thirteen operations/thirty-four implementations |
-| 2026-11-04 | F004 copy: four movement controls, exact float32 bits, typed unary buffers, complete output digest, 8*n work and compiler/runtime interpretation; fourteen operations/thirty-eight implementations |
-
-| 2026-11-04 | F004 clamp and closure: ordered bounds, branches/selection/repaired MinMax, exact output bits, acceptance audit and complete baseline SDK ledger; fifteen operations/forty-one implementations |
-
-| 2026-11-04 | F004 three-array MulAdd extension: ternary inputs/bindings, fused policy/gate, 16*n work, full evidence, agent plan/worker propagation; sixteen operations/forty-three implementations |
-
-| 2026-11-04 | F004 Float64 addition: true binary64 arrays/bindings, actual lane boundaries, 24*n work, full binary64 evidence and bounded emulated partial loads; seventeen operations/forty-five implementations |
-
-| 2026-11-04 | F004 uint8 saturation: real byte inputs, exhaustive pair validation, typed bindings, 3*n work, actual lanes/full numeric-byte evidence; eighteen operations/forty-seven implementations |
-
-| 2026-11-04 | F004 bit roundtrip: exact Float32/Uint32 reinterpretation, all NaN/zero bits, full output evidence and instruction-selection interpretation; nineteen operations/forty-nine implementations |
-
-| 2026-11-04 | F004 XOR bits: two opaque operands, bitwise truth-oracle tests, 12*n work and full raw-word evidence; twenty-three operations/fifty-eight implementations |
-
-Project links: [source](https://github.com/akolybelnikov/go-simd),
-[changelog](https://github.com/akolybelnikov/go-simd/blob/main/CHANGELOG.md),
-[migration checkpoints](https://github.com/akolybelnikov/go-simd/blob/main/docs/migration/README.md),
-[issues](https://github.com/akolybelnikov/go-simd/issues).
+- [Broadcasts and predicates](13-Broadcast-and-predicate-experiments) · [Byte masks](19-Predicate-export-and-byte-masks) · [Packed masks](20-Packed-predicate-masks) · [Clamp](22-Clamp-and-numerical-contracts)
+- [Array sums](14-Sum-and-reduction-order) · [Dot products](15-Dot-product-and-unfused-rounding) · [Accumulator counts](16-Accumulator-count-experiments) · [Block sums](29-Fixed-block-horizontal-sum)
+- [Fused affine transforms](17-Fused-affine-and-rounding) · [Fused dot products](18-Fused-dot-and-fold-orders) · [Three-array multiply-add](24-Three-array-fused-multiply-add)
+- [Float32 copy](21-Copy-and-data-movement) · [Float64 addition](25-Float64-addition) · [Float64 copy](31-Exact-Float64-copy) · [Saturating byte addition](26-Uint8-saturating-addition)
+- [Bit reinterpretation](27-Bit-reinterpretation-round-trip) · [Bitwise XOR](28-XOR-of-float32-bit-patterns) · [Carryless multiplication](30-Carryless-polynomial-multiplication)

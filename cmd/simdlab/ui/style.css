@@ -146,3 +146,6 @@ footer { padding-block: 17px 25px; color: var(--muted); font-size: .78rem; }
   .top-inner { min-height: 56px; }
   .top-inner, main, footer { padding-inline: 15px; }
 }
+@media (max-width: 360px) {
+  .top-actions .local { display: none; }
+}

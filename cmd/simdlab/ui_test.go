@@ -150,6 +150,51 @@ func TestLocalUIExploreUsesCatalogMethodsAndSizes(t *testing.T) {
 	require.Empty(t, entries)
 }
 
+func TestLocalUIOperationGuidesResolveOffline(t *testing.T) {
+	app := testLocalUI(t)
+	catalog := postUI(app, "/api/catalog", "")
+	require.Equal(t, http.StatusOK, catalog.Code)
+	var response struct {
+		Operations []struct {
+			Group    string `json:"group"`
+			Summary  string `json:"summary"`
+			GuideURL string `json:"guide_url"`
+		}
+	}
+	require.NoError(t, json.Unmarshal(catalog.Body.Bytes(), &response))
+	require.Len(t, response.Operations, len(app.catalog.Operations))
+
+	get := func(path string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodGet, app.origin+path, nil)
+		recorder := httptest.NewRecorder()
+		app.ServeHTTP(recorder, request)
+		return recorder
+	}
+	home := get("/wiki/")
+	require.Equal(t, http.StatusOK, home.Code)
+	require.Contains(t, home.Body.String(), "<table>")
+	require.Contains(t, home.Body.String(), `href="/wiki/04-Operation-guide"`)
+	require.Contains(t, home.Body.String(), `href="/wiki/02-First-experiment"`)
+	require.Equal(t, http.StatusNotFound, get("/wiki/../../go.mod").Code)
+
+	pages := make(map[string]string)
+	for _, operation := range response.Operations {
+		t.Run(operation.Group, func(t *testing.T) {
+			require.NotEmpty(t, operation.Summary)
+			path, anchor, ok := strings.Cut(operation.GuideURL, "#")
+			require.True(t, ok)
+			require.NotEmpty(t, anchor)
+			if pages[path] == "" {
+				guide := get(path)
+				require.Equal(t, http.StatusOK, guide.Code)
+				pages[path] = guide.Body.String()
+			}
+			require.Contains(t, pages[path], `id="`+anchor+`"`)
+			require.Contains(t, pages[path], "What is timed.")
+		})
+	}
+}
+
 func TestLocalUIRunsCustomAdditionSizes(t *testing.T) {
 	app := testLocalUI(t)
 	aligned := postUI(app, "/api/ask", `{"question":"Compare addition for 80,000 values."}`)

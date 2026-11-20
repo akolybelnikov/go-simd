@@ -339,12 +339,13 @@ go run ./examples/basic
 
 Make equivalents include `make check`, `make test`, `make vet`, `make fmt` and
 `make fmt-check`. `make clean` removes generated reports and Go build artifacts.
-The [complete command registry](https://github.com/akolybelnikov/go-simd/wiki/03-Command-registry)
-lists every Make target/variable, CLI flag and native Go benchmark control.
+The [CLI reference](docs/cli.md) covers common command options and comparison
+recipes. Run `make help` for the Make targets.
 
-The [progressive Wiki](https://github.com/akolybelnikov/go-simd/wiki) includes
-kernel examples, recipes, numerical contracts, troubleshooting and credited SIMD
-reading. Editable sources live in `docs/wiki/`. See the [changelog](CHANGELOG.md)
+The [Wiki](https://github.com/akolybelnikov/go-simd/wiki) covers benchmark
+methods, experiment recipes, numerical behavior, and troubleshooting.
+See [wiki maintenance](docs/development/wiki-maintenance.md) for contributor
+instructions. See the [changelog](CHANGELOG.md)
 and [migration record](docs/migration/README.md). The [F004 contract index](docs/features/F004-completion.md) links the original
 15-operation scope and all eight delivered extensions. Further operations,
 imported data, agent workflows and HTML have separate tracker entries.
