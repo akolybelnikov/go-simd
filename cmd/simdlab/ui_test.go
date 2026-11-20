@@ -86,7 +86,7 @@ func TestLocalUIRequiresSessionAndOneApproval(t *testing.T) {
 
 func TestLocalUICaptureAndOfflineQuestion(t *testing.T) {
 	app := testLocalUI(t)
-	data, err := os.ReadFile(filepath.Join("..", "..", "docs", "features", "evidence", "sum-cancellation.measurements.json"))
+	data, err := os.ReadFile(filepath.Join("testdata", "sum-cancellation.measurements.json"))
 	require.NoError(t, err)
 	opened := postUI(app, "/api/open", string(data))
 	require.Equal(t, http.StatusOK, opened.Code, opened.Body.String())

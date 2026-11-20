@@ -20,7 +20,7 @@ with the catalog or measured timings, then paste it into an AI assistant you cho
 
 Use the CLI for scripts, automation, and SSH. The public site source provides
 downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)
-and [distribution roadmap](docs/local-ui-roadmap.md).
+for the local app and saved reports.
 
 ## Run directly
 
@@ -53,8 +53,7 @@ methods and input sizes available on your machine. See the [CLI reference](docs/
 for Ollama setup, exact flags, and reopening saved evidence.
 
 The lab covers 23 operations and 58 implementations. See the [operation catalogue](#operation-catalogue),
-[experiment recipes](docs/wiki/07-Experiment-recipes.md), and
-[SDK coverage ledger](docs/features/F004-api-coverage.md).
+and [experiment recipes](docs/wiki/07-Experiment-recipes.md).
 Inspired by [SIMD and Go](https://internals-for-interns.com/posts/go-simd/) by Jesús Espino.
 
 ## Command reference
@@ -346,11 +345,7 @@ recipes. Run `make help` for the Make targets.
 
 The [Wiki](https://github.com/akolybelnikov/go-simd/wiki) covers benchmark
 methods, experiment recipes, numerical behavior, and troubleshooting.
-See [wiki maintenance](docs/development/wiki-maintenance.md) for contributor
-instructions. See the [changelog](CHANGELOG.md)
-and [migration record](docs/migration/README.md). The [F004 contract index](docs/features/F004-completion.md) links the original
-15-operation scope and all eight delivered extensions. Further operations,
-imported data, agent workflows and HTML have separate tracker entries.
+See the [changelog](CHANGELOG.md) for release changes.
 
 Shared boundaries live in `internal/cli`, `internal/engine`, `internal/platform`,
 `internal/catalog`, `internal/input`, `internal/evidence`, `internal/result` and `internal/report`.

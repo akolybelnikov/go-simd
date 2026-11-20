@@ -148,8 +148,7 @@ can return no usable proposal, and are cancellable with Ctrl+C. Exact flags
 provide a fallback for experiments. Each model-proposed plan still requires the
 same human confirmation. Interpret prints verified observations and caveats as
 plain text. Use `interpret -preview -json` for structured output with fact IDs.
-See the [preview checks](agent-preview.md) and
-[model evaluation](interpret-evaluation.md) for current limitations.
+Use the measured repeat ranges and caveats when judging the result.
 
 Use `-group computation` for the expression experiment. Every Make run, list
 and report target forwards `ARGS`, including group shortcuts:

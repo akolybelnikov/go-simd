@@ -68,7 +68,7 @@ func TestGuideNaturalPhrasingsWithoutModel(t *testing.T) {
 }
 
 func TestGuideResultsRespectScopeAndCaveats(t *testing.T) {
-	capture := filepath.Join("..", "..", "docs", "features", "evidence", "sum-cancellation.measurements.json")
+	capture := filepath.Join("testdata", "sum-cancellation.measurements.json")
 	for _, tc := range []struct {
 		question string
 		want     []string
@@ -96,7 +96,7 @@ func TestGuideResultsRespectScopeAndCaveats(t *testing.T) {
 }
 
 func TestGuideModelCannotSubstituteSavedResult(t *testing.T) {
-	capture := filepath.Join("..", "..", "docs", "features", "evidence", "sum-cancellation.measurements.json")
+	capture := filepath.Join("testdata", "sum-cancellation.measurements.json")
 	for _, response := range []string{
 		"",
 		`{"message":{"tool_calls":[{"function":{"name":"route_lab_request","arguments":{"action":"result"}}}]},"done":true}`,

@@ -84,6 +84,3 @@ sample backed by a saved sum capture. In Cloudflare Pages, connect this
 repository, set the production branch, leave the build command empty, and
 set the output directory to `site`. Verify the release assets and checksums
 before announcing downloads. [Cloudflare static HTML guide](https://developers.cloudflare.com/pages/framework-guides/deploy-anything/)
-
-See the [delivery roadmap](local-ui-roadmap.md) for acceptance checks and
-deferred work.

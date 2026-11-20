@@ -25,7 +25,7 @@ terms that cancel. Its exact mathematical total was 1.
 The returned totals differ because the methods add the values in a
 different order. The timing comes from one host with eight float32 lanes
 and only three iterations per repeat. Treat it as an example of reading
-a result. [The saved measurement capture](https://github.com/akolybelnikov/go-simd/blob/main/docs/features/evidence/sum-cancellation.measurements.json)
+a result. [The saved measurement capture](https://github.com/akolybelnikov/go-simd/blob/main/cmd/simdlab/testdata/sum-cancellation.measurements.json)
 
 ## Try it
 

@@ -32,3 +32,11 @@ Thumbs.db
 
 # Local requirements and implementation tracking
 /.ai/
+
+# Local project management and evaluation records
+/docs/features/
+/docs/migration/
+/docs/development/
+/docs/*roadmap*
+/docs/*evaluation*
+/docs/agent-preview.md
