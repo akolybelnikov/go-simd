@@ -29,7 +29,25 @@ saved evidence with the installed CLI alone.
 For a fresh checkout, run `git clone https://github.com/akolybelnikov/go-simd.git`
 and `cd go-simd`.
 
-From the checkout with Go **1.27.3**, in PowerShell:
+Use Go **1.27.3** or a compatible patch release with `GOEXPERIMENT=simd`. Run
+the setup for your shell from the checkout. CI verifies Linux/amd64 and
+Windows/amd64. macOS source builds are outside the current CI matrix.
+
+**macOS and Linux (sh, Bash, or Zsh)**
+
+```sh
+export GOEXPERIMENT=simd
+go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport
+go_bin=$(go env GOBIN)
+if [ -z "$go_bin" ]; then
+  go_path=$(go env GOPATH)
+  go_bin="${go_path%%:*}/bin"
+fi
+export PATH="$go_bin:$PATH"
+simdlab help
+```
+
+**Windows (PowerShell)**
 
 ```powershell
 $env:GOEXPERIMENT = 'simd'
@@ -40,12 +58,11 @@ $env:Path = "$goBin;$env:Path"
 simdlab help
 ```
 
-The PATH change applies to this PowerShell session. Add the same directory to
-your user PATH to keep it for future terminals. On POSIX shells, build with
-`GOEXPERIMENT=simd go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport`
-and add `GOBIN` or the Go workspace's `bin` directory to PATH. The installed
-executables run outside the checkout. See [build or install](#build-or-install)
-for local builds and copying a binary to a measuring host.
+The PATH change applies to the current terminal. Add the same directory to
+your shell startup file or Windows user PATH to keep it. Once installed, the
+commands below are the same across platforms and run outside the checkout.
+See [build or install](#build-or-install) for local builds and copying a binary
+to a measuring host.
 
 ### Pick a workflow
 
@@ -74,7 +91,7 @@ any working directory.
 
 1. Find the strategy IDs and supported element counts for addition.
 
-   ```powershell
+   ```text
    simdlab catalog -text -group addition
    ```
 
@@ -83,8 +100,8 @@ any working directory.
    `run sha256:…` line from the prompt within five minutes to run it once, or
    press Ctrl+C to decline. `-preview` opts in to the experiment CLI.
 
-   ```powershell
-   simdlab experiment -preview -group addition -variants 'scalar,simd-partial' -sizes 1024 -count 3 -benchtime 100ms
+   ```text
+   simdlab experiment -preview -group addition -variants scalar,simd-partial -sizes 1024 -count 3 -benchtime 100ms
    ```
 
 3. Copy the `evidence` path from the final JSON output and replace the example
@@ -92,16 +109,16 @@ any working directory.
    `artifacts/experiments/` relative to the working directory. Use `-artifacts`
    to choose another location.
 
-   ```powershell
-   simdlab inspect -text 'path/to/measurements.json'
+   ```text
+   simdlab inspect -text "path/to/measurements.json"
    ```
 
 For scripts, omit `-text` to get JSON from `catalog` and `inspect`. `simdlab plan`
 reads an explicit JSON request from stdin and prints the resolved plan without
 measuring. For a direct Markdown report, use the report CLI:
 
-```powershell
-simdreport -group addition -bench '^BenchmarkAddition$/^n=1024$' -count 3 -benchtime 100ms -format md
+```text
+simdreport -group addition -bench "^BenchmarkAddition$/^n=1024$" -count 3 -benchtime 100ms -format md
 ```
 
 The report writes its output and companion capture under `artifacts/addition/`.
@@ -109,10 +126,11 @@ The full default sweep can take several minutes.
 
 ## Try the optional Ollama previews
 
-Install and start [Ollama for Windows](https://docs.ollama.com/windows), or use
-an existing server. Download the default development model on that server.
+Install and start Ollama for [macOS](https://docs.ollama.com/macos),
+[Linux](https://docs.ollama.com/linux), or [Windows](https://docs.ollama.com/windows).
+You can also use an existing server. Download the default model on that server.
 
-```powershell
+```text
 ollama pull qwen3:4b
 ollama ls
 ```
@@ -120,10 +138,10 @@ ollama ls
 Try one of these commands after downloading the model. Replace the capture path
 with the evidence saved by your run.
 
-```powershell
-simdlab ask -preview 'Which addition implementations are available?'
-simdlab experiment -preview 'Use plan_experiment for group addition, variants scalar and simd-partial, size 1024, count 3, benchtime 100ms.'
-simdlab interpret -preview 'path/to/measurements.json' 'How did SIMD compare with scalar?'
+```text
+simdlab ask -preview "Which addition implementations are available?"
+simdlab experiment -preview "Use plan_experiment for group addition, variants scalar and simd-partial, size 1024, count 3, benchtime 100ms."
+simdlab interpret -preview "path/to/measurements.json" "How did SIMD compare with scalar?"
 ```
 
 The default endpoint is `http://127.0.0.1:11434`. Put `-endpoint` or `-model`
@@ -209,8 +227,8 @@ parameters; exact float32 bits and relevant fixture identity survive in evidence
 | `-dot-input` | `balanced` | Dot/dotfma fixture: balanced, cancellation, mixed-magnitude, fusion-sensitive |
 | `-fma-input` | `balanced` | Fused affine/muladd fixture: balanced, rounding, mixed-magnitude |
 
-```powershell
-go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench '^BenchmarkSelection$/^n=1024$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group selection -threshold 0 -pattern shuffled -seed 123 -bench "^BenchmarkSelection$/^n=1024$" -count 3 -benchtime 100ms -format md
 go run ./examples/patterns
 ```
 
@@ -226,8 +244,8 @@ comparison makes equality and NaN false. SIMD includes conversion, extraction
 and valid byte writes; logical work is `5*n`. Reports retain the full byte-output
 digest after timing. See [predicate export](https://github.com/akolybelnikov/go-simd/wiki/19-Predicate-export-and-byte-masks).
 
-```powershell
-go run ./cmd/simdreport -group predicate '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicate$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group predicate "-threshold=-1.5" -pattern shuffled -seed 123 -bench "^BenchmarkPredicate$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/predicate
 ```
 
@@ -237,8 +255,8 @@ conversion and packing; logical work is `4*n+ceil(n/8)`. Both representations
 share input recipes but retain distinct output identities. Run
 `go run ./examples/predicatepack`; see [packed masks](https://github.com/akolybelnikov/go-simd/wiki/20-Packed-predicate-masks).
 
-```powershell
-go run ./cmd/simdreport -group predicatepack '-threshold=-1.5' -pattern shuffled -seed 123 -bench '^BenchmarkPredicatePacked$/^n=65$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group predicatepack "-threshold=-1.5" -pattern shuffled -seed 123 -bench "^BenchmarkPredicatePacked$/^n=65$" -count 3 -benchtime 100ms -format md
 ```
 
 Copy compares a source loop, Go's built-in copy, partial vectors and full vectors
@@ -246,8 +264,8 @@ with a scalar tail. All preserve exact float32 bits, including NaN payloads and
 signed zero. Measured buffers are disjoint; logical work is `8*n`. Percentages
 use Scalar; inspect GoCopy as another optimized control. See [copy and movement](https://github.com/akolybelnikov/go-simd/wiki/21-Copy-and-data-movement).
 
-```powershell
-go run ./cmd/simdreport -group copy -bench '^BenchmarkCopy$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group copy -bench "^BenchmarkCopy$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/copy
 ```
 
@@ -257,8 +275,8 @@ signed-zero/equality ties keep their bits. `-pattern` selects clipped positions;
 `-pattern none` also permits the full infinite interval. Work is `8*n`, and the
 complete output digest is retained after timing. See [clamp](https://github.com/akolybelnikov/go-simd/wiki/22-Clamp-and-numerical-contracts).
 
-```powershell
-go run ./cmd/simdreport -group clamp '-lower=-1.5' -upper 2.5 -pattern shuffled -seed 123 -bench '^BenchmarkClamp$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group clamp "-lower=-1.5" -upper 2.5 -pattern shuffled -seed 123 -bench "^BenchmarkClamp$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/clamp
 ```
 
@@ -266,8 +284,8 @@ MulAdd streams three arrays and rounds a*b+c once. It shares -fma-input recipes,
 with no scalar coefficients. Logical work is 16*n; Scalar uses corrected software
 FMA32, while SIMDPartial records its verified vector/software path. See [MulAdd](https://github.com/akolybelnikov/go-simd/wiki/24-Three-array-fused-multiply-add).
 
-```powershell
-go run ./cmd/simdreport -group muladd -fma-input rounding -bench '^BenchmarkMulAdd$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group muladd -fma-input rounding -bench "^BenchmarkMulAdd$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/muladd
 ```
 
@@ -275,8 +293,8 @@ Float64 addition uses -group addition64 and true binary64 fixtures. It accounts
 for 24*n logical bytes, with half as many lanes at a fixed vector width. Case.Vector
 retains actual Float64 lanes. Existing addition remains float32. See [Float64 addition](https://github.com/akolybelnikov/go-simd/wiki/25-Float64-addition).
 
-```powershell
-go run ./cmd/simdreport -group addition64 -bench '^BenchmarkAddition64$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group addition64 -bench "^BenchmarkAddition64$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/addition64
 ```
 
@@ -284,8 +302,8 @@ Uint8 saturation computes min(a+b,255), with true byte inputs/output and 3*n
 logical traffic. It preserves the distinction between clipping and wraparound.
 See [uint8 saturation](https://github.com/akolybelnikov/go-simd/wiki/26-Uint8-saturating-addition).
 
-```powershell
-go run ./cmd/simdreport -group saturatingadd8 -bench '^BenchmarkSaturatingAdd8$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group saturatingadd8 -bench "^BenchmarkSaturatingAdd8$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/saturatingadd8
 ```
 
@@ -294,8 +312,8 @@ including NaN payloads and signed zero. Logical work is 8*n. Compilers may remov
 the bitcast steps; the experiment measures a complete kernel, not instruction
 latency. See [bit representation](https://github.com/akolybelnikov/go-simd/wiki/27-Bit-reinterpretation-round-trip).
 
-```powershell
-go run ./cmd/simdreport -group bitroundtrip -bench '^BenchmarkBitRoundTrip$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group bitroundtrip -bench "^BenchmarkBitRoundTrip$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/bitroundtrip
 ```
 
@@ -303,8 +321,8 @@ Xorbits applies word logic to two opaque float32 representations, such as a
 sign-bit mask. It performs no floating arithmetic; logical traffic is 12*n and
 all input/output bits survive in evidence. See [XOR bits](https://github.com/akolybelnikov/go-simd/wiki/28-XOR-of-float32-bit-patterns).
 
-```powershell
-go run ./cmd/simdreport -group xorbits -bench '^BenchmarkXorBits$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group xorbits -bench "^BenchmarkXorBits$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/xorbits
 ```
 
@@ -314,8 +332,8 @@ scalar tail. Rounding can differ in either direction. Logical bytes are `4*n+4`;
 individual results and fold identities survive in evidence. See the
 [sum and reduction-order guide](https://github.com/akolybelnikov/go-simd/wiki/14-Sum-and-reduction-order).
 
-```powershell
-go run ./cmd/simdreport -group sum -sum-input cancellation -bench '^BenchmarkSum$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group sum -sum-input cancellation -bench "^BenchmarkSum$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/sum
 ```
 
@@ -325,8 +343,8 @@ lengths return `reduction.ErrLengthMismatch`. Logical work is `8*n+4` bytes.
 The [dot guide](https://github.com/akolybelnikov/go-simd/wiki/15-Dot-product-and-unfused-rounding)
 explains fixtures, unfused rounding and result evidence.
 
-```powershell
-go run ./cmd/simdreport -group dot -dot-input cancellation -bench '^BenchmarkDot$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group dot -dot-input cancellation -bench "^BenchmarkDot$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/dot
 ```
 
@@ -344,8 +362,8 @@ Listing, quick output and evidence expose the actual path. The startup probe
 runs outside measurement; existing affine/dot remain unfused. See the
 [FMA guide](https://github.com/akolybelnikov/go-simd/wiki/17-Fused-affine-and-rounding).
 
-```powershell
-go run ./cmd/simdreport -group affinefma -fma-input rounding '-alpha=1.0000001192092896' '-beta=-1' -bench '^BenchmarkAffineFMA$/^n=8$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group affinefma -fma-input rounding "-alpha=1.0000001192092896" "-beta=-1" -bench "^BenchmarkAffineFMA$/^n=8$" -count 3 -benchtime 100ms -format md
 go run ./examples/fma
 ```
 
@@ -356,8 +374,8 @@ same stripes. Evidence records the actual path for full vectors, scalar tails
 and emulation alongside fold order and scalar result bits. See the
 [fused-dot guide](https://github.com/akolybelnikov/go-simd/wiki/18-Fused-dot-and-fold-orders).
 
-```powershell
-go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench '^BenchmarkDotFMA$/^n=64$' -count 3 -benchtime 100ms -format md
+```text
+go run ./cmd/simdreport -group dotfma -dot-input fusion-sensitive -bench "^BenchmarkDotFMA$/^n=64$" -count 3 -benchtime 100ms -format md
 go run ./examples/dotfma
 ```
 
@@ -381,14 +399,12 @@ selectors fail before artifacts are created.
 
 ## Build or install
 
-Build hosts need Go **1.27.3** with `GOEXPERIMENT=simd`. GNU Make plus a POSIX
-shell is optional. A compatible target binary needs neither Go nor the
-`GOEXPERIMENT` environment setting at runtime.
+Set `GOEXPERIMENT=simd` as shown in [the setup above](#install-the-cli-from-source).
+GNU Make plus a POSIX shell is optional. A compatible target binary runs without
+Go or the `GOEXPERIMENT` environment setting at runtime.
 
-```powershell
-$env:GOEXPERIMENT = 'simd'
+```text
 go build -o ./bin/ ./cmd/simdbench ./cmd/simdreport ./cmd/simdlab
-go install ./cmd/simdbench ./cmd/simdreport ./cmd/simdlab
 ```
 
 Make equivalents: `make build` and `make install`. Installation uses `GOBIN`,
@@ -425,7 +441,7 @@ Abrupt termination recovery and worker manifests remain later work.
 
 ## Develop and learn
 
-```powershell
+```text
 go test ./... -count=1
 go vet ./...
 gofmt -l cmd internal examples
