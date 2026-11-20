@@ -18,6 +18,8 @@ a model. Press Ctrl+C to cancel.
 
 ## Ask an agent
 
+The examples below work without Ollama. Other wording may use the optional local model.
+
 ```text
 simdlab ask
 ```

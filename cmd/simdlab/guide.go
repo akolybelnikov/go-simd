@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/akolybelnikov/go-simd/internal/agent"
+	"github.com/akolybelnikov/go-simd/internal/analysis"
 	"github.com/akolybelnikov/go-simd/internal/catalog"
 	"github.com/akolybelnikov/go-simd/internal/evidence"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
@@ -163,12 +164,18 @@ func (s *guideSession) run(ctx context.Context, stdin io.Reader, stdout, stderr 
 					return err
 				}
 				if s.saved.path != "" {
-					if err := s.explain("result", stdout); err != nil {
+					if _, err := fmt.Fprintln(stdout, savedResultOffer); err != nil {
 						return err
 					}
 				}
 				previous = ""
 				continue
+			}
+			switch request.Action {
+			case "result", "repeats", "result_repeats", "details":
+				// A model can recognize a result question, but it cannot establish
+				// that the saved run covers all the user's qualifiers.
+				request = guideRequest{Action: "result_target"}
 			}
 		}
 
@@ -198,8 +205,8 @@ func (s *guideSession) handle(ctx context.Context, reader *bufio.Scanner, reques
 	case "clarify":
 		_, err := fmt.Fprintln(stdout, "Which operation would you like to compare? You can name an operation such as addition or summing an array.")
 		return true, err
-	case "result", "repeats", "result_repeats", "details":
-		return false, s.explain(request.Action, stdout)
+	case "result", "repeats", "result_repeats", "details", "result_target":
+		return false, s.explain(request, stdout)
 	}
 	operation := s.operation(request.Group)
 	if operation == nil {
@@ -276,21 +283,43 @@ func (s *guideSession) handle(ctx context.Context, reader *bufio.Scanner, reques
 	}
 }
 
-func (s *guideSession) explain(action string, stdout io.Writer) error {
+const savedResultOffer = "To see the saved run separately, ask: Explain the saved result."
+
+func (s *guideSession) explain(request guideRequest, stdout io.Writer) error {
 	if s.saved.path == "" {
 		_, err := fmt.Fprintln(stdout, "No saved measurements yet. "+guideFallback)
 		return err
 	}
+	if request.Action == "result_target" {
+		_, err := fmt.Fprintln(stdout, "I couldn't match that question to the saved run. "+savedResultOffer)
+		return err
+	}
 	inspection := s.saved.inspection
+	if request.Group != "" {
+		operation, _ := catalog.ByGroup(request.Group)
+		if !slices.ContainsFunc(inspection.Series, func(series analysis.SeriesFact) bool {
+			return series.OperationID == operation.ID
+		}) {
+			_, err := fmt.Fprintf(stdout, "The saved run has no measurements for %s. %s\n", operation.Title, savedResultOffer)
+			return err
+		}
+	}
+	if request.Size != 0 {
+		inspection = resultAtSize(inspection, request.Size)
+		if len(inspection.Series) == 0 {
+			_, err := fmt.Fprintf(stdout, "The saved run has no measurements at %d values per array. %s\n", request.Size, savedResultOffer)
+			return err
+		}
+	}
 	var answer string
-	switch action {
+	switch request.Action {
 	case "repeats":
-		answer = repeatSummary(inspection)
+		answer = repeatSummary(inspection) + shortResultCaveats(inspection)
 	case "details":
 		answer = inspectionText(inspection)
 	default:
 		answer = comparisonSummary(inspection)
-		if action == "result_repeats" {
+		if request.Action == "result_repeats" {
 			answer += repeatSummary(inspection)
 		}
 		if s.generated {
@@ -301,6 +330,16 @@ func (s *guideSession) explain(action string, stdout io.Writer) error {
 	}
 	_, err := io.WriteString(stdout, terminalText(answer+"Measurements: "+s.saved.path+"\n"))
 	return err
+}
+
+func resultAtSize(inspection analysis.Interpretation, size int) analysis.Interpretation {
+	inspection.Series = slices.DeleteFunc(slices.Clone(inspection.Series), func(series analysis.SeriesFact) bool {
+		return series.Elements != size
+	})
+	inspection.Comparisons = slices.DeleteFunc(slices.Clone(inspection.Comparisons), func(fact analysis.ComparisonFact) bool {
+		return fact.Elements != size
+	})
+	return inspection
 }
 
 func (s *guideSession) operation(group string) *labapi.OperationDescriptor {
@@ -332,6 +371,9 @@ func supportedSizesText(sizes []int) string {
 }
 
 func guideMethods(operation labapi.OperationDescriptor, requested []string) ([]string, error) {
+	if len(requested) == 0 && operation.Group == "addition" {
+		requested = additionStarter().Variants
+	}
 	if len(requested) == 0 {
 		for _, method := range operation.Strategies {
 			if method.UsesSIMD && method.WorkerPolicy == catalog.Serial {

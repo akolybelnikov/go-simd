@@ -175,6 +175,7 @@ func measureComparison(ctx context.Context, tools *labtools.Toolset, plan labapi
 
 func comparisonSummary(inspection analysis.Interpretation) string {
 	var text strings.Builder
+	qualifications := shortResultCaveats(inspection)
 	for _, c := range inspection.Comparisons {
 		baseline := findSeries(inspection, c.BaselineStrategy, c.Elements)
 		candidate := findSeries(inspection, c.CandidateStrategy, c.Elements)
@@ -192,7 +193,11 @@ func comparisonSummary(inspection analysis.Interpretation) string {
 			if percent == "100%" {
 				percent = "over 99.9%"
 			}
-			fmt.Fprintf(&text, "%s took %s less time than %s for the %d-value batch.\n", firstName, percent, secondName, c.Elements)
+			if qualifications != "" {
+				fmt.Fprintf(&text, "%s had a %s lower median in this run than %s for the %d-value batch.\n", firstName, percent, secondName, c.Elements)
+			} else {
+				fmt.Fprintf(&text, "%s took %s less time than %s for the %d-value batch.\n", firstName, percent, secondName, c.Elements)
+			}
 		}
 		fmt.Fprintf(&text, "Median per batch: %.4g ns for %s and %.4g ns for %s", first.MedianNS, firstName, second.MedianNS, secondName)
 		if first.Samples == second.Samples {
@@ -204,11 +209,33 @@ func comparisonSummary(inspection analysis.Interpretation) string {
 	if text.Len() == 0 {
 		fmt.Fprintln(&text, "The saved run has no compatible timing comparison.")
 	}
+	text.WriteString(qualifications)
+	return text.String()
+}
+
+func shortResultCaveats(inspection analysis.Interpretation) string {
+	var text strings.Builder
 	if inspection.Status != "complete" {
 		fmt.Fprintln(&text, "This run is incomplete. The results cover the repeats saved before it stopped.")
 	}
 	if inspection.MeasuringEnvironment.Emulated {
 		fmt.Fprintln(&text, "This run used SIMD emulation.")
+	}
+	for _, series := range inspection.Series {
+		if series.Samples < 3 {
+			fmt.Fprintln(&text, "At least one method has fewer than three repeats, so timing variability is uncertain.")
+			break
+		}
+	}
+	for _, caveat := range inspection.Caveats {
+		switch caveat.Code {
+		case "fixed_iterations":
+			fmt.Fprintln(&text, "This run used a fixed iteration count. Short measurements can make timings less stable.")
+		case "different_fold_orders":
+			fmt.Fprintln(&text, "The methods add values in different orders, which can change the rounded result.")
+		case "parallel_vs_serial":
+			fmt.Fprintln(&text, "The comparison includes differences in concurrency as well as implementation.")
+		}
 	}
 	return text.String()
 }
@@ -236,9 +263,6 @@ func repeatSummary(inspection analysis.Interpretation) string {
 	for _, series := range inspection.Series {
 		fmt.Fprintf(&text, "%s at %d values: %d repeats, %.4g–%.4g ns per batch (median %.4g ns).\n",
 			seriesMethodName(series), series.Elements, series.Samples, series.MinimumNS, series.MaximumNS, series.MedianNS)
-	}
-	if inspection.Status != "complete" {
-		fmt.Fprintln(&text, "The run was incomplete. These ranges cover the saved repeats.")
 	}
 	return text.String()
 }

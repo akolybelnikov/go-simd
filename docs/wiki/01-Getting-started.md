@@ -1,5 +1,8 @@
 # 01 — Getting started
 
+[Run your first addition comparison](02-First-experiment) for the direct and
+guided quick starts. If you need to build the CLI first, follow the setup below.
+
 Goal: obtain the checkout, enable the experimental toolchain feature, and verify
 that your environment can run the lab. No account, cloud service, or GUI is
 required for the laboratory commands.

@@ -54,15 +54,18 @@ The default is `artifacts/experiments/` in the current working directory.
 | `simdlab inspect -text "path/to/measurements.json"` | Show medians, ranges, and measuring-host details. |
 | `simdbench -group addition` | Terminal demo. Use `simdlab run addition` to save a starter report. |
 
-The documented starter prompts work without a model. For other phrasings,
-`simdlab ask` can use Ollama with `qwen3:4b` at `http://127.0.0.1:11434`.
-Use `-model`, `-endpoint`, and `-timeout` (default 30 seconds) to change these settings. A remote
-endpoint receives the question and catalog choices for model-assisted requests.
+The quick-start prompts work without Ollama. Other wording may use the optional
+local model. `simdlab ask` uses `qwen3:4b` at `http://127.0.0.1:11434` by default.
+Use `-model`, `-endpoint`, or `-timeout` (default 30 seconds) to change these
+settings. A remote endpoint receives the question and catalog choices for
+model-assisted requests.
 
 The guided session compares the ordinary scalar method with one alternative
 at one size. It uses 1,024 values if you omit the size and asks for a supported
 size if needed. Type `details` for the measuring host, timings, and caveats.
 Use the exact plan flags below for custom repeat counts or size sweeps.
+For a result at a particular size, ask “Which method was faster at 1,024
+values?” To see the saved run separately, ask “Explain the saved result.”
 
 ## Other ways to launch the tools
 
