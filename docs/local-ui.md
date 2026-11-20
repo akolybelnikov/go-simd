@@ -49,7 +49,7 @@ recipe, validated plan and measuring code.
 
 ## Ask an agent
 
-For a step-by-step walkthrough, including terminal setup for both providers,
+For a step-by-step walkthrough,
 see [Chat with an agent](wiki/33-Chat-with-an-agent.md).
 
 Use **Ask an agent about your use case** in **Explore** to describe the type
@@ -63,18 +63,16 @@ comparison would help answer a follow-up question. The lab shows recorded
 evidence and caveats alongside the model’s explanation. Treat explanations
 about cache, bandwidth, and similar bottlenecks as hypotheses to test.
 
-- **Copy to another assistant** works out of the box. Review the question and
+- **Copy to another assistant** is the default. Review the question and
   lab context, then paste it into an assistant you choose.
 - **OpenAI** appears when the process starts with `OPENAI_API_KEY` set.
   Launch `simdlab ui` from that environment and choose **OpenAI ·
   gpt-6.1-sol** in **How to ask**. This uses the API with your key and is
   billed to your API account. The lab allows up to 24 OpenAI requests per
   session. [GPT-6.1 Sol API documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
-- **Ollama** appears when you start Ollama with an installed model and launch
-  `simdlab ui -ollama`. Choose an installed model from the list. Use
-  `simdlab ui -ollama -model MODEL` to choose one at launch. Ollama’s
-  local-only mode keeps inference offline. Model quality and reply time
-  depend on the model and machine. [Ollama local-only setup](https://docs.ollama.com/faq#how-do-i-disable-ollamas-cloud-features)
+
+For testing a local candidate, launch `simdlab ui -ollama -model MODEL`
+with the installed model name. The panel labels it **Experimental**.
 
 Use **Review what will be sent** (or **Review what will be copied** in copy
 mode) to inspect the question, recent messages,

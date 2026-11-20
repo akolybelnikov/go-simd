@@ -6,8 +6,7 @@ Run these commands from a terminal where the lab executables are on your PATH. T
 | --- | --- |
 | Open the browser lab | `simdlab ui` |
 | Print the private browser address | `simdlab ui -no-open` |
-| Enable chat with installed local Ollama models | `simdlab ui -ollama` |
-| Choose one installed model for local chat | `simdlab ui -ollama -model MODEL` |
+| Test an installed Ollama model in browser chat | `simdlab ui -ollama -model MODEL` |
 | Compare two ways of adding 1,024 values | `simdlab run addition` |
 | Browse operations and methods in the terminal | `simdlab catalog -text` |
 | Open the guided terminal session | `simdlab ask` |

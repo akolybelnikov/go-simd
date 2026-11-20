@@ -441,10 +441,9 @@ function openAgent(mode) {
   const remoteProviders = agentProviders.filter((provider) => provider.id === "openai");
   byID("agent-provider").replaceChildren(
     new Option("Copy to another assistant", "copy"),
-    ...(localProviders.length ? localProviders.map((provider) => new Option("Local · Ollama · " + provider.model, provider.id)) :
-      [new Option("Local · Ollama — set up", "setup-local")]),
     ...(remoteProviders.length ? remoteProviders.map((provider) => new Option("Remote · OpenAI · " + provider.model, provider.id)) :
       [new Option("Remote · OpenAI — set up", "setup-remote")]),
+    ...localProviders.map((provider) => new Option("Experimental · Ollama · " + provider.model, provider.id)),
   );
   question.value = "";
   question.placeholder = mode === "catalog" ?
@@ -470,28 +469,24 @@ function updateAgentControls() {
   const provider = byID("agent-provider").value;
   const copy = provider === "copy";
   const setup = provider.startsWith("setup-");
-  const localSetup = provider === "setup-local";
   byID("agent-compose").hidden = setup;
   byID("agent-question").required = !setup;
   byID("agent-setup").hidden = !setup;
   byID("agent-sharing").hidden = setup;
   if (setup) {
-    byID("agent-setup-title").textContent = localSetup ? "Enable local Ollama chat" : "Enable remote OpenAI chat";
-    byID("agent-setup-instructions").textContent = localSetup ?
-      "Start Ollama on this machine with an installed local model. Stop the lab in its terminal with Ctrl+C, then launch it again:" :
+    byID("agent-setup-title").textContent = "Enable OpenAI chat";
+    byID("agent-setup-instructions").textContent =
       "Set OPENAI_API_KEY in the terminal that launches the lab. Requests use your API account. Stop the lab with Ctrl+C and use the commands for your terminal, replacing your-api-key with your own key:";
-    byID("agent-setup-command").textContent = localSetup ? "simdlab ui -ollama" :
+    byID("agent-setup-command").textContent =
       "Windows PowerShell\n$env:OPENAI_API_KEY = 'your-api-key'\nsimdlab ui\n\nmacOS / Linux\nexport OPENAI_API_KEY='your-api-key'\nsimdlab ui";
-    byID("agent-setup-next").textContent = localSetup ?
-      "Open the new browser address, return to Ask an agent, and select your installed model under How to ask. The setup guide explains how to install a model." :
+    byID("agent-setup-next").textContent =
       "Open the new browser address, return to Ask an agent, and select Remote · OpenAI. Enter your key only in the terminal.";
   }
   byID("agent-sharing").textContent = copy
-    ? (agentProviders.length ? "Copy the question and lab context to paste into an assistant you choose."
-      : "Copy works offline. In-app chat can be enabled with a local Ollama model or an OpenAI API key.")
+    ? "Copy the question and lab context, then paste them into the assistant you already use."
     : provider === "openai"
       ? "Send shares your question, recent replies, and lab context with OpenAI. API charges may apply. Avoid pasting sensitive data."
-      : "Send shares your question, recent replies, and lab context with Ollama on this machine. Use Ollama’s local-only mode for offline chat.";
+      : "This model is available for evaluation. Check its explanation against the recorded evidence.";
   byID("agent-preview-label").textContent = copy ? "Review what will be copied" : "Review what will be sent";
   byID("agent-send").textContent = copy ? "Copy question and context" : "Send";
   byID("agent-provider").disabled = Boolean(agentRequest);

@@ -15,16 +15,10 @@ On **Compare**, choose **Run locally** for the addition starter or use a
 preview from the catalog. **Results** shows the measured difference and
 individual repeats, opens saved captures, and downloads Markdown. The
 benchmark runs on the machine that launched `simdlab`. Comparisons work offline.
-Choose **Ask an agent** in Explore or Results for questions about SIMD,
-your workload, or a specific batch of results. Copy the question to an
-assistant you already use, or enable in-app chat with a local Ollama model
-or your own OpenAI API key for GPT-6.1 Sol. [Chat setup](docs/wiki/33-Chat-with-an-agent.md)
-
-For local chat, start Ollama with an installed model and launch
-`simdlab ui -ollama`. In **How to ask**, select that model, type a question,
-and choose **Send**. You can ask follow-up questions in the same panel.
-For OpenAI, set `OPENAI_API_KEY` before launching `simdlab ui` and select
-**OpenAI · gpt-6.1-sol**. Review the shared context before sending.
+Choose **Ask an agent** in Explore or Results to review and copy your
+question with the relevant lab context. Paste it into an assistant you
+already use. You can also connect your own OpenAI API key for in-app chat
+with GPT-6.1 Sol. [Chat guide](docs/wiki/33-Chat-with-an-agent.md)
 
 Use the CLI for scripts, automation, and SSH. The public site source provides
 downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)

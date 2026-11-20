@@ -25,8 +25,8 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 	flags.SetOutput(stderr)
 	root := flags.String("artifacts", filepath.Join("artifacts", "experiments"), "local artifact directory")
 	noOpen := flags.Bool("no-open", false, "print the private browser URL without opening it")
-	useOllama := flags.Bool("ollama", false, "enable chat with a local Ollama model")
-	model := flags.String("model", "", "choose one installed Ollama model instead of listing models")
+	useOllama := flags.Bool("ollama", false, "enable experimental Ollama support")
+	model := flags.String("model", "", "installed Ollama model to use for experimental browser chat")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
@@ -65,25 +65,8 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	if *useOllama {
-		provider := newChatProvider("ollama", localModel, "")
-		models := []string{localModel}
-		if *model == "" {
-			models = nil
-			switch installed, err := provider.localModels(ctx); {
-			case err != nil:
-				fmt.Fprintln(stderr, "Ollama model listing unavailable. Start Ollama and restart the lab to list models.")
-			case len(installed) == 0:
-				fmt.Fprintln(stderr, "No installed local Ollama models found. Install one and restart the lab to list it.")
-			default:
-				models = installed[:min(24, len(installed))]
-			}
-		}
-		for _, name := range models {
-			option := provider
-			option.id, option.model = "ollama:"+name, name
-			app.chatProviders = append(app.chatProviders, option)
-		}
+	if *useOllama && *model != "" {
+		app.chatProviders = append(app.chatProviders, newChatProvider("ollama:"+localModel, localModel, ""))
 	}
 	if key := strings.TrimSpace(os.Getenv("OPENAI_API_KEY")); key != "" {
 		app.chatProviders = append(app.chatProviders, newChatProvider("openai", openAIChatModel, key))

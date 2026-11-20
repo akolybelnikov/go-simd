@@ -13,26 +13,10 @@ The answer uses the context for that selected batch.
 
 ## Choose how to ask
 
-The panel opens with **How to ask**. Choose **Copy to another assistant** to
-copy your question with the lab context, then paste it into an assistant
-you use. **Local · Ollama** and **Remote · OpenAI** are also listed.
-When a provider needs setup, select its **set up** entry to see launch
-instructions in the panel. After restarting the lab, open its new browser
-address and select the enabled provider.
-
-### Local Ollama
-
-Start Ollama and install a local model. Then launch:
-
-```text
-simdlab ui -ollama
-```
-
-Open the panel and select an installed model in **How to ask**. The lab lists
-models when it starts. If you install one afterward, restart the lab. To
-choose one model at launch, use `simdlab ui -ollama -model MODEL`, replacing
-`MODEL` with its installed name. Use Ollama’s local-only setting for offline
-inference. [Ollama local-only setup](https://docs.ollama.com/faq#how-do-i-disable-ollamas-cloud-features)
+The panel opens on **Copy to another assistant**. Write your question,
+review what will be copied, and paste it into the assistant you already
+use. Preparing the context works offline. **Remote · OpenAI** is an
+optional connection.
 
 ### OpenAI
 
