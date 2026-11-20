@@ -1,171 +1,40 @@
 # go-simd
 
-An experimental Go SIMD laboratory: **23 operations / 58 implementations** over
-generated `float32`, `float64`, `uint8` and `uint64` slices. Explore arithmetic,
-broadcasts, masks, reductions, exact bits, movement and polynomial multiplication.
-Run quick comparisons or save repeated measurements as TXT, Markdown or CSV.
-Results depend on hardware, toolchain, size and background load; SIMD can be slower.
+Compare ordinary and vectorized Go operations on generated arrays. Timings
+describe the operation on the machine running the lab. [Install the CLI](docs/cli.md#install-the-cli-from-source)
+to try either path.
 
-**M3:** both commands run as standalone binaries on a compatible local machine,
-cloud VM or remote server. The default report backend needs neither Go nor the
-source checkout at runtime. Reports stay on the machine where you run the CLI.
-
-**F004 is complete for the agreed current scope**, including ordered clamp.
-See the [acceptance record](docs/features/F004-completion.md) and
-[SDK coverage ledger](docs/features/F004-api-coverage.md) for delivered experiments
-and explicitly deferred extensions.
-
-Eight extensions add three-array FMA, Float64 addition/copy, uint8 saturation,
-bit roundtrip/XOR, fixed-block sum8 and uint64 carryless products. Their exact
-contracts and evidence are indexed in [F004 completion](docs/features/F004-completion.md).
-
-## Start here
-
-**Ollama is optional.** You can explore operations, run benchmarks, and read
-saved evidence with the installed CLI alone.
-
-### Install the CLI from source
-
-For a fresh checkout, run `git clone https://github.com/akolybelnikov/go-simd.git`
-and `cd go-simd`.
-
-Use Go **1.27.3** or a compatible patch release with `GOEXPERIMENT=simd`. Run
-the setup for your shell from the checkout. CI verifies Linux/amd64 and
-Windows/amd64. macOS source builds are outside the current CI matrix.
-
-**macOS and Linux (sh, Bash, or Zsh)**
-
-```sh
-export GOEXPERIMENT=simd
-go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport
-go_bin=$(go env GOBIN)
-if [ -z "$go_bin" ]; then
-  go_path=$(go env GOPATH)
-  go_bin="${go_path%%:*}/bin"
-fi
-export PATH="$go_bin:$PATH"
-simdlab help
-```
-
-**Windows (PowerShell)**
-
-```powershell
-$env:GOEXPERIMENT = 'simd'
-go install ./cmd/simdlab ./cmd/simdbench ./cmd/simdreport
-$goBin = go env GOBIN
-if (-not $goBin) { $goBin = Join-Path ((go env GOPATH).Split([IO.Path]::PathSeparator)[0]) 'bin' }
-$env:Path = "$goBin;$env:Path"
-simdlab help
-```
-
-The PATH change applies to the current terminal. Add the same directory to
-your shell startup file or Windows user PATH to keep it. Once installed, the
-commands below are the same across platforms and run outside the checkout.
-See [build or install](#build-or-install) for local builds and copying a binary
-to a measuring host.
-
-### Pick a workflow
-
-| Task | Without a model | With Ollama (preview) |
-| --- | --- | --- |
-| Explore available operations | `simdlab catalog -text -group addition` | `simdlab ask -preview "Which addition implementations are available?"` |
-| Run a benchmark | Use exact `simdlab experiment -preview` flags below, or run `simdreport` directly. | Ask `simdlab experiment -preview` to propose a plan, then confirm it. |
-| Read saved evidence | `simdlab inspect -text` with the evidence file | `simdlab interpret -preview` with the same file and a question |
-
-### Other ways to launch the tools
-
-Flags are the same for installed commands, `go run` and Make. Only the launcher
-changes. Make and `go run` need Go and the checkout. Installed binaries run from
-any working directory.
-
-| Task | Installed / on PATH | Go from checkout | Make from checkout |
-| --- | --- | --- | --- |
-| List operations and runtime context | `simdreport -list` | `go run ./cmd/simdreport -list` | `make list` |
-| Quick comparison, all groups | `simdbench` | `go run ./cmd/simdbench` | `make run` |
-| Quick addition comparison | `simdbench -group addition` | `go run ./cmd/simdbench -group addition` | `make run-addition` |
-| Save a Markdown sweep | `simdreport -format md` | `go run ./cmd/simdreport -format md` | `make report ARGS="-format md"` |
-| Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |
-| Quick help | `simdbench -h` | `go run ./cmd/simdbench -h` | `make run ARGS="-h"` |
-
-## Run a benchmark without Ollama
-
-1. Find the strategy IDs and supported element counts for addition.
-
-   ```text
-   simdlab catalog -text -group addition
-   ```
-
-2. Request a small, measured comparison with two strategies and three repeats
-   each. Review the displayed plan and measuring host. Copy the exact
-   `run sha256:…` line from the prompt within five minutes to run it once, or
-   press Ctrl+C to decline. `-preview` opts in to the experiment CLI.
-
-   ```text
-   simdlab experiment -preview -group addition -variants scalar,simd-partial -sizes 1024 -count 3 -benchtime 100ms
-   ```
-
-3. Copy the `evidence` path from the final JSON output and replace the example
-   path below. By default, experiment evidence is saved under
-   `artifacts/experiments/` relative to the working directory. Use `-artifacts`
-   to choose another location.
-
-   ```text
-   simdlab inspect -text "path/to/measurements.json"
-   ```
-
-For scripts, omit `-text` to get JSON from `catalog` and `inspect`. `simdlab plan`
-reads an explicit JSON request from stdin and prints the resolved plan without
-measuring. For a direct Markdown report, use the report CLI:
+## Run directly
 
 ```text
-simdreport -group addition -bench "^BenchmarkAddition$/^n=1024$" -count 3 -benchtime 100ms -format md
+simdlab run addition
 ```
 
-The report writes its output and companion capture under `artifacts/addition/`.
-The full default sweep can take several minutes.
+This compares ordinary and vectorized addition on two generated arrays of
+1,024 float32 values, with three repeats per method. The terminal displays
+the settings, runs the comparison, and prints the timing difference and the
+paths to the Markdown report and measurement file. This path works without
+a model. Press Ctrl+C to cancel.
 
-## Try the optional Ollama previews
-
-Install and start Ollama for [macOS](https://docs.ollama.com/macos),
-[Linux](https://docs.ollama.com/linux), or [Windows](https://docs.ollama.com/windows).
-You can also use an existing server. Download the default model on that server.
+## Ask an agent
 
 ```text
-ollama pull qwen3:4b
-ollama ls
+simdlab ask
 ```
 
-Try one of these commands after downloading the model. Replace the capture path
-with the evidence saved by your run.
+Enter **Compare ordinary and vectorized addition for 1,024 numbers.** Review
+the methods, batch size, and repeats, then enter **yes** to measure or **no**
+to decline. After the run, ask **Which took less time, and by how much?** or
+**Were the repeats consistent?** The answer uses measurements saved during
+the session. Enter **quit** to leave.
 
-```text
-simdlab ask -preview "Which addition implementations are available?"
-simdlab experiment -preview "Use plan_experiment for group addition, variants scalar and simd-partial, size 1024, count 3, benchtime 100ms."
-simdlab interpret -preview "path/to/measurements.json" "How did SIMD compare with scalar?"
-```
+You can also ask **Can I compare ways of summing an array?** to see the
+methods and input sizes available on your machine. See the [CLI reference](docs/cli.md)
+for Ollama setup, exact flags, and reopening saved evidence.
 
-The default endpoint is `http://127.0.0.1:11434`. Put `-endpoint` or `-model`
-before the question or file path to use a different server or installed model.
-A remote endpoint receives the prompt and any catalog or evidence summaries
-used by the selected command. Model-assisted steps can take tens of seconds,
-can return no usable proposal, and are cancellable with Ctrl+C. Exact flags
-provide a fallback for experiments. Each model-proposed plan still requires the
-same human confirmation. Interpret prints verified observations and caveats as
-plain text. Use `interpret -preview -json` for structured output with fact IDs.
-See the [preview checks](docs/agent-preview.md) and
-[model evaluation](docs/interpret-evaluation.md) for current limitations.
-
-Use `-group computation` for the expression experiment. Every Make run, list
-and report target forwards `ARGS`, including group shortcuts:
-
-```bash
-make help
-make list ARGS="-group addition"
-make run-computation ARGS="-list"
-make report-addition COUNT=3 BENCHTIME=100ms ARGS="-format md -bench BenchmarkAddition/n=1024/Scalar"
-```
-
-Prefer direct commands for complex regex or paths needing careful shell quoting.
+The lab covers 23 operations and 58 implementations. See the [operation catalogue](#operation-catalogue),
+[experiment recipes](docs/wiki/07-Experiment-recipes.md), and
+[SDK coverage ledger](docs/features/F004-api-coverage.md).
 
 ## Command reference
 
@@ -400,7 +269,7 @@ selectors fail before artifacts are created.
 
 ## Build or install
 
-Set `GOEXPERIMENT=simd` as shown in [the setup above](#install-the-cli-from-source).
+Set `GOEXPERIMENT=simd` as shown in the [installation guide](docs/cli.md#install-the-cli-from-source).
 GNU Make plus a POSIX shell is optional. A compatible target binary runs without
 Go or the `GOEXPERIMENT` environment setting at runtime.
 

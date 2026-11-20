@@ -11,11 +11,16 @@ or [Make targets](#complete-make-catalogue).
 
 ## Pick a task
 
+Start with [your first addition comparison](02-First-experiment). For
+`simdlab` options and Ollama setup, see the [CLI reference](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md).
+
 | Task | Installed / on PATH | Go from checkout | Make from checkout |
 | --- | --- | --- | --- |
 | List operations and runtime context | `simdreport -list` | `go run ./cmd/simdreport -list` | `make list` |
 | Quick comparison | `simdbench` | `go run ./cmd/simdbench` | `make run` |
-| Quick addition | `simdbench -group addition` | `go run ./cmd/simdbench -group addition` | `make run-addition` |
+| Addition starter with saved report | `simdlab run addition` | `go run ./cmd/simdlab run addition` | — |
+| Guided session | `simdlab ask` | `go run ./cmd/simdlab ask` | — |
+| Addition terminal demo | `simdbench -group addition` | `go run ./cmd/simdbench -group addition` | `make run-addition` |
 | Quick expression | `simdbench -group computation` | `go run ./cmd/simdbench -group computation` | `make run-computation` |
 | Markdown sweep | `simdreport -format md` | `go run ./cmd/simdreport -format md` | `make report ARGS="-format md"` |
 | Report help | `simdreport -h` | `go run ./cmd/simdreport -h` | `make report ARGS="-h"` |

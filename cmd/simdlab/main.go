@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/akolybelnikov/go-simd/internal/evidence"
 	"github.com/akolybelnikov/go-simd/internal/labapi"
@@ -50,8 +51,16 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 1
 	}
 	switch args[0] {
+	case "run":
+		return runStarter(args[1:], stdout, stderr)
 	case "ask":
-		return runAsk(service, args[1:], stdin, stdout, stderr)
+		for _, arg := range args[1:] {
+			name, _, _ := strings.Cut(arg, "=")
+			if name == "-preview" || name == "--preview" {
+				return runAsk(service, args[1:], stdin, stdout, stderr)
+			}
+		}
+		return runGuide(service, args[1:], stdin, stdout, stderr)
 	case "catalog":
 		return runCatalog(service, args[1:], stdout, stderr)
 	case "plan":
@@ -177,10 +186,13 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 func printUsage(writer io.Writer) {
 	fmt.Fprintln(writer, "usage: simdlab <command>")
 	fmt.Fprintln(writer, "\nWithout a model:")
+	fmt.Fprintln(writer, "  run addition                         compare ordinary and vectorized addition")
 	fmt.Fprintln(writer, "  catalog -text [-group group]          find operation groups, strategy IDs and sizes")
 	fmt.Fprintln(writer, "  plan                                 validate a JSON plan request from stdin")
 	fmt.Fprintln(writer, "  experiment -preview <plan flags>     review and confirm an exact benchmark")
 	fmt.Fprintln(writer, "  inspect -text <measurements.json>     read saved evidence")
+	fmt.Fprintln(writer, "\nGuided session:")
+	fmt.Fprintln(writer, "  ask [-evidence measurements.json]    explore, approve a comparison, or explain results")
 	fmt.Fprintln(writer, "\nOptional Ollama previews:")
 	fmt.Fprintln(writer, "  ask -preview <question>              ask about the operation catalog")
 	fmt.Fprintln(writer, "  experiment -preview <request>        ask for a benchmark proposal, then review it")

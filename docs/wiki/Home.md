@@ -1,12 +1,33 @@
 # go-simd user knowledge guide
 
-Learn to run, understand, and extend a small Go SIMD experiment laboratory.
-Start with a smoke measurement, learn the comparison boundaries, then design a
-repeatable experiment on your own toolchain and machine.
+[Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) to try either path.
 
-**Guide baseline:** architecture M3 / F004 baseline plus eight delivered extensions, 23 operations / 58 implementations, reviewed 2026-11-04.
-Command names and examples describe implemented behavior. Future work is marked
-explicitly. This guide grows alongside each delivered feature.
+## Run directly
+
+```text
+simdlab run addition
+```
+
+This compares ordinary and vectorized addition on two generated arrays of
+1,024 float32 values, with three repeats per method. The terminal displays
+the settings, runs the comparison, and prints the timing difference and the
+paths to the Markdown report and measurement file. This path works without
+a model. Press Ctrl+C to cancel.
+
+## Ask an agent
+
+```text
+simdlab ask
+```
+
+Enter **Compare ordinary and vectorized addition for 1,024 numbers.** Review
+the methods, batch size, and repeats, then enter **yes** to measure or **no**
+to decline. After the run, ask **Which took less time, and by how much?** or
+**Were the repeats consistent?** The answer uses measurements saved during
+the session. Enter **quit** to leave.
+
+Follow the [first experiment walkthrough](02-First-experiment) or see the
+[CLI reference](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md) for Ollama setup and exact flags.
 
 ## Choose your starting point
 
@@ -83,18 +104,6 @@ not a stable public import API. Installed commands run without Go or source;
 `go run`, Make and the explicit developer backend need the checkout. See the
 [capability ledger](https://github.com/akolybelnikov/go-simd/wiki/11-Glossary-and-capabilities)
 before planning file imports, additional numeric types, or installed tooling.
-
-## A one-command first measurement
-
-After setting `GOEXPERIMENT=simd` in your shell, run from the repository root:
-
-```powershell
-go run ./cmd/simdreport -group addition -bench '^BenchmarkAddition$/^n=1$/^(Scalar|SIMDPartial)$' -count 1 -benchtime 1x
-```
-
-This checks setup and report generation. One iteration is a smoke check, not a
-sound performance conclusion. Continue with the first-experiment guide for a
-useful repeated measurement.
 
 ## Guide history
 

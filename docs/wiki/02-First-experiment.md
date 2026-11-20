@@ -1,4 +1,39 @@
-# 02 — Your first experiment
+# Your first addition comparison
+
+[Install the CLI](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source).
+
+## Run directly
+
+```text
+simdlab run addition
+```
+
+This compares ordinary and vectorized addition on two generated arrays of
+1,024 float32 values, with three repeats per method. The terminal displays
+the settings, runs the comparison, and prints the timing difference and the
+paths to the Markdown report and measurement file. This path works without
+a model. Press Ctrl+C to cancel.
+
+## Ask an agent
+
+```text
+simdlab ask
+```
+
+Enter **Compare ordinary and vectorized addition for 1,024 numbers.** Review
+the methods, batch size, and repeats, then enter **yes** to measure or **no**
+to decline. After the run, ask **Which took less time, and by how much?** or
+**Were the repeats consistent?** The answer uses measurements saved during
+the session. Enter **quit** to leave.
+
+## Read and share the result
+
+For example, with medians of 80 ns for vectorized addition and 100 ns for
+ordinary addition, vectorized addition took 20% less time per batch. The
+Markdown report includes the observed repeat ranges and measuring host.
+Use `simdlab inspect -text` with the printed measurement path to see details.
+
+## Custom comparison with three methods
 
 Question: for a modest input size on this machine, how do serial partial-vector
 addition and scalar-tail addition compare with the scalar loop?
