@@ -49,8 +49,7 @@
           <div class="catalog-fields">
             <label for="catalog-method">Compare with <strong id="catalog-baseline"></strong><select id="catalog-method"></select></label>
             <label for="catalog-size">Values per input array
-              <input id="catalog-size" type="number" min="1" step="1" required list="catalog-size-suggestions" aria-describedby="catalog-size-hint">
-              <datalist id="catalog-size-suggestions"></datalist>
+              <input id="catalog-size" type="number" min="1" step="1" required aria-describedby="catalog-size-hint catalog-size-explanation">
               <small id="catalog-size-hint" class="meta"></small>
             </label>
             <label for="catalog-repeats">Repeats per method
@@ -58,6 +57,7 @@
               <small id="catalog-repeats-hint" class="meta"></small>
             </label>
           </div>
+          <p id="catalog-size-explanation" class="meta">SIMD works in groups of values; group size depends on the operation, data type, and vector width. Leftover values use the selected method's remainder handling. Preview the comparison for partial-vector, scalar-tail, or padding details.</p>
           <button class="primary" type="submit" id="catalog-submit">Preview comparison <span aria-hidden="true">→</span></button>
         </form>
         <p id="catalog-preview-status" class="status" role="status"></p>

@@ -149,7 +149,6 @@ function chooseOperation(operation) {
   const defaultMethod = methods.find((method) => method.uses_simd && method.worker_policy === "serial") || methods[0];
   byID("catalog-method").replaceChildren(...methods.map((method) => new Option(method.label, method.id)));
   byID("catalog-method").value = defaultMethod?.id || "";
-  byID("catalog-size-suggestions").replaceChildren(...operation.supported_sizes.map((size) => new Option(integer.format(size), size)));
   const size = byID("catalog-size");
   size.max = operation.max_size;
   size.value = 1024;
