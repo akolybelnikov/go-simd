@@ -42,7 +42,7 @@ func runExperiment(args []string, stdin io.Reader, stdout, stderr io.Writer) int
 	flags.SetOutput(stderr)
 	preview := flags.Bool("preview", false, "enable the local experiment preview")
 	endpoint := flags.String("endpoint", "http://127.0.0.1:11434", "Ollama server base URL")
-	model := flags.String("model", "qwen3:4b", "installed Ollama model")
+	model := flags.String("model", "", "installed Ollama model (explicit selection; experimental)")
 	think := flags.Bool("think", true, "request Ollama's separate thinking channel")
 	root := flags.String("artifacts", filepath.Join("artifacts", "experiments"), "local artifact directory")
 	group := flags.String("group", "", "exact catalog group")
@@ -91,6 +91,7 @@ func runExperiment(args []string, stdin io.Reader, stdout, stderr io.Writer) int
 			return 2
 		}
 		client = modelClient
+		fmt.Fprintln(stderr, "Experimental Ollama model:", terminalText(*model))
 	}
 	executable, err := os.Executable()
 	if err != nil {

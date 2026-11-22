@@ -61,7 +61,7 @@ func TestExperimentCLI(t *testing.T) {
 			if tt.tool == "" {
 				args = append(args, "-endpoint", "http://127.0.0.1:1", "-group", "addition", "-variants", "scalar,simd-partial", "-sizes", "8", "-count", "1", "-benchtime", "1x")
 			} else {
-				args = append(args, "-endpoint", server.URL, "Compare scalar and SIMD addition")
+				args = append(args, "-model", "fixture", "-endpoint", server.URL, "Compare scalar and SIMD addition")
 			}
 			code := run(args, strings.NewReader(tt.confirmation), &stdout, &stderr)
 			require.Equal(t, tt.wantCode, code, stderr.String())
@@ -97,13 +97,13 @@ func TestExperimentCLI(t *testing.T) {
 			}))
 			defer interpretServer.Close()
 			stdout.Reset()
-			require.Zero(t, run([]string{"interpret", "-preview", "-endpoint", interpretServer.URL, result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
+			require.Zero(t, run([]string{"interpret", "-preview", "-model", "fixture", "-endpoint", interpretServer.URL, result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
 			require.Contains(t, stdout.String(), "What the measurements show")
 			require.Contains(t, stdout.String(), "median")
 			require.Contains(t, stdout.String(), "What to keep in mind")
 			require.NotContains(t, stdout.String(), "series-1")
 			stdout.Reset()
-			require.Zero(t, run([]string{"interpret", "-preview", "-json", "-endpoint", interpretServer.URL, result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
+			require.Zero(t, run([]string{"interpret", "-preview", "-json", "-model", "fixture", "-endpoint", interpretServer.URL, result.Evidence}, strings.NewReader(""), &stdout, &stderr), stderr.String())
 			require.Contains(t, stdout.String(), `"decision": "answer"`)
 			require.Contains(t, stdout.String(), `"id": "series-1"`)
 		})

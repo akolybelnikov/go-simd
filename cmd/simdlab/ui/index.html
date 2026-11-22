@@ -147,17 +147,32 @@
       </section>
     </section>
   </main>
-  <dialog id="agent-dialog" aria-labelledby="agent-title" aria-describedby="agent-description">
+  <dialog id="agent-dialog" aria-labelledby="agent-title" aria-describedby="agent-description agent-local-notice">
     <header class="section-head">
       <h2 id="agent-title">Ask an agent</h2>
       <button class="quiet" id="agent-close" type="button">Close</button>
     </header>
     <p id="agent-description">Ask about SIMD, find an operation for your workload, or work through a result.</p>
+    <aside class="agent-notice" aria-labelledby="agent-guidance-title">
+      <strong id="agent-guidance-title">Choose your AI assistant</strong>
+      <p id="agent-local-notice">Local Ollama chat is experimental. The models tested so far made mistakes when choosing operations and preparing comparisons. We do not yet recommend a local model for browser chat.</p>
+      <a href="/wiki/34-AI-setup-and-model-recommendations" target="_blank" rel="noopener">AI setup, testing, and model recommendations ↗</a>
+    </aside>
     <p class="meta" id="agent-selection"></p>
     <div id="agent-transcript" class="chat-transcript" role="log" aria-label="Conversation" tabindex="0" hidden></div>
     <form id="agent-form">
       <label for="agent-provider">How to ask</label>
       <select id="agent-provider"></select>
+      <section id="agent-local-models" hidden>
+        <label for="agent-model">Chat model</label>
+        <div class="agent-model-row">
+          <select id="agent-model" aria-describedby="agent-model-status agent-recommendations"><option value="">Choose an installed model</option></select>
+          <button id="agent-model-refresh" class="secondary" type="button">Refresh</button>
+        </div>
+        <p class="meta" id="agent-model-status" role="status"></p>
+        <p class="meta" id="agent-recommendations">Installed models are for experimentation. The lab does not download models automatically.</p>
+        <pre id="agent-model-install" hidden></pre>
+      </section>
       <p class="meta" id="agent-sharing"></p>
       <section class="agent-setup" id="agent-setup" aria-live="polite" hidden>
         <h3 id="agent-setup-title"></h3>
@@ -165,7 +180,7 @@
         <pre id="agent-setup-command"></pre>
         <p id="agent-setup-next"></p>
       </section>
-      <p class="meta"><a href="/wiki/33-Chat-with-an-agent" target="_blank" rel="noopener">Local and remote chat setup ↗</a></p>
+      <p class="meta"><a href="/wiki/33-Chat-with-an-agent" target="_blank" rel="noopener">How to ask and review a comparison ↗</a></p>
       <div id="agent-compose">
       <label for="agent-question">Your question</label>
       <textarea id="agent-question" rows="3" maxlength="4096" required autofocus></textarea>

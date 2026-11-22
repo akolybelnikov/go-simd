@@ -29,7 +29,11 @@ func setupModelClient(t *testing.T) *ollama.Client {
 	require.NoError(t, err)
 
 	httpClient := &http.Client{Timeout: 2 * time.Minute}
-	modelClient, err := ollama.NewClient(ep, "qwen3:4b", httpClient)
+	model := os.Getenv("GO_SIMD_OLLAMA_MODEL")
+	if model == "" {
+		t.Skip("set GO_SIMD_OLLAMA_MODEL to an installed model for live evaluation")
+	}
+	modelClient, err := ollama.NewClient(ep, model, httpClient)
 	require.NoError(t, err)
 
 	return modelClient

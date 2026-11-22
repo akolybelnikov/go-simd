@@ -32,7 +32,7 @@ func runGuide(service *labservice.Deterministic, args []string, stdin io.Reader,
 	flags := flag.NewFlagSet("ask", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	endpoint := flags.String("endpoint", "http://127.0.0.1:11434", "Ollama server for additional phrasings")
-	model := flags.String("model", "qwen3:4b", "installed Ollama model")
+	model := flags.String("model", "", "installed Ollama model (explicit selection; experimental)")
 	think := flags.Bool("think", false, "request Ollama's separate thinking channel")
 	timeout := flags.Duration("timeout", 30*time.Second, "model deadline (maximum 5m)")
 	root := flags.String("artifacts", filepath.Join("artifacts", "experiments"), "local artifact directory")
@@ -47,10 +47,15 @@ func runGuide(service *labservice.Deterministic, args []string, stdin io.Reader,
 		fmt.Fprintln(stderr, "usage: simdlab ask [options]; enter questions after the prompt")
 		return 2
 	}
-	client, err := newLocalModelClient(*endpoint, *model, *timeout, *think)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 2
+	var client agent.ModelClient
+	if *model != "" {
+		selected, err := newLocalModelClient(*endpoint, *model, *timeout, *think)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 2
+		}
+		client = selected
+		fmt.Fprintln(stderr, "Experimental Ollama model:", terminalText(*model))
 	}
 	available, err := service.Catalog("all")
 	if err != nil {
@@ -146,6 +151,18 @@ func (s *guideSession) run(ctx context.Context, stdin io.Reader, stdout, stderr 
 		}
 		pending = guideRequest{}
 		if !matched {
+			if s.model == nil {
+				if _, err := fmt.Fprintln(stdout, "No local model selected. For experimental AI wording, restart with simdlab ask -model MODEL. "+guideFallback); err != nil {
+					return err
+				}
+				if s.saved.path != "" {
+					if _, err := fmt.Fprintln(stdout, savedResultOffer); err != nil {
+						return err
+					}
+				}
+				previous = ""
+				continue
+			}
 			if _, err := fmt.Fprintln(stdout, "Asking Ollama to resolve the request…"); err != nil {
 				return err
 			}

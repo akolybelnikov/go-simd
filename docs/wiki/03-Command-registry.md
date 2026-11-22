@@ -6,6 +6,8 @@ Run these commands from a terminal where the lab executables are on your PATH. T
 | --- | --- |
 | Open the browser lab | `simdlab ui` |
 | Print the private browser address | `simdlab ui -no-open` |
+| Choose an installed experimental local chat model | `simdlab ui -ollama` |
+| Configure OpenAI chat model (API key required) | `simdlab ui -openai-model MODEL` |
 | Test an installed Ollama model in browser chat | `simdlab ui -ollama -model MODEL` |
 | Compare two ways of adding 1,024 values | `simdlab run addition` |
 | Browse operations and methods in the terminal | `simdlab catalog -text` |
@@ -45,3 +47,5 @@ Fixtures generate data that exposes specific differences. Keep fixture settings 
 ## Build, install and run remotely
 
 Use the [installation guide](https://github.com/akolybelnikov/go-simd/blob/main/docs/cli.md#install-the-cli-from-source) for the source build or choose an archive for your platform. To compare on a remote machine, start the terminal command there. The timings describe that machine, and the reports are saved there.
+
+Local model selection is explicit; no local browser-chat model is currently recommended. [AI setup and testing](34-AI-setup-and-model-recommendations).

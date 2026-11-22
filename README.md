@@ -18,7 +18,8 @@ benchmark runs on the machine that launched `simdlab`. Comparisons work offline.
 Choose **Ask an agent** in Explore or Results to review and copy your
 question with the relevant lab context. Paste it into an assistant you
 already use. You can also connect your own OpenAI API key for in-app chat
-with GPT-6.1 Sol. [Chat guide](docs/wiki/33-Chat-with-an-agent.md)
+with a configurable model (default GPT-6.1 Sol). Local Ollama chat is experimental;
+no local browser-chat model is currently recommended. [AI setup and model recommendations](docs/wiki/34-AI-setup-and-model-recommendations.md) · [Chat guide](docs/wiki/33-Chat-with-an-agent.md)
 
 Use the CLI for scripts, automation, and SSH. The public site source provides
 downloads, documentation, and a sample report. See the [browser guide](docs/local-ui.md)

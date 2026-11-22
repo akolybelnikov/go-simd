@@ -22,7 +22,7 @@ func runInterpret(service *labservice.Deterministic, args []string, stdout, stde
 	preview := flags.Bool("preview", false, "enable model-assisted interpretation")
 	structured := flags.Bool("json", false, "emit structured JSON including evidence IDs")
 	endpoint := flags.String("endpoint", "http://127.0.0.1:11434", "Ollama server base URL")
-	model := flags.String("model", "qwen3:4b", "installed Ollama model")
+	model := flags.String("model", "", "installed Ollama model (explicit selection; experimental)")
 	think := flags.Bool("think", true, "request Ollama's separate thinking channel")
 	timeout := flags.Duration("timeout", 2*time.Minute, "model deadline (maximum 5m)")
 	if err := flags.Parse(args); err != nil {
@@ -59,6 +59,7 @@ func runInterpret(service *labservice.Deterministic, args []string, stdout, stde
 		fmt.Fprintln(stderr, terminalText(err.Error()))
 		return 2
 	}
+	fmt.Fprintln(stderr, "Experimental Ollama model:", terminalText(*model))
 	interrupt, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	ctx, cancel := context.WithTimeout(interrupt, *timeout)

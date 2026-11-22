@@ -49,6 +49,10 @@ recipe, validated plan and measuring code.
 
 ## Ask an agent
 
+Both chat buttons explain the current local-model status and link to
+[AI setup and model recommendations](wiki/34-AI-setup-and-model-recommendations.md).
+No local browser-chat model is currently recommended.
+
 For a step-by-step walkthrough,
 see [Chat with an agent](wiki/33-Chat-with-an-agent.md).
 
@@ -66,13 +70,17 @@ about cache, bandwidth, and similar bottlenecks as hypotheses to test.
 - **Copy to another assistant** is the default. Review the question and
   lab context, then paste it into an assistant you choose.
 - **OpenAI** appears when the process starts with `OPENAI_API_KEY` set.
-  Launch `simdlab ui` from that environment and choose **OpenAI ·
-  gpt-6.1-sol** in **How to ask**. This uses the API with your key and is
+  Launch `simdlab ui` from that environment and choose **Remote · OpenAI · MODEL** in **How to ask**. Use `simdlab ui -openai-model MODEL`
+  to select a compatible alternative to the default `gpt-6.1-sol`. This uses the API with your key and is
   billed to your API account. The lab allows up to 24 OpenAI requests per
   session. [GPT-6.1 Sol API documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
 
-For testing a local candidate, launch `simdlab ui -ollama -model MODEL`
-with the installed model name. The panel labels it **Experimental**.
+For experimental local chat, launch `simdlab ui -ollama`, select **Local · Ollama**,
+and choose an installed **Chat model**. Use **Refresh** after installation or a
+service restart. Launch with `-ollama -model MODEL` for an explicit initial model.
+The selector shows evaluation status and never downloads models. Changing Chat
+model cancels the pending reply and starts a new thread; this selection affects
+chat only, not the separate launch-time local intent resolver.
 
 Use **Review what will be sent** (or **Review what will be copied** in copy
 mode) to inspect the question, recent messages,

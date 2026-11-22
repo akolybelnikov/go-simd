@@ -20,6 +20,7 @@ import (
 	"github.com/akolybelnikov/go-simd/internal/labapi"
 	"github.com/akolybelnikov/go-simd/internal/labservice"
 	"github.com/akolybelnikov/go-simd/internal/labtools"
+	"github.com/akolybelnikov/go-simd/internal/modelcatalog"
 )
 
 //go:embed ui/index.html ui/app.js ui/style.css
@@ -35,6 +36,8 @@ type localUI struct {
 	model               agent.ModelClient
 	catalog             labapi.CatalogResponse
 	chatProviders       []chatProvider
+	localChat           *chatProvider
+	initialChatModel    string
 
 	mu             sync.Mutex
 	pending        *uiProposal
@@ -119,6 +122,8 @@ func (app *localUI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.URL.Path {
+	case "/api/chat/models":
+		app.chatModels(w, r)
 	case "/api/catalog":
 		app.explore(w)
 	case "/api/preview":
@@ -146,14 +151,17 @@ func (app *localUI) explore(w http.ResponseWriter) {
 	}
 	view := struct {
 		labapi.CatalogResponse
-		Operations     []operationView      `json:"operations"`
-		DefaultRepeats int                  `json:"default_repeats"`
-		MaxRepeats     int                  `json:"max_repeats"`
-		ChatProviders  []chatProviderOption `json:"chat_providers"`
+		Operations       []operationView      `json:"operations"`
+		DefaultRepeats   int                  `json:"default_repeats"`
+		MaxRepeats       int                  `json:"max_repeats"`
+		ChatProviders    []chatProviderOption `json:"chat_providers"`
+		LocalChatEnabled bool                 `json:"ollama_enabled"`
+		InitialChatModel string               `json:"initial_chat_model,omitempty"`
+		LocalModelNotice string               `json:"local_model_notice"`
 	}{
 		CatalogResponse: app.catalog, DefaultRepeats: starterRepeats,
 		MaxRepeats:    labapi.DefaultPlanPolicy().MaxCount,
-		ChatProviders: app.chatOptions(),
+		ChatProviders: app.chatOptions(), LocalChatEnabled: app.localChat != nil, InitialChatModel: app.initialChatModel, LocalModelNotice: modelcatalog.BrowserNotice(),
 	}
 	for _, operation := range app.catalog.Operations {
 		operation.Strategies = slices.Clone(operation.Strategies)
@@ -323,7 +331,7 @@ func (app *localUI) ask(w http.ResponseWriter, r *http.Request) {
 	request, matched := matchGuideRequest(strings.TrimSpace(body.Question))
 	if !matched {
 		if app.model == nil {
-			uiError(w, http.StatusUnprocessableEntity, "Try “Compare summing an array with a loop and with vectors.” For other wording, start simdlab ui -ollama.")
+			uiError(w, http.StatusUnprocessableEntity, "Try “Compare summing an array with a loop and with vectors.” For other wording, start simdlab ui -ollama -model MODEL.")
 			return
 		}
 		if status, message := app.beginModel("ollama"); status != 0 {

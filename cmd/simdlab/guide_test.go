@@ -116,7 +116,7 @@ func TestGuideModelCannotSubstituteSavedResult(t *testing.T) {
 			timeout = "100ms"
 		}
 		input := strings.NewReader("Did the same thing happen with 8192 inputs?\nquit\n")
-		require.Zero(t, run([]string{"ask", "-endpoint", server.URL, "-timeout", timeout, "-evidence", capture}, input, &stdout, &stderr), stderr.String())
+		require.Zero(t, run([]string{"ask", "-model", "fixture", "-endpoint", server.URL, "-timeout", timeout, "-evidence", capture}, input, &stdout, &stderr), stderr.String())
 		require.Contains(t, stdout.String(), savedResultOffer)
 		require.NotContains(t, stdout.String(), "Median per batch")
 	}
@@ -195,7 +195,7 @@ func TestGuideModelNeedsTerminalApprovalAndFallsBackOnTimeout(t *testing.T) {
 			var stdout, stderr bytes.Buffer
 			root := t.TempDir()
 			input := strings.NewReader("Could you time two variants of adding floats?\n")
-			require.Zero(t, run([]string{"ask", "-endpoint", server.URL, "-timeout", tc.timeout, "-artifacts", root}, input, &stdout, &stderr), stderr.String())
+			require.Zero(t, run([]string{"ask", "-model", "fixture", "-endpoint", server.URL, "-timeout", tc.timeout, "-artifacts", root}, input, &stdout, &stderr), stderr.String())
 			require.Contains(t, stdout.String(), tc.want)
 			dirs, err := os.ReadDir(root)
 			require.NoError(t, err)

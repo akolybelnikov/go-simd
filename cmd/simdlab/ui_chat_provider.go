@@ -174,7 +174,7 @@ func (p chatProvider) requireLocalModel(ctx context.Context) error {
 	if slices.Contains(models, p.model) || slices.Contains(models, name) {
 		return nil
 	}
-	return errors.New("choose an installed local model with simdlab ui -ollama -model")
+	return errors.New("choose an installed local model in Chat model, or start simdlab ui -ollama -model MODEL")
 }
 
 func (p chatProvider) localModels(ctx context.Context) ([]string, error) {
@@ -206,11 +206,23 @@ func (p chatProvider) localModels(ctx context.Context) ([]string, error) {
 	}
 	var names []string
 	for _, model := range installed.Models {
-		if model.Name != "" && len(model.Name) <= 200 && model.RemoteHost == "" && model.RemoteModel == "" &&
+		if validChatModel(model.Name) && model.RemoteHost == "" && model.RemoteModel == "" &&
 			!strings.HasSuffix(model.Name, "-cloud") && !strings.HasSuffix(model.Name, ":cloud") {
 			names = append(names, model.Name)
 		}
 	}
 	slices.Sort(names)
 	return slices.Compact(names), nil
+}
+
+func validChatModel(name string) bool {
+	if name == "" || len(name) > 200 || !((name[0] >= 'a' && name[0] <= 'z') || (name[0] >= 'A' && name[0] <= 'Z') || (name[0] >= '0' && name[0] <= '9')) {
+		return false
+	}
+	for _, r := range name {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || strings.ContainsRune("._:/-@", r)) {
+			return false
+		}
+	}
+	return true
 }

@@ -27,7 +27,7 @@ func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader,
 	flags.SetOutput(stderr)
 	preview := flags.Bool("preview", false, "enable the experimental catalog assistant")
 	endpoint := flags.String("endpoint", "http://127.0.0.1:11434", "Ollama server base URL")
-	model := flags.String("model", "qwen3:4b", "installed Ollama model")
+	model := flags.String("model", "", "installed Ollama model (explicit selection; experimental)")
 	think := flags.Bool("think", true, "request Ollama's separate thinking channel")
 	timeout := flags.Duration("timeout", 2*time.Minute, "whole turn timeout (maximum 5m)")
 	if err := flags.Parse(args); err != nil {
@@ -72,7 +72,7 @@ func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader,
 	defer stop()
 	ctx, cancel := context.WithTimeout(interrupt, *timeout)
 	defer cancel()
-	fmt.Fprintln(stderr, "Waiting for the catalog assistant…")
+	fmt.Fprintln(stderr, "Waiting for experimental Ollama model "+terminalText(*model)+"…")
 	reply, err := runtime.RunTurn(ctx, []agent.Message{{Role: agent.RoleUser, Content: question}}, dispatcher, agent.TurnLimits{MaxModelSteps: 2, MaxToolCalls: 1})
 	if err != nil {
 		fmt.Fprintln(stderr, terminalText(err.Error()))
@@ -86,6 +86,9 @@ func runAsk(catalog labdispatch.CatalogExplorer, args []string, stdin io.Reader,
 }
 
 func newLocalModelClient(endpoint, model string, timeout time.Duration, think bool) (*ollama.Client, error) {
+	if !validChatModel(model) {
+		return nil, fmt.Errorf("select an installed Ollama model with -model MODEL; local models are experimental")
+	}
 	base, err := url.Parse(endpoint)
 	if err != nil || base.User != nil || base.RawQuery != "" || base.Fragment != "" {
 		return nil, fmt.Errorf("invalid Ollama endpoint")

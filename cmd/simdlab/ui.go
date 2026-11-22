@@ -26,11 +26,20 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 	root := flags.String("artifacts", filepath.Join("artifacts", "experiments"), "local artifact directory")
 	noOpen := flags.Bool("no-open", false, "print the private browser URL without opening it")
 	useOllama := flags.Bool("ollama", false, "enable experimental Ollama support")
-	model := flags.String("model", "", "installed Ollama model to use for experimental browser chat")
+	model := flags.String("model", "", "initial installed Ollama chat model (requires -ollama; experimental)")
+	openAIModel := flags.String("openai-model", openAIChatModel, "OpenAI Responses model for chat (requires OPENAI_API_KEY)")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
+		return 2
+	}
+	if *model != "" && !*useOllama {
+		fmt.Fprintln(stderr, "-model requires -ollama; use -openai-model for OpenAI chat")
+		return 2
+	}
+	if (*model != "" && !validChatModel(*model)) || !validChatModel(*openAIModel) {
+		fmt.Fprintln(stderr, "use a model name without spaces or shell characters")
 		return 2
 	}
 	if flags.NArg() != 0 || *root == "" {
@@ -40,10 +49,7 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 
 	var client agent.ModelClient
 	localModel := *model
-	if localModel == "" {
-		localModel = "qwen3:4b"
-	}
-	if *useOllama {
+	if *useOllama && localModel != "" {
 		local, err := newLocalModelClient("http://127.0.0.1:11434", localModel, uiModelTimeout, false)
 		if err != nil {
 			fmt.Fprintln(stderr, terminalText(err.Error()))
@@ -65,11 +71,12 @@ func runUI(service *labservice.Deterministic, args []string, stdout, stderr io.W
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	if *useOllama && *model != "" {
-		app.chatProviders = append(app.chatProviders, newChatProvider("ollama:"+localModel, localModel, ""))
+	if *useOllama {
+		local := newChatProvider("ollama", "", "")
+		app.localChat, app.initialChatModel = &local, localModel
 	}
 	if key := strings.TrimSpace(os.Getenv("OPENAI_API_KEY")); key != "" {
-		app.chatProviders = append(app.chatProviders, newChatProvider("openai", openAIChatModel, key))
+		app.chatProviders = append(app.chatProviders, newChatProvider("openai", *openAIModel, key))
 	}
 
 	server := &http.Server{

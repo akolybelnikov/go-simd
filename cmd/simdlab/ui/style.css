@@ -166,3 +166,11 @@ footer { padding-block: 17px 25px; color: var(--muted); font-size: .78rem; }
 @media (max-width: 360px) {
   .top-actions .local { display: none; }
 }
+
+.agent-notice { padding: 12px 14px; margin: 12px 0; background: var(--soft); border: 1px solid var(--border); border-radius: 8px; }
+.agent-notice p { margin: 6px 0; font-size: .9rem; }
+.agent-notice a { font-size: .9rem; }
+.agent-model-row { display: flex; align-items: center; gap: 8px; }
+.agent-model-row select { min-width: 0; flex: 1; }
+#agent-model-install { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; }
+@media (max-width: 420px) { .agent-model-row { align-items: stretch; flex-direction: column; } }

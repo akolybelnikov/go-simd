@@ -25,6 +25,13 @@ let selectedOperation;
 let agentPrompt;
 let agentSelection;
 let agentProviders = [];
+let agentLocalEnabled = false;
+let agentInitialModel = "";
+let agentLocalModels = [];
+let agentModelsLoaded = false;
+let agentModelsLoading = false;
+let agentModelsVersion = 0;
+let agentModelsError = "";
 let agentHistory = [];
 let agentRequest;
 let agentConversation = 0;
@@ -83,6 +90,9 @@ async function loadCatalog() {
     byID("catalog-repeats-hint").textContent = "1 to " + catalog.max_repeats + " repeats.";
     operations = catalog.operations.toSorted((a, b) => a.title.localeCompare(b.title));
     agentProviders = catalog.chat_providers || [];
+    agentLocalEnabled = catalog.ollama_enabled || false;
+    agentInitialModel = catalog.initial_chat_model || "";
+    if (catalog.local_model_notice) byID("agent-local-notice").textContent = catalog.local_model_notice;
     byID("agent-catalog").disabled = operations.length === 0;
     const host = catalog.runtime;
     byID("catalog-host").textContent = host.os + " / " + host.arch +
@@ -443,8 +453,10 @@ function openAgent(mode) {
     new Option("Copy to another assistant", "copy"),
     ...(remoteProviders.length ? remoteProviders.map((provider) => new Option("Remote · OpenAI · " + provider.model, provider.id)) :
       [new Option("Remote · OpenAI — set up", "setup-remote")]),
+    ...(agentLocalEnabled ? [new Option("Local · Ollama · experimental", "ollama")] : [new Option("Local · Ollama — set up", "setup-local")]),
     ...localProviders.map((provider) => new Option("Experimental · Ollama · " + provider.model, provider.id)),
   );
+  if (agentLocalEnabled && agentInitialModel) byID("agent-provider").value = "ollama";
   question.value = "";
   question.placeholder = mode === "catalog" ?
     "I have float32 sensor readings and need to clip them to a fixed range. Which operation should I compare?" :
@@ -452,9 +464,12 @@ function openAgent(mode) {
   byID("agent-share-preview").open = false;
   resetAgentConversation();
   byID("agent-dialog").showModal();
+  if (byID("agent-provider").value === "ollama") refreshAgentModels();
 }
 
 function resetAgentConversation() {
+  agentRequest?.abort();
+  agentRequest = null;
   agentConversation++;
   agentHistory = [];
   const transcript = byID("agent-transcript");
@@ -473,7 +488,14 @@ function updateAgentControls() {
   byID("agent-question").required = !setup;
   byID("agent-setup").hidden = !setup;
   byID("agent-sharing").hidden = setup;
-  if (setup) {
+  const local = provider === "ollama";
+  byID("agent-local-models").hidden = !local;
+  if (setup && provider === "setup-local") {
+    byID("agent-setup-title").textContent = "Try experimental local chat";
+    byID("agent-setup-instructions").textContent = "Install and start Ollama, then relaunch the lab with local model discovery enabled. No local browser-chat model is recommended yet; read the model guide before choosing a download.";
+    byID("agent-setup-command").textContent = "simdlab ui -ollama";
+    byID("agent-setup-next").textContent = "Return to Ask an agent, choose Local · Ollama, and select an installed Chat model. The lab does not download models automatically.";
+  } else if (setup) {
     byID("agent-setup-title").textContent = "Enable OpenAI chat";
     byID("agent-setup-instructions").textContent =
       "Set OPENAI_API_KEY in the terminal that launches the lab. Requests use your API account. Stop the lab with Ctrl+C and use the commands for your terminal, replacing your-api-key with your own key:";
@@ -489,17 +511,67 @@ function updateAgentControls() {
       : "This model is available for evaluation. Check its explanation against the recorded evidence.";
   byID("agent-preview-label").textContent = copy ? "Review what will be copied" : "Review what will be sent";
   byID("agent-send").textContent = copy ? "Copy question and context" : "Send";
-  byID("agent-provider").disabled = Boolean(agentRequest);
+  byID("agent-provider").disabled = false;
+  const selected = agentLocalModels.find((model) => model.name === byID("agent-model").value);
+  byID("agent-model").disabled = agentModelsLoading;
+  byID("agent-model-refresh").disabled = agentModelsLoading;
+  if (local) {
+    byID("agent-model-status").textContent = agentModelsLoading ? "Checking installed models…" :
+      agentModelsError || (selected ? selected.name + " · " + selected.status + ". " + selected.note + (selected.evaluated ? " Tested " + selected.evaluated + "." : "") + (selected.installed ? "" : " Not installed.") :
+        agentLocalModels.length ? "Choose an installed model to experiment with local chat." : "No local models are installed. Read the setup guide before choosing a download, then use Refresh.");
+    byID("agent-model-install").hidden = !selected || selected.installed;
+    byID("agent-model-install").textContent = selected && !selected.installed ? "Install this experimental model yourself in a terminal, then Refresh:\nollama pull " + selected.name : "";
+  }
   byID("agent-question").readOnly = Boolean(agentRequest);
-  byID("agent-send").disabled = Boolean(agentRequest);
+  byID("agent-send").disabled = Boolean(agentRequest) || (local && (agentModelsLoading || agentModelsError !== "" || !selected?.installed));
   byID("agent-stop").hidden = !agentRequest;
   byID("agent-reset").hidden = copy || agentHistory.length === 0;
   byID("agent-reset").disabled = Boolean(agentRequest);
 }
 
+async function refreshAgentModels() {
+  const version = ++agentModelsVersion;
+  const previous = byID("agent-model").value || (!agentModelsLoaded ? agentInitialModel : "");
+  agentModelsLoading = true;
+  agentModelsError = "";
+  updateAgentControls();
+  try {
+    const result = await api("/api/chat/models");
+    if (version !== agentModelsVersion) return;
+    agentLocalModels = result.models;
+    agentModelsError = result.error || "";
+    byID("agent-model").replaceChildren(new Option("Choose an installed model", ""));
+    for (const [label, recommended] of [["Recommended for browser chat", true], ["Experimental installed models and setup", false]]) {
+      const entries = agentLocalModels.filter((model) => model.recommended === recommended);
+      if (!entries.length) continue;
+      const group = document.createElement("optgroup");
+      group.label = label;
+      for (const model of entries) group.append(new Option(model.name + " · " + model.status + (model.installed ? "" : " · not installed"), model.name));
+      byID("agent-model").append(group);
+    }
+    byID("agent-recommendations").textContent = result.has_recommendations ? "Read the setup guide for the recommended models' tested hardware and settings." :
+      "Installed models are for experimentation. The lab does not download models automatically.";
+    const selected = agentLocalModels.find((model) => model.name === previous || model.name === previous + ":latest");
+    if (selected) byID("agent-model").value = selected.name;
+    if (agentModelsLoaded && previous && !selected) {
+      resetAgentConversation();
+      status("The selected model is no longer installed. Choose another model or Refresh after installing it.", true, "agent-status");
+    }
+    agentModelsLoaded = true;
+  } catch (error) {
+    if (version === agentModelsVersion) agentModelsError = error.message;
+  } finally {
+    if (version === agentModelsVersion) {
+      agentModelsLoading = false;
+      updateAgentControls();
+    }
+  }
+}
+
 function agentBody() {
   return {
     provider: byID("agent-provider").value,
+    model: byID("agent-provider").value === "ollama" ? byID("agent-model").value : undefined,
     selection: agentSelection,
     question: byID("agent-question").value.trim(),
     history: agentHistory,
@@ -568,17 +640,19 @@ async function submitAgentQuestion(event) {
   const conversation = agentConversation;
   agentRequest = request;
   updateAgentControls();
-  status("Waiting for " + agentProviders.find((provider) => provider.id === body.provider)?.label + "…", false, "agent-status");
+  const label = body.provider === "ollama" ? "Ollama · " + body.model :
+    agentProviders.find((provider) => provider.id === body.provider)?.label + " · " + agentProviders.find((provider) => provider.id === body.provider)?.model;
+  status("Waiting for " + label + "…", false, "agent-status");
   try {
     const reply = await api("/api/chat", JSON.stringify(body), request.signal);
     if (conversation !== agentConversation || !byID("agent-dialog").open) return;
     if (reply.lab_only) {
-      renderAgentReply(reply, body.provider);
+      renderAgentReply(reply, label);
       status("", false, "agent-status");
       return;
     }
     appendAgentEntry("You", body.question, "user");
-    renderAgentReply(reply, body.provider);
+    renderAgentReply(reply, label);
     agentHistory = [...agentHistory, { role: "user", content: body.question },
       { role: "assistant", content: [reply.answer, reply.hypothesis,
         reply.draft && "Suggested comparison: " + JSON.stringify(reply.draft)].filter(Boolean).join("\n") }].slice(-6);
@@ -590,9 +664,11 @@ async function submitAgentQuestion(event) {
         error.name !== "AbortError", "agent-status");
     }
   } finally {
-    agentRequest = null;
-    updateAgentControls();
-    updateAgentQuestion();
+    if (agentRequest === request) {
+      agentRequest = null;
+      updateAgentControls();
+      updateAgentQuestion();
+    }
   }
 }
 
@@ -611,9 +687,8 @@ function appendAgentEntry(label, message, role) {
   return entry;
 }
 
-function renderAgentReply(reply, providerID) {
-  const provider = agentProviders.find((option) => option.id === providerID);
-  const entry = appendAgentEntry(reply.lab_only ? "SIMD Lab" : provider.label, reply.answer, "assistant");
+function renderAgentReply(reply, label) {
+  const entry = appendAgentEntry(reply.lab_only ? "SIMD Lab" : label, reply.answer, "assistant");
   if (reply.hypothesis) {
     const paragraph = document.createElement("p");
     const heading = document.createElement("strong");
@@ -684,9 +759,20 @@ byID("agent-catalog").addEventListener("click", () => openAgent("catalog"));
 byID("agent-results").addEventListener("click", () => openAgent("results"));
 byID("agent-close").addEventListener("click", () => byID("agent-dialog").close());
 byID("agent-dialog").addEventListener("close", () => {
-  if (!byID("agent-dialog").open) agentRequest?.abort();
+  if (!byID("agent-dialog").open) {
+    resetAgentConversation();
+    agentModelsVersion++;
+    agentModelsLoading = false;
+  }
 });
-byID("agent-provider").addEventListener("change", resetAgentConversation);
+byID("agent-provider").addEventListener("change", () => {
+  agentModelsVersion++;
+  agentModelsLoading = false;
+  resetAgentConversation();
+  if (byID("agent-provider").value === "ollama") refreshAgentModels();
+});
+byID("agent-model").addEventListener("change", resetAgentConversation);
+byID("agent-model-refresh").addEventListener("click", refreshAgentModels);
 byID("agent-stop").addEventListener("click", () => agentRequest?.abort());
 byID("agent-reset").addEventListener("click", () => {
   byID("agent-question").value = "";

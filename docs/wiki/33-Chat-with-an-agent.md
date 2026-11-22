@@ -1,5 +1,7 @@
 # Chat with an agent
 
+Start with [AI setup and model recommendations](34-AI-setup-and-model-recommendations) for local-model testing, installation, and API configuration. No local browser-chat model is currently recommended.
+
 Use chat to learn about SIMD, find an operation for your workload, or discuss
 a saved result. Start with one of these questions.
 
@@ -37,8 +39,8 @@ export OPENAI_API_KEY='your-api-key'
 simdlab ui
 ```
 
-Select **Remote · OpenAI · gpt-6.1-sol** in **How to ask**. This app currently uses
-that model for OpenAI chat. Requests use your API account, and this lab
+Select **Remote · OpenAI · MODEL** in **How to ask**. The default model is
+`gpt-6.1-sol`; configure a compatible alternative with `simdlab ui -openai-model MODEL`. Requests use your API account, and this lab
 session allows up to 24 OpenAI requests. [OpenAI API setup](https://developers.openai.com/api/docs/quickstart)
 
 ## Send a question and follow up
@@ -54,7 +56,7 @@ and raw arrays are omitted. Your typed question is also sent to the chosen
 provider. Review it before sharing private data.
 
 **Stop** cancels the pending request. **New chat** clears the conversation.
-Changing provider or closing and reopening the panel starts a new thread.
+Changing provider or Chat model, or closing and reopening the panel, starts a new thread.
 If a reply fails or takes too long, you can copy the question and context.
 
 ## Try a suggested comparison

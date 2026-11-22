@@ -190,6 +190,7 @@ func shortChatText(value string, limit int) string {
 
 type uiChatRequest struct {
 	Provider  string        `json:"provider,omitempty"`
+	Model     string        `json:"model,omitempty"`
 	Selection chatSelection `json:"selection"`
 	Question  string        `json:"question"`
 	History   []chatMessage `json:"history,omitempty"`
@@ -211,11 +212,24 @@ func (app *localUI) chat(w http.ResponseWriter, r *http.Request, preview bool) {
 		return
 	}
 	providerIndex := slices.IndexFunc(app.chatProviders, func(p chatProvider) bool { return p.id == request.Provider })
-	if providerIndex < 0 || strings.TrimSpace(request.Question) == "" {
+	var provider chatProvider
+	if request.Provider == "ollama" && app.localChat != nil {
+		if !validChatModel(request.Model) {
+			uiError(w, http.StatusBadRequest, "Choose an installed local chat model.")
+			return
+		}
+		provider = *app.localChat
+		provider.model = request.Model
+	} else if providerIndex >= 0 {
+		provider = app.chatProviders[providerIndex]
+	} else {
 		uiError(w, http.StatusBadRequest, "Choose a configured provider and enter a question.")
 		return
 	}
-	provider := app.chatProviders[providerIndex]
+	if strings.TrimSpace(request.Question) == "" {
+		uiError(w, http.StatusBadRequest, "Enter a question.")
+		return
+	}
 	if status, message := app.beginModel(provider.id); status != 0 {
 		uiError(w, status, message)
 		return

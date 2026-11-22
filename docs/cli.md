@@ -56,9 +56,10 @@ The default is `artifacts/experiments/` in the current working directory.
 | `simdbench -group addition` | Terminal demo. Use `simdlab run addition` to save a starter report. |
 
 The quick-start prompts work without Ollama. Other wording may use the optional
-local model. `simdlab ask` uses `qwen3:4b` at `http://127.0.0.1:11434` by default.
-Use `-model`, `-endpoint`, or `-timeout` (default 30 seconds) to change these
-settings. A remote endpoint receives the question and catalog choices for
+local model selected explicitly with `simdlab ask -model MODEL`. There is no
+automatic model fallback. The default endpoint is `http://127.0.0.1:11434`;
+use `-endpoint` or `-timeout` (default 30 seconds) to change those settings.
+Local chat is experimental; see [AI setup and model recommendations](wiki/34-AI-setup-and-model-recommendations.md). A remote endpoint receives the question and catalog choices for
 model-assisted requests.
 
 The guided session compares the ordinary scalar method with one alternative
@@ -125,19 +126,20 @@ The full default sweep can take several minutes.
 
 Install and start Ollama for [macOS](https://docs.ollama.com/macos),
 [Linux](https://docs.ollama.com/linux), or [Windows](https://docs.ollama.com/windows).
-You can also use an existing server. Download the default model on that server.
+You can also use an existing server. Choose an installed experimental model
+explicitly; no local browser-chat model is recommended yet. Check the model guide
+before choosing a download.
 
 ```text
-ollama pull qwen3:4b
 ollama ls
 ```
 
-Try one of these commands after downloading the model. Replace the capture path
+Replace `INSTALLED_MODEL` with the exact installed model name. Replace the capture path
 with the evidence saved by your run.
 
 ```text
-simdlab ask -preview "Which addition implementations are available?"
-simdlab interpret -preview "path/to/measurements.json" "How did SIMD compare with scalar?"
+simdlab ask -preview -model INSTALLED_MODEL "Which addition implementations are available?"
+simdlab interpret -preview -model INSTALLED_MODEL "path/to/measurements.json" "How did SIMD compare with scalar?"
 ```
 
 The default endpoint is `http://127.0.0.1:11434`. Put `-endpoint` or `-model`
@@ -161,3 +163,20 @@ make report-addition COUNT=3 BENCHTIME=100ms ARGS="-format md -bench BenchmarkAd
 ```
 
 Prefer direct commands for complex regex or paths needing careful shell quoting.
+
+## Browser chat models
+
+`simdlab ui -ollama` enables local installed-model discovery. Choose an experimental
+Chat model in the panel, or provide `-ollama -model INSTALLED_MODEL` at launch.
+No models are downloaded automatically. The panel's Chat model selection applies
+to chat; the launch-time model also configures the separate local intent resolver.
+
+`simdlab ui -openai-model MODEL` configures a compatible OpenAI Responses model
+when `OPENAI_API_KEY` is set. The default remains `gpt-6.1-sol`. The UI shows the
+actual configured remote model. `-model` continues to mean local Ollama; it is
+not a remote-provider option. See the [API-key instructions](wiki/34-AI-setup-and-model-recommendations.md#connect-openai-with-an-api-key).
+
+Model-assisted previews now require an explicit local `-model`; older releases
+silently used `qwen3:4b`. Ordinary guided examples and exact comparisons continue
+to work without AI. Browser chat keeps its 65-second reply budget; CLI thinking
+and timeout flags do not change browser settings.
