@@ -1,0 +1,37 @@
+[
+  {
+    "run": "qwen3-4b",
+    "cases": 12,
+    "http_200": 8,
+    "cases_with_raw_response": 8,
+    "semantic_success_is_not_automatically_scored": true
+  },
+  {
+    "run": "qwen3.5-4b",
+    "cases": 12,
+    "http_200": 10,
+    "cases_with_raw_response": 10,
+    "semantic_success_is_not_automatically_scored": true
+  },
+  {
+    "run": "granite4.2-3b",
+    "cases": 12,
+    "http_200": 10,
+    "cases_with_raw_response": 10,
+    "semantic_success_is_not_automatically_scored": true
+  },
+  {
+    "run": "qwen3.5-9b-focused",
+    "cases": 4,
+    "http_200": 2,
+    "cases_with_raw_response": 2,
+    "semantic_success_is_not_automatically_scored": true
+  },
+  {
+    "run": "qwen3.5-9b-long-budget",
+    "cases": 2,
+    "http_200": 2,
+    "cases_with_raw_response": 2,
+    "semantic_success_is_not_automatically_scored": true
+  }
+]

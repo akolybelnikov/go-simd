@@ -1,0 +1,10 @@
+=== RUN   TestIntegration_DocumentationCitation
+    integration_test.go:112: **ns/op** stands for **nanoseconds per operation**, representing the **average time** for a **complete kernel call** across the selected slice of operations in benchmarks (e.g., using Go-Simd).
+        
+        **Source**: `docs/wiki/06-Understanding-results.md`, Section: *Read each number correctly*
+--- PASS: TestIntegration_DocumentationCitation (61.94s)
+=== RUN   TestIntegration_RuntimeToolCall
+    integration_test.go:167: model returned tool ToolCall: {ID:ollama-call-0 Name:search_lab_docs Arguments:{"op_name":"addition"}}
+--- PASS: TestIntegration_RuntimeToolCall (23.57s)
+PASS
+ok  	github.com/akolybelnikov/go-simd/internal/agent/ollama	85.507s

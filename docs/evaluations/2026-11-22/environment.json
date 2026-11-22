@@ -1,0 +1,242 @@
+{
+  "schema": "go-simd.model-evaluation-environment/v1",
+  "date": "2026-11-22",
+  "source_revision": "86eb973",
+  "ollama": "0.40.17",
+  "go": "1.27.3",
+  "experiment": "simd",
+  "os": "linux",
+  "arch": "amd64",
+  "cpu": "AMD EPYC 9V74 (virtual CPU)",
+  "visible_processors": 9,
+  "ram_gib": 9.7,
+  "gpu": false,
+  "suite_order": [
+    "qwen3:4b",
+    "qwen3.5:4b",
+    "granite4.2:3b",
+    "qwen3.5:9b (four focused browser cases, then two CLI tests)"
+  ],
+  "runs_per_case": 1,
+  "browser_settings": {
+    "think": false,
+    "num_ctx": 16384,
+    "num_predict": 900,
+    "temperature": 0,
+    "client_timeout_seconds": 65
+  },
+  "models": {
+    "qwen3:4b": {
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "digest": "sha256:e18a783aae5525fd2852fc94c985541a77e791e034abc2d3056474d59de336fc",
+        "size": 487
+      },
+      "layers": [
+        {
+          "mediaType": "application/vnd.ollama.image.model",
+          "digest": "sha256:3e4cb14174460404e7a233e531675303b2fbf7749c02f91864fe311ab6344e4f",
+          "size": 2497280480
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.template",
+          "digest": "sha256:2d54db2b9bb29ce7db54fea63a891f5859603813c555b1f88b5e0994652897f9",
+          "size": 1506
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.license",
+          "digest": "sha256:d18a5cc71b84bc4af394a31116bd3932b42241de70c77d2b76d69a314ec8aa12",
+          "size": 11338
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.params",
+          "digest": "sha256:cff3f395ef3756ab63e58b0ad1b32bb6f802905cae1472e6a12034e4246fbbdb",
+          "size": 120
+        },
+        {
+          "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+          "digest": "sha256:359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+          "size": 859
+        }
+      ]
+    },
+    "qwen3.5:4b": {
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "digest": "sha256:788a4d94bc3f431ac0cd067005be4b838a09330427962952420b05d10ecf84db",
+        "size": 177
+      },
+      "layers": [
+        {
+          "mediaType": "application/vnd.ollama.image.projector",
+          "digest": "sha256:e56a899b1540860385465756dd308c84417410b94dbc1c380adffd20a921ca60",
+          "size": 675569120,
+          "from": "mmproj.gguf"
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.model",
+          "digest": "sha256:a9d0a3e1d8c91732a3812becd31f8d4a8ff57414903f226306069f0437e2ac50",
+          "size": 2648593216,
+          "from": "model.gguf"
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.template",
+          "digest": "sha256:b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+          "size": 13
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.license",
+          "digest": "sha256:50cbab8a892c5f2993b8c7351a99182507472def3b1374558308605d99b86b32",
+          "size": 11343
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.params",
+          "digest": "sha256:9371364b27a52acac9d87f88bd93c9db1174d8d6ec57f6888925cdc1788871ff",
+          "size": 65
+        },
+        {
+          "mediaType": "application/vnd.ollama.manifest.list.v2+json",
+          "digest": "sha256:492e37dc69072c5a189a0cf21d32d844c983d599e4553a1e4d2ebd3f6b1299e2",
+          "size": 470
+        },
+        {
+          "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+          "digest": "sha256:d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+          "size": 1088
+        }
+      ],
+      "runner": "llamacpp",
+      "format": "gguf"
+    },
+    "granite4.2:3b": {
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "digest": "sha256:0946fa72593248201cedb81b487d08408461bb8b5a1a7d4c32ddb23e7a0f66cd",
+        "size": 417
+      },
+      "layers": [
+        {
+          "mediaType": "application/vnd.ollama.image.model",
+          "digest": "sha256:20e436143017578687f7f848225cc6c6038126c84149192229c7dff6e4e0f427",
+          "size": 2244012160,
+          "from": "/Users/runner/.ollama/models/blobs/sha256-20e436143017578687f7f848225cc6c6038126c84149192229c7dff6e4e0f427"
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.license",
+          "digest": "sha256:58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+          "size": 11357
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.params",
+          "digest": "sha256:02897ca0d6a33881b1581b775af2884e9eed3ea9b7db8141e0dc0ef2e707fd18",
+          "size": 31
+        },
+        {
+          "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+          "digest": "sha256:40577dc168a3a9ad34e9a1234e0c2570be86097fa75a236d4574ae985705d3c4",
+          "size": 825
+        }
+      ]
+    },
+    "qwen3.5:9b": {
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "config": {
+        "mediaType": "application/vnd.docker.container.image.v1+json",
+        "digest": "sha256:08f9698c1116d2ba3d2c1751f6e98919823e13bb28ff5eb7451c7bc9b40907c5",
+        "size": 177
+      },
+      "layers": [
+        {
+          "mediaType": "application/vnd.ollama.image.projector",
+          "digest": "sha256:f836f08f921193f4d6b6a6952dba0a6fb116759d26a757bcb395d570d73976ca",
+          "size": 921704832,
+          "from": "mmproj.gguf"
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.model",
+          "digest": "sha256:02d45dc1cf451ba2475ac33b301c2dd8f985abe4c182ce04a1f2f5bf0260278d",
+          "size": 5629109120,
+          "from": "model.gguf"
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.template",
+          "digest": "sha256:b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+          "size": 13
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.license",
+          "digest": "sha256:50cbab8a892c5f2993b8c7351a99182507472def3b1374558308605d99b86b32",
+          "size": 11343
+        },
+        {
+          "mediaType": "application/vnd.ollama.image.params",
+          "digest": "sha256:9371364b27a52acac9d87f88bd93c9db1174d8d6ec57f6888925cdc1788871ff",
+          "size": 65
+        },
+        {
+          "mediaType": "application/vnd.ollama.manifest.list.v2+json",
+          "digest": "sha256:fdf5fd4cd409881fac86077d7be23e1cb1a4d1c0083108ff81ad557b3dfd7b01",
+          "size": 470
+        },
+        {
+          "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+          "digest": "sha256:56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
+          "size": 1088
+        }
+      ],
+      "runner": "llamacpp",
+      "format": "gguf"
+    }
+  },
+  "inkling_review_only": {
+    "weights_bytes": 20188097271,
+    "config_digest": "sha256:e08fbf920968972a4c0b995902c5e68d3ad71ce84bbd0e21800aec6df21e1ba5",
+    "reason_not_run": "Published 20GB checkpoint exceeds 9.7GiB RAM; recommended hardware is 32GB+ memory."
+  },
+  "focused_browser_cases": [
+    "matching-operation",
+    "unsupported-type",
+    "correctness",
+    "requested-draft"
+  ],
+  "cli_settings": {
+    "think": true,
+    "client_timeout_seconds": 120,
+    "context": 4096,
+    "tests": [
+      "RuntimeToolCall",
+      "DocumentationCitation"
+    ],
+    "temperature": 1,
+    "sampling": "Model defaults, not the browser temperature=0 profile"
+  },
+  "diagnostic_browser_settings": {
+    "model": "qwen3.5:9b",
+    "cases": [
+      "unsupported-type",
+      "requested-draft"
+    ],
+    "client_timeout_seconds": 180,
+    "other_options": "same as browser defaults",
+    "fresh_server": true
+  },
+  "diagnostic_browser_results": {
+    "unsupported-type": {
+      "elapsed_ms": 165390,
+      "core_answer": "float64 sum unavailable",
+      "false_detail": "claimed copy64 is the only float64 group"
+    },
+    "requested-draft": {
+      "elapsed_ms": 37364,
+      "draft": null,
+      "result": "incorrect refusal"
+    }
+  }
+}
